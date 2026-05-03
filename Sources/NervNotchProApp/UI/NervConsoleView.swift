@@ -1,7 +1,25 @@
 import SwiftUI
 
+struct NotchIslandLayout: Equatable {
+    let compactNotchSize: CGSize
+
+    var compactSize: CGSize {
+        compactNotchSize
+    }
+
+    var expandedSize: CGSize {
+        CGSize(width: 820, height: 420)
+    }
+}
+
 struct NervConsoleView: View {
     @ObservedObject var viewModel: NotchViewModel
+    let layout: NotchIslandLayout
+
+    init(viewModel: NotchViewModel, compactNotchSize: CGSize = NotchGeometry.simulatedNotchSize) {
+        self.viewModel = viewModel
+        self.layout = NotchIslandLayout(compactNotchSize: compactNotchSize)
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -31,8 +49,11 @@ struct NervConsoleView: View {
                     .transition(.opacity)
             }
         }
-        .frame(width: isExpanded ? 820 : 224, height: isExpanded ? 420 : 36)
-        .notchIslandChrome(edgeColor: isExpanded ? NervStyle.red : compactStatusColor, isExpanded: isExpanded)
+        .frame(
+            width: isExpanded ? layout.expandedSize.width : layout.compactSize.width,
+            height: isExpanded ? layout.expandedSize.height : layout.compactSize.height
+        )
+        .notchIslandChrome(isExpanded: isExpanded)
     }
 
     private var expandedConsole: some View {
@@ -58,7 +79,7 @@ struct NervConsoleView: View {
 
             Rectangle()
                 .fill(NervStyle.red.opacity(0.75))
-                .frame(width: 1, height: 16)
+                .frame(width: 1, height: min(16, max(8, layout.compactSize.height - 14)))
 
             Text(viewModel.magiState.judgement.title)
                 .font(NervStyle.monoSmall)
@@ -68,6 +89,7 @@ struct NervConsoleView: View {
         }
         .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
     }
 
     private var header: some View {

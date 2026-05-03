@@ -24,4 +24,30 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(shape.metrics.topCornerRadius, 19)
         XCTAssertEqual(shape.metrics.bottomCornerRadius, 24)
     }
+
+    func testChromeDoesNotDrawOuterBorder() {
+        let style = NotchIslandChromeStyle()
+
+        XCTAssertFalse(style.drawsOuterBorder)
+    }
+
+    func testChromeDoesNotDrawTopHighlight() {
+        let style = NotchIslandChromeStyle()
+
+        XCTAssertFalse(style.drawsTopHighlight)
+    }
+
+    func testLayoutUsesPhysicalNotchSizeForCompactIsland() {
+        let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+
+        XCTAssertEqual(layout.compactSize.width, 210)
+        XCTAssertEqual(layout.compactSize.height, 32)
+    }
+
+    func testLayoutKeepsExpandedConsoleSizeIndependentFromPhysicalNotch() {
+        let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+
+        XCTAssertEqual(layout.expandedSize.width, 820)
+        XCTAssertEqual(layout.expandedSize.height, 420)
+    }
 }

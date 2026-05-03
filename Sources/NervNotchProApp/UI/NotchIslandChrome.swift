@@ -59,13 +59,18 @@ struct NotchIslandShape: Shape {
     }
 }
 
+struct NotchIslandChromeStyle: Equatable {
+    let drawsOuterBorder = false
+    let drawsTopHighlight = false
+}
+
 struct NotchIslandChrome: ViewModifier {
-    let edgeColor: Color
     let isExpanded: Bool
     let showsScanlines: Bool
 
     func body(content: Content) -> some View {
         let shape = NotchIslandShape(metrics: NotchIslandChromeMetrics(isExpanded: isExpanded))
+        let style = NotchIslandChromeStyle()
 
         content
             .background(
@@ -81,20 +86,23 @@ struct NotchIslandChrome: ViewModifier {
                         .clipShape(shape)
                 }
             }
-            .overlay(
-                shape
-                    .stroke(edgeColor.opacity(0.36), lineWidth: 1)
-            )
+            .overlay {
+                if style.drawsOuterBorder {
+                    shape.stroke(Color.clear, lineWidth: 0)
+                }
+            }
             .overlay(alignment: .top) {
-                Rectangle()
-                    .fill(.white.opacity(0.06))
-                    .frame(height: 1)
+                if style.drawsTopHighlight {
+                    Rectangle()
+                        .fill(.white.opacity(0.06))
+                        .frame(height: 1)
+                }
             }
     }
 }
 
 extension View {
-    func notchIslandChrome(edgeColor: Color, isExpanded: Bool, showsScanlines: Bool = true) -> some View {
-        modifier(NotchIslandChrome(edgeColor: edgeColor, isExpanded: isExpanded, showsScanlines: showsScanlines))
+    func notchIslandChrome(isExpanded: Bool, showsScanlines: Bool = true) -> some View {
+        modifier(NotchIslandChrome(isExpanded: isExpanded, showsScanlines: showsScanlines))
     }
 }

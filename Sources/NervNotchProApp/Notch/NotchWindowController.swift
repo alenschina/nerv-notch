@@ -12,9 +12,7 @@ final class NotchWindowController: NSWindowController {
     init(screen: NSScreen, viewModel: NotchViewModel, usesSimulatedNotch: Bool) {
         self.viewModel = viewModel
 
-        let notchSize = screen.safeAreaInsets.top > 0
-            ? CGSize(width: 210, height: max(32, screen.safeAreaInsets.top))
-            : .zero
+        let notchSize = screen.physicalNotchSize
 
         let geometry = NotchGeometry(
             screenFrame: screen.frame,
@@ -26,7 +24,12 @@ final class NotchWindowController: NSWindowController {
         let panel = NotchPanel(contentRect: geometry.windowFrame())
         super.init(window: panel)
 
-        let hostingController = NSHostingController(rootView: NervConsoleView(viewModel: viewModel))
+        let hostingController = NSHostingController(
+            rootView: NervConsoleView(
+                viewModel: viewModel,
+                compactNotchSize: geometry.effectiveNotchSize
+            )
+        )
         panel.contentViewController = hostingController
         panel.setFrame(geometry.windowFrame(), display: true)
         hostingController.view.frame = panel.contentView?.bounds ?? .zero

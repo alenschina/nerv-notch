@@ -31,6 +31,18 @@ final class NotchGeometryTests: XCTestCase {
         XCTAssertEqual(geometry.notchScreenRect.height, 36)
     }
 
+    func testPhysicalNotchHeightIsNotClampedToFallbackHeight() {
+        let geometry = NotchGeometry(
+            screenFrame: CGRect(x: 0, y: 0, width: 1512, height: 982),
+            notchSize: CGSize(width: 210, height: 28),
+            windowHeight: 460,
+            usesSimulatedNotch: false
+        )
+
+        XCTAssertEqual(geometry.effectiveNotchSize.height, 28)
+        XCTAssertEqual(geometry.notchScreenRect.height, 28)
+    }
+
     func testOpenedPanelIsCenteredUnderTopEdge() {
         let geometry = NotchGeometry(
             screenFrame: CGRect(x: 100, y: 50, width: 1512, height: 982),
