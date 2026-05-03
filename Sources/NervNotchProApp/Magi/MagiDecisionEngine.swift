@@ -1,6 +1,7 @@
 import Foundation
 
 struct MagiDecisionState: Equatable, Sendable {
+    let sampledAt: Date
     let cpu: MagiPanelDecision
     let memory: MagiPanelDecision
     let network: MagiPanelDecision
@@ -9,30 +10,33 @@ struct MagiDecisionState: Equatable, Sendable {
 
 struct MagiPanelDecision: Equatable, Sendable {
     enum Level: Equatable, Sendable {
-        case unavailable
-        case idle
         case normal
-        case high
+        case highLoad
         case critical
+        case idle
+        case unavailable
     }
 
-    let level: Level
+    let codeName: String
     let title: String
-    let detail: String
-    let value: String
+    let primaryValue: String
+    let secondaryValue: String
+    let level: Level
+    let statusText: String
+    let decisionText: String
 }
 
 struct CentralDogmaJudgement: Equatable, Sendable {
     enum Level: Equatable, Sendable {
         case synchronized
-        case partialSync
         case elevatedAlert
         case emergencyMode
+        case partialSync
     }
 
     let level: Level
     let title: String
-    let detail: String
+    let summary: String
 }
 
 struct MagiDecisionEngine: Sendable {
@@ -43,6 +47,7 @@ struct MagiDecisionEngine: Sendable {
         let judgement = evaluateJudgement(panels: [cpu, memory, network])
 
         return MagiDecisionState(
+            sampledAt: snapshot.sampledAt,
             cpu: cpu,
             memory: memory,
             network: network,
@@ -52,154 +57,178 @@ struct MagiDecisionEngine: Sendable {
 
     private func evaluateCPU(_ sample: CPUSample?) -> MagiPanelDecision {
         guard let sample else {
-            return MagiPanelDecision(
-                level: .unavailable,
-                title: "CPU",
-                detail: "No processor telemetry available",
-                value: "Unavailable"
-            )
+            return unavailablePanel(codeName: "MELCHIOR-01", title: "CPU LOAD")
         }
 
         let level: MagiPanelDecision.Level
+        let statusText: String
+        let decisionText: String
+
         if sample.usageRatio >= 0.90 {
             level = .critical
+            statusText = "CRITICAL"
+            decisionText = "PROCESSOR SATURATION"
         } else if sample.usageRatio >= 0.70 {
-            level = .high
+            level = .highLoad
+            statusText = "HIGH LOAD"
+            decisionText = "LOAD RISING"
         } else {
             level = .normal
+            statusText = "NORMAL"
+            decisionText = "LOAD ACCEPTABLE"
         }
 
         return MagiPanelDecision(
+            codeName: "MELCHIOR-01",
+            title: "CPU LOAD",
+            primaryValue: percent(sample.usageRatio),
+            secondaryValue: "\(sample.coreCount) CORES",
             level: level,
-            title: "CPU",
-            detail: "\(sample.coreCount) cores sampled",
-            value: Self.percent(sample.usageRatio)
+            statusText: statusText,
+            decisionText: decisionText
         )
     }
 
     private func evaluateMemory(_ sample: MemorySample?) -> MagiPanelDecision {
         guard let sample else {
-            return MagiPanelDecision(
-                level: .unavailable,
-                title: "Memory",
-                detail: "No memory telemetry available",
-                value: "Unavailable"
-            )
+            return unavailablePanel(codeName: "BALTHASAR-02", title: "MEMORY")
         }
 
         let usageRatio = TelemetryCalculations.memoryUsageRatio(sample)
         let level: MagiPanelDecision.Level
+        let statusText: String
+        let decisionText: String
+
         if usageRatio >= 0.90 {
             level = .critical
+            statusText = "CRITICAL"
+            decisionText = "MEMORY PRESSURE CRITICAL"
         } else if usageRatio >= 0.75 {
-            level = .high
+            level = .highLoad
+            statusText = "HIGH LOAD"
+            decisionText = "MEMORY PRESSURE RISING"
         } else {
             level = .normal
+            statusText = "NORMAL"
+            decisionText = "MEMORY STABLE"
         }
 
         return MagiPanelDecision(
+            codeName: "BALTHASAR-02",
+            title: "MEMORY",
+            primaryValue: percent(usageRatio),
+            secondaryValue: "\(ByteFormat.megabytes(sample.availableBytes)) FREE",
             level: level,
-            title: "Memory",
-            detail: "\(ByteFormat.string(from: sample.availableBytes)) available",
-            value: Self.percent(usageRatio)
+            statusText: statusText,
+            decisionText: decisionText
         )
     }
 
     private func evaluateNetwork(_ sample: NetworkRate?) -> MagiPanelDecision {
         guard let sample else {
+            return unavailablePanel(codeName: "CASPER-03", title: "NETWORK")
+        }
+
+        if sample.activeInterfaceCount == 0 {
             return MagiPanelDecision(
-                level: .unavailable,
-                title: "Network",
-                detail: "No network telemetry available",
-                value: "Unavailable"
+                codeName: "CASPER-03",
+                title: "NETWORK",
+                primaryValue: "0 KB/s",
+                secondaryValue: "NO ACTIVE LINK",
+                level: .idle,
+                statusText: "COMM LINK IDLE",
+                decisionText: "COMMUNICATION STANDBY"
             )
         }
 
         let totalRate = sample.downBytesPerSecond + sample.upBytesPerSecond
         let level: MagiPanelDecision.Level
-        if sample.activeInterfaceCount == 0 {
-            level = .idle
-        } else if totalRate >= 100_000_000 {
+        let statusText: String
+        let decisionText: String
+
+        if totalRate >= 100_000_000 {
             level = .critical
+            statusText = "CRITICAL"
+            decisionText = "BANDWIDTH SATURATION"
         } else if totalRate >= 25_000_000 {
-            level = .high
+            level = .highLoad
+            statusText = "HIGH TRAFFIC"
+            decisionText = "COMM LOAD RISING"
         } else {
             level = .normal
+            statusText = "ACTIVE"
+            decisionText = "COMM LINK ACTIVE"
         }
 
         return MagiPanelDecision(
+            codeName: "CASPER-03",
+            title: "NETWORK",
+            primaryValue: ByteFormat.rate(sample.downBytesPerSecond),
+            secondaryValue: "UP \(ByteFormat.rate(sample.upBytesPerSecond))",
             level: level,
-            title: "Network",
-            detail: "\(sample.activeInterfaceCount) active interfaces",
-            value: "\(ByteFormat.string(from: totalRate))/s"
+            statusText: statusText,
+            decisionText: decisionText
         )
     }
 
     private func evaluateJudgement(panels: [MagiPanelDecision]) -> CentralDogmaJudgement {
-        let level: CentralDogmaJudgement.Level
         if panels.contains(where: { $0.level == .unavailable }) {
-            level = .partialSync
-        } else if panels.contains(where: { $0.level == .critical }) {
-            level = .emergencyMode
-        } else if panels.contains(where: { $0.level == .high }) {
-            level = .elevatedAlert
-        } else {
-            level = .synchronized
+            return CentralDogmaJudgement(
+                level: .partialSync,
+                title: "PARTIAL SYNC",
+                summary: "MAGI CONSENSUS DEGRADED"
+            )
+        }
+
+        if panels.contains(where: { $0.level == .critical }) {
+            return CentralDogmaJudgement(
+                level: .emergencyMode,
+                title: "EMERGENCY MODE",
+                summary: "CENTRAL DOGMA ALERT"
+            )
+        }
+
+        if panels.contains(where: { $0.level == .highLoad }) {
+            return CentralDogmaJudgement(
+                level: .elevatedAlert,
+                title: "ELEVATED ALERT",
+                summary: "SYSTEM LOAD INCREASING"
+            )
         }
 
         return CentralDogmaJudgement(
-            level: level,
-            title: title(for: level),
-            detail: detail(for: level)
+            level: .synchronized,
+            title: "SYNCHRONIZED",
+            summary: "MAGI SYSTEMS NOMINAL"
         )
     }
 
-    private func title(for level: CentralDogmaJudgement.Level) -> String {
-        switch level {
-        case .synchronized:
-            return "Synchronized"
-        case .partialSync:
-            return "Partial Sync"
-        case .elevatedAlert:
-            return "Elevated Alert"
-        case .emergencyMode:
-            return "Emergency Mode"
-        }
+    private func unavailablePanel(codeName: String, title: String) -> MagiPanelDecision {
+        MagiPanelDecision(
+            codeName: codeName,
+            title: title,
+            primaryValue: "--",
+            secondaryValue: "NO SIGNAL",
+            level: .unavailable,
+            statusText: "DATA UNAVAILABLE",
+            decisionText: "SIGNAL LOST"
+        )
     }
 
-    private func detail(for level: CentralDogmaJudgement.Level) -> String {
-        switch level {
-        case .synchronized:
-            return "All MAGI panels report nominal conditions"
-        case .partialSync:
-            return "One or more MAGI panels lack telemetry"
-        case .elevatedAlert:
-            return "One or more MAGI panels report elevated load"
-        case .emergencyMode:
-            return "One or more MAGI panels report critical load"
-        }
-    }
-
-    private static func percent(_ ratio: Double) -> String {
+    private func percent(_ ratio: Double) -> String {
         "\(Int((ratio * 100).rounded()))%"
     }
 }
 
 enum ByteFormat {
-    static func string(from bytes: UInt64) -> String {
-        let units = ["B", "KB", "MB", "GB", "TB"]
-        var value = Double(bytes)
-        var unitIndex = 0
+    static func megabytes(_ bytes: UInt64) -> String {
+        "\(bytes / 1_048_576) MB"
+    }
 
-        while value >= 1_000, unitIndex < units.count - 1 {
-            value /= 1_000
-            unitIndex += 1
+    static func rate(_ bytesPerSecond: UInt64) -> String {
+        if bytesPerSecond >= 1_048_576 {
+            return "\(bytesPerSecond / 1_048_576) MB/s"
         }
-
-        if unitIndex == 0 {
-            return "\(bytes) \(units[unitIndex])"
-        }
-
-        return String(format: "%.1f %@", value, units[unitIndex])
+        return "\(bytesPerSecond / 1024) KB/s"
     }
 }
