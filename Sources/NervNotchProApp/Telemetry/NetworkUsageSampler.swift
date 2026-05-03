@@ -36,14 +36,25 @@ final class NetworkUsageSampler {
     }
 
     private func readCounters() -> (counters: NetworkCounters, activeInterfaceCount: Int)? {
+        guard let activeInterfaceNames = readActiveInterfaceNames(),
+              let counters = readInterfaceCounters(for: activeInterfaceNames)
+        else {
+            return nil
+        }
+
+        return (
+            counters: counters,
+            activeInterfaceCount: activeInterfaceNames.count
+        )
+    }
+
+    private func readActiveInterfaceNames() -> Set<String>? {
         var interfaceAddresses: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&interfaceAddresses) == 0, let interfaceAddresses else { return nil }
         defer {
             freeifaddrs(interfaceAddresses)
         }
 
-        var receivedBytes: UInt64 = 0
-        var sentBytes: UInt64 = 0
         var activeInterfaceNames = Set<String>()
 
         var cursor: UnsafeMutablePointer<ifaddrs>? = interfaceAddresses
@@ -62,20 +73,67 @@ final class NetworkUsageSampler {
             }
 
             let name = String(cString: interface.ifa_name)
-            guard shouldSampleInterface(named: name), let data = interface.ifa_data else {
+            guard shouldSampleInterface(named: name) else {
                 continue
             }
 
-            let interfaceData = data.assumingMemoryBound(to: if_data.self).pointee
-            receivedBytes += UInt64(interfaceData.ifi_ibytes)
-            sentBytes += UInt64(interfaceData.ifi_obytes)
             activeInterfaceNames.insert(name)
         }
 
-        return (
-            counters: NetworkCounters(receivedBytes: receivedBytes, sentBytes: sentBytes),
-            activeInterfaceCount: activeInterfaceNames.count
+        return activeInterfaceNames
+    }
+
+    private func readInterfaceCounters(for activeInterfaceNames: Set<String>) -> NetworkCounters? {
+        var managementInformationBase = [CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0]
+        var byteCount = 0
+
+        guard sysctl(&managementInformationBase, u_int(managementInformationBase.count), nil, &byteCount, nil, 0) == 0,
+              byteCount > 0
+        else {
+            return nil
+        }
+
+        let buffer = UnsafeMutableRawPointer.allocate(
+            byteCount: byteCount,
+            alignment: MemoryLayout<if_msghdr2>.alignment
         )
+        defer {
+            buffer.deallocate()
+        }
+
+        guard sysctl(&managementInformationBase, u_int(managementInformationBase.count), buffer, &byteCount, nil, 0) == 0 else {
+            return nil
+        }
+
+        var receivedBytes: UInt64 = 0
+        var sentBytes: UInt64 = 0
+        var offset = 0
+
+        while offset + MemoryLayout<if_msghdr2>.stride <= byteCount {
+            let message = buffer.advanced(by: offset).loadUnaligned(as: if_msghdr2.self)
+            let messageLength = Int(message.ifm_msglen)
+
+            guard messageLength > 0, offset + messageLength <= byteCount else {
+                return nil
+            }
+
+            if Int32(message.ifm_type) == RTM_IFINFO2,
+               let name = interfaceName(for: UInt32(message.ifm_index)),
+               activeInterfaceNames.contains(name) {
+                receivedBytes += UInt64(message.ifm_data.ifi_ibytes)
+                sentBytes += UInt64(message.ifm_data.ifi_obytes)
+            }
+
+            offset += messageLength
+        }
+
+        return NetworkCounters(receivedBytes: receivedBytes, sentBytes: sentBytes)
+    }
+
+    private func interfaceName(for index: UInt32) -> String? {
+        var nameBuffer = [CChar](repeating: 0, count: Int(IF_NAMESIZE))
+        guard if_indextoname(index, &nameBuffer) != nil else { return nil }
+        return String(cString: nameBuffer)
     }
 
     private func shouldSampleInterface(named name: String) -> Bool {
