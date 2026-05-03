@@ -21,4 +21,19 @@ final class NotchViewModelTests: XCTestCase {
         XCTAssertEqual(magiState.cpu.level, .highLoad)
         XCTAssertEqual(magiState.judgement.level, .elevatedAlert)
     }
+
+    func testViewModelPublishesInteractionStateTransitions() async {
+        let viewModel = await NotchViewModel(
+            settings: AppSettings(),
+            decisionEngine: MagiDecisionEngine()
+        )
+
+        await viewModel.handleInteraction(.notchClicked, at: 10)
+        var interactionState = await viewModel.interactionState
+        XCTAssertEqual(interactionState, .opened)
+
+        await viewModel.handleInteraction(.outsideClicked, at: 11)
+        interactionState = await viewModel.interactionState
+        XCTAssertEqual(interactionState, .closed)
+    }
 }

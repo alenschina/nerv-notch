@@ -26,8 +26,11 @@ final class NotchWindowController: NSWindowController {
         let panel = NotchPanel(contentRect: geometry.windowFrame())
         super.init(window: panel)
 
-        panel.contentViewController = NSHostingController(rootView: NervConsoleView(viewModel: viewModel))
+        let hostingController = NSHostingController(rootView: NervConsoleView(viewModel: viewModel))
+        panel.contentViewController = hostingController
         panel.setFrame(geometry.windowFrame(), display: true)
+        hostingController.view.frame = panel.contentView?.bounds ?? .zero
+        hostingController.view.autoresizingMask = [.width, .height]
 
         eventMonitor = NotchEventMonitor(
             geometry: geometry,
