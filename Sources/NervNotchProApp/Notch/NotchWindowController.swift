@@ -6,6 +6,8 @@ import SwiftUI
 final class NotchWindowController: NSWindowController {
     private let viewModel: NotchViewModel
     private var cancellables = Set<AnyCancellable>()
+    private var eventMonitor: NotchEventMonitor?
+    private var timer: Timer?
 
     init(screen: NSScreen, viewModel: NotchViewModel, usesSimulatedNotch: Bool) {
         self.viewModel = viewModel
@@ -27,6 +29,22 @@ final class NotchWindowController: NSWindowController {
         panel.contentViewController = NSHostingController(rootView: NervConsoleView(viewModel: viewModel))
         panel.setFrame(geometry.windowFrame(), display: true)
 
+        eventMonitor = NotchEventMonitor(
+            geometry: geometry,
+            openedPanelSize: CGSize(width: 820, height: 420)
+        ) { [weak viewModel] event in
+            Task { @MainActor in
+                viewModel?.handleInteraction(event)
+            }
+        }
+        eventMonitor?.start()
+
+        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak viewModel] _ in
+            Task { @MainActor in
+                viewModel?.handleInteraction(.timerTick)
+            }
+        }
+
         viewModel.$interactionState
             .receive(on: DispatchQueue.main)
             .sink { [weak panel] state in
@@ -42,5 +60,10 @@ final class NotchWindowController: NSWindowController {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        timer?.invalidate()
+        eventMonitor?.stop()
     }
 }
