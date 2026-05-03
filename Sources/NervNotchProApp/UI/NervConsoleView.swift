@@ -6,17 +6,10 @@ struct NervConsoleView: View {
     var body: some View {
         ZStack(alignment: .top) {
             Color.clear
-
-            if isExpanded {
-                expandedConsole
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            } else {
-                compactIsland
-                    .transition(.opacity.combined(with: .scale(scale: 0.92, anchor: .top)))
-            }
+            islandSurface
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .animation(.easeOut(duration: 0.16), value: isExpanded)
+        .animation(.easeOut(duration: 0.25), value: isExpanded)
     }
 
     private var isExpanded: Bool {
@@ -26,6 +19,20 @@ struct NervConsoleView: View {
         case .closed, .hoverArming:
             return false
         }
+    }
+
+    private var islandSurface: some View {
+        ZStack {
+            if isExpanded {
+                expandedConsole
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            } else {
+                compactIsland
+                    .transition(.opacity)
+            }
+        }
+        .frame(width: isExpanded ? 820 : 224, height: isExpanded ? 420 : 36)
+        .notchIslandChrome(edgeColor: isExpanded ? NervStyle.red : compactStatusColor, isExpanded: isExpanded)
     }
 
     private var expandedConsole: some View {
@@ -41,10 +48,6 @@ struct NervConsoleView: View {
             CentralDogmaJudgementView(judgement: viewModel.magiState.judgement)
         }
         .padding(14)
-        .frame(width: 820, height: 420)
-        .background(NervStyle.background)
-        .overlay(ScanlineOverlay())
-        .overlay(Rectangle().stroke(NervStyle.red, lineWidth: 2))
     }
 
     private var compactIsland: some View {
@@ -64,10 +67,7 @@ struct NervConsoleView: View {
                 .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 14)
-        .frame(width: 224, height: 36)
-        .background(Color.black.opacity(0.92))
-        .overlay(ScanlineOverlay().opacity(0.35))
-        .overlay(Rectangle().stroke(compactStatusColor.opacity(0.9), lineWidth: 1))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var header: some View {
