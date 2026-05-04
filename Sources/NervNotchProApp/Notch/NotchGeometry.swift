@@ -26,6 +26,17 @@ struct NotchGeometry: Equatable, Sendable {
         )
     }
 
+    var compactIslandScreenRect: CGRect {
+        let notch = effectiveNotchSize
+        let size = CGSize(width: notch.width + notch.height * 2, height: notch.height)
+        return CGRect(
+            x: screenFrame.midX - size.width / 2,
+            y: screenFrame.maxY - size.height,
+            width: size.width,
+            height: size.height
+        )
+    }
+
     func openedPanelScreenRect(size: CGSize) -> CGRect {
         CGRect(
             x: screenFrame.midX - size.width / 2,
@@ -45,7 +56,7 @@ struct NotchGeometry: Equatable, Sendable {
     }
 
     func isPointInNotch(_ point: CGPoint) -> Bool {
-        notchScreenRect
+        compactIslandScreenRect
             .insetBy(dx: -Self.hitTestPadding.width, dy: -Self.hitTestPadding.height)
             .contains(point)
     }

@@ -2,9 +2,19 @@ import SwiftUI
 
 struct NotchIslandLayout: Equatable {
     let compactNotchSize: CGSize
+    private let hoverExpansionWidth: CGFloat = 16
 
     var compactSize: CGSize {
-        compactNotchSize
+        compactSize(isHovering: false)
+    }
+
+    func compactSize(isHovering: Bool) -> CGSize {
+        let iconSpaceWidth = compactNotchSize.height * 2
+        let hoverWidth = isHovering ? hoverExpansionWidth : 0
+        return CGSize(
+            width: compactNotchSize.width + iconSpaceWidth + hoverWidth,
+            height: compactNotchSize.height
+        )
     }
 
     var expandedSize: CGSize {
@@ -28,6 +38,7 @@ struct NervConsoleView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(.easeOut(duration: 0.25), value: isExpanded)
+        .animation(.easeInOut(duration: 0.18), value: isCompactHovering)
     }
 
     private var isExpanded: Bool {
@@ -37,6 +48,13 @@ struct NervConsoleView: View {
         case .closed, .hoverArming:
             return false
         }
+    }
+
+    private var isCompactHovering: Bool {
+        if case .hoverArming = viewModel.interactionState {
+            return true
+        }
+        return false
     }
 
     private var islandSurface: some View {
@@ -50,8 +68,8 @@ struct NervConsoleView: View {
             }
         }
         .frame(
-            width: isExpanded ? layout.expandedSize.width : layout.compactSize.width,
-            height: isExpanded ? layout.expandedSize.height : layout.compactSize.height
+            width: isExpanded ? layout.expandedSize.width : layout.compactSize(isHovering: isCompactHovering).width,
+            height: isExpanded ? layout.expandedSize.height : layout.compactSize(isHovering: isCompactHovering).height
         )
         .notchIslandChrome(isExpanded: isExpanded)
     }

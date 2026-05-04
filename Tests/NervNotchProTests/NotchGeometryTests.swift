@@ -70,4 +70,17 @@ final class NotchGeometryTests: XCTestCase {
         XCTAssertTrue(geometry.isPointInNotch(CGPoint(x: 645, y: 948)))
         XCTAssertFalse(geometry.isPointInNotch(CGPoint(x: 500, y: 948)))
     }
+
+    func testCompactIslandScreenRectIncludesIconSpaceOnBothSides() {
+        let geometry = NotchGeometry(
+            screenFrame: CGRect(x: 0, y: 0, width: 1512, height: 982),
+            notchSize: CGSize(width: 210, height: 32),
+            windowHeight: 460,
+            usesSimulatedNotch: false
+        )
+
+        XCTAssertEqual(geometry.compactIslandScreenRect.origin.x, 619)
+        XCTAssertEqual(geometry.compactIslandScreenRect.width, 274)
+        XCTAssertEqual(geometry.compactIslandScreenRect.height, 32)
+    }
 }

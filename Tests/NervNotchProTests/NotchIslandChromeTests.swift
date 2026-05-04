@@ -37,11 +37,23 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertFalse(style.drawsTopHighlight)
     }
 
-    func testLayoutUsesPhysicalNotchSizeForCompactIsland() {
+    func testLayoutUsesPhysicalNotchHeightForCompactIsland() {
         let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
 
-        XCTAssertEqual(layout.compactSize.width, 210)
         XCTAssertEqual(layout.compactSize.height, 32)
+    }
+
+    func testLayoutAddsSquareIconSpaceOnBothSidesOfCompactIsland() {
+        let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+
+        XCTAssertEqual(layout.compactSize.width, 274)
+    }
+
+    func testLayoutExtendsCompactIslandWidthWhileHovering() {
+        let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+
+        XCTAssertEqual(layout.compactSize(isHovering: true).width, 290)
+        XCTAssertEqual(layout.compactSize(isHovering: true).height, 32)
     }
 
     func testLayoutKeepsExpandedConsoleSizeIndependentFromPhysicalNotch() {
