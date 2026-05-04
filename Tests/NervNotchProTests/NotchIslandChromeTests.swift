@@ -62,4 +62,12 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(layout.expandedSize.width, 820)
         XCTAssertEqual(layout.expandedSize.height, 420)
     }
+
+    func testMagiConsoleLayoutKeepsTriadCenteredBetweenSymmetricInfoColumns() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.sideInfoWidth, 154)
+        XCTAssertEqual(metrics.triadWidth, 300)
+        XCTAssertEqual(metrics.sideInfoWidth, metrics.trailingInfoWidth)
+    }
 }

@@ -75,18 +75,7 @@ struct NervConsoleView: View {
     }
 
     private var expandedConsole: some View {
-        VStack(spacing: 10) {
-            header
-
-            HStack(spacing: 10) {
-                MagiDecisionPanelView(decision: viewModel.magiState.cpu)
-                MagiDecisionPanelView(decision: viewModel.magiState.memory)
-                MagiDecisionPanelView(decision: viewModel.magiState.network)
-            }
-
-            CentralDogmaJudgementView(judgement: viewModel.magiState.judgement)
-        }
-        .padding(14)
+        MagiTriadConsoleView(state: viewModel.magiState)
     }
 
     private var compactIsland: some View {
@@ -108,18 +97,6 @@ struct NervConsoleView: View {
         .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
-    }
-
-    private var header: some View {
-        HStack {
-            Text("NERV HQ / MAGI SYS")
-                .font(.system(size: 14, weight: .black, design: .monospaced))
-                .foregroundStyle(NervStyle.red)
-            Spacer()
-            Text(viewModel.magiState.sampledAt.formatted(date: .omitted, time: .standard))
-                .font(NervStyle.monoSmall)
-                .foregroundStyle(NervStyle.muted)
-        }
     }
 
     private var compactStatusColor: Color {
