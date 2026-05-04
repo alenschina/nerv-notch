@@ -74,7 +74,7 @@ final class NotchIslandChromeTests: XCTestCase {
     func testMagiTriadUsesReferenceUnitProportions() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.topUnitSize, CGSize(width: 216, height: 118))
+        XCTAssertEqual(metrics.topUnitSize, CGSize(width: 149, height: 118))
         XCTAssertEqual(metrics.bottomUnitSize, CGSize(width: 136, height: 104))
         XCTAssertEqual(metrics.hubSize, CGSize(width: 120, height: 72.5))
         XCTAssertEqual(metrics.topUnitCenter, CGPoint(x: 184, y: 60))
@@ -115,6 +115,8 @@ final class NotchIslandChromeTests: XCTestCase {
     func testMagiHubTopEdgeFullyOverlapsBalthasarBottomEdge() {
         let metrics = MagiConsoleLayoutMetrics()
 
+        XCTAssertEqual(metrics.hubTopEdgeLength, 62)
+        XCTAssertEqual(metrics.hubBottomEdgeLength, 33)
         XCTAssertEqual(metrics.hubTopEdgeLength, metrics.topUnitBottomEdgeLength)
         XCTAssertEqual(metrics.hubTopEdgeLength, metrics.hubSize.width - metrics.hubUpperSlantRun.width * 2)
         XCTAssertEqual(metrics.hubUpperLeftEdge, metrics.balthasarBottomLeftEdge)
@@ -125,8 +127,7 @@ final class NotchIslandChromeTests: XCTestCase {
         let metrics = MagiConsoleLayoutMetrics()
 
         XCTAssertEqual(metrics.hubUpperSlantRun, metrics.sharedSlantRun)
-        XCTAssertEqual(metrics.hubLowerSlantRun.width, metrics.hubUpperSlantRun.width * metrics.hubLowerSlantScale)
-        XCTAssertEqual(metrics.hubLowerSlantRun.height, metrics.hubUpperSlantRun.height * metrics.hubLowerSlantScale)
+        XCTAssertNotEqual(metrics.hubUpperSlantRun, metrics.hubLowerSlantRun)
     }
 
     func testMagiHubBottomEdgeAdaptsToSharedSlantSlope() {
@@ -161,6 +162,7 @@ final class NotchIslandChromeTests: XCTestCase {
     func testBalthasarBottomEdgeAdaptsToSharedSlantSlope() {
         let metrics = MagiConsoleLayoutMetrics()
 
+        XCTAssertEqual(metrics.topUnitLowerSideRun, metrics.bottomInnerCornerBevel)
         XCTAssertEqual(metrics.topUnitLowerSideRun.height, metrics.topUnitSize.height - metrics.topUnitVerticalSideHeight)
         XCTAssertEqual(
             metrics.topUnitBottomEdgeLength,
@@ -174,7 +176,7 @@ final class NotchIslandChromeTests: XCTestCase {
 
         XCTAssertEqual(
             metrics.topUnitVerticalSideHeight,
-            metrics.topUnitSize.height - metrics.hubUpperSlantRun.height - (metrics.topUnitSize.width - metrics.hubSize.width) / 2,
+            metrics.topUnitSize.height - metrics.bottomInnerCornerBevel.height,
             accuracy: 0.001
         )
     }

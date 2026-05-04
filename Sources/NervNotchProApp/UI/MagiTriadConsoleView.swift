@@ -13,7 +13,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadWidth: CGFloat = 368
     let triadHeight: CGFloat = 258
     let columnSpacing: CGFloat = 14
-    let topUnitSize = CGSize(width: 216, height: 118)
+    let topUnitSize = CGSize(width: 149, height: 118)
     let bottomUnitSize = CGSize(width: 136, height: 104)
     let hubSize = CGSize(width: 120, height: 72.5)
     let topUnitCenter = CGPoint(x: 184, y: 60)
@@ -22,7 +22,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let melchiorCenter = CGPoint(x: 268.5, y: 200)
     let sharedSlantRun = CGSize(width: 29, height: 29)
     let hubLowerSlantScale: CGFloat = 1.5
-    let topUnitVerticalSideHeight: CGFloat = 41
+    let topUnitVerticalSideHeight: CGFloat = 74.5
 
     var bottomInnerCornerBevel: CGSize {
         hubLowerSlantRun
