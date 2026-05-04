@@ -3,9 +3,67 @@ import SwiftUI
 struct MagiConsoleLayoutMetrics: Equatable {
     let sideInfoWidth: CGFloat = 154
     let trailingInfoWidth: CGFloat = 154
-    let triadWidth: CGFloat = 300
+    let triadWidth: CGFloat = 344
     let triadHeight: CGFloat = 258
     let columnSpacing: CGFloat = 14
+    let topUnitSize = CGSize(width: 216, height: 118)
+    let bottomUnitSize = CGSize(width: 136, height: 104)
+    let hubSize = CGSize(width: 120, height: 58)
+    let topUnitCenter = CGPoint(x: 172, y: 60)
+    let hubCenter = CGPoint(x: 172, y: 145)
+    let casperCenter = CGPoint(x: 68, y: 197)
+    let melchiorCenter = CGPoint(x: 276, y: 197)
+    let bottomInnerCornerBevel = CGSize(width: 24, height: 29)
+
+    var hubLowerLeftEdgeUpper: CGPoint {
+        CGPoint(x: hubCenter.x - hubSize.width / 2, y: hubCenter.y)
+    }
+
+    var hubLowerLeftEdgeLower: CGPoint {
+        CGPoint(
+            x: hubCenter.x - hubSize.width / 2 + hubSize.width * 0.2,
+            y: hubCenter.y + hubSize.height / 2
+        )
+    }
+
+    var hubLowerRightEdgeUpper: CGPoint {
+        CGPoint(x: hubCenter.x + hubSize.width / 2, y: hubCenter.y)
+    }
+
+    var hubLowerRightEdgeLower: CGPoint {
+        CGPoint(
+            x: hubCenter.x + hubSize.width / 2 - hubSize.width * 0.2,
+            y: hubCenter.y + hubSize.height / 2
+        )
+    }
+
+    var casperInnerBevelUpper: CGPoint {
+        CGPoint(
+            x: casperCenter.x + bottomUnitSize.width / 2 - bottomInnerCornerBevel.width,
+            y: casperCenter.y - bottomUnitSize.height / 2
+        )
+    }
+
+    var casperInnerBevelLower: CGPoint {
+        CGPoint(
+            x: casperCenter.x + bottomUnitSize.width / 2,
+            y: casperCenter.y - bottomUnitSize.height / 2 + bottomInnerCornerBevel.height
+        )
+    }
+
+    var melchiorInnerBevelUpper: CGPoint {
+        CGPoint(
+            x: melchiorCenter.x - bottomUnitSize.width / 2 + bottomInnerCornerBevel.width,
+            y: melchiorCenter.y - bottomUnitSize.height / 2
+        )
+    }
+
+    var melchiorInnerBevelLower: CGPoint {
+        CGPoint(
+            x: melchiorCenter.x - bottomUnitSize.width / 2,
+            y: melchiorCenter.y - bottomUnitSize.height / 2 + bottomInnerCornerBevel.height
+        )
+    }
 }
 
 struct MagiTriadConsoleView: View {
@@ -174,10 +232,12 @@ private struct MagiTriadView: View {
     let melchior: MagiPanelDecision
     let judgement: CentralDogmaJudgement
 
+    private let metrics = MagiConsoleLayoutMetrics()
+
     var body: some View {
         ZStack {
             MagiConnectorShape()
-                .stroke(NervStyle.green.opacity(0.84), style: StrokeStyle(lineWidth: 7, lineCap: .square, lineJoin: .miter))
+                .stroke(NervStyle.green.opacity(0.82), style: StrokeStyle(lineWidth: 5, lineCap: .square, lineJoin: .miter))
                 .shadow(color: NervStyle.green.opacity(0.65), radius: 8)
 
             MagiUnitView(
@@ -185,28 +245,28 @@ private struct MagiTriadView: View {
                 label: "BALTHASAR-2",
                 placement: .top
             )
-            .frame(width: 190, height: 108)
-            .position(x: 150, y: 55)
+            .frame(width: metrics.topUnitSize.width, height: metrics.topUnitSize.height)
+            .position(metrics.topUnitCenter)
 
             MagiHubView(judgement: judgement)
-                .frame(width: 112, height: 58)
-                .position(x: 150, y: 132)
+                .frame(width: metrics.hubSize.width, height: metrics.hubSize.height)
+                .position(metrics.hubCenter)
 
             MagiUnitView(
                 decision: casper,
                 label: "CASPER-3",
                 placement: .bottomLeft
             )
-            .frame(width: 136, height: 104)
-            .position(x: 72, y: 206)
+            .frame(width: metrics.bottomUnitSize.width, height: metrics.bottomUnitSize.height)
+            .position(metrics.casperCenter)
 
             MagiUnitView(
                 decision: melchior,
                 label: "MELCHIOR-1",
                 placement: .bottomRight
             )
-            .frame(width: 136, height: 104)
-            .position(x: 228, y: 206)
+            .frame(width: metrics.bottomUnitSize.width, height: metrics.bottomUnitSize.height)
+            .position(metrics.melchiorCenter)
         }
     }
 }
@@ -232,33 +292,42 @@ private struct MagiUnitView: View {
                         .shadow(color: strokeColor.opacity(0.85), radius: 8)
                 )
 
-            VStack(spacing: placement == .top ? 8 : 7) {
-                Text(decisionMarker)
-                    .font(.system(size: placement == .top ? 26 : 22, weight: .black, design: .default))
-                    .foregroundStyle(strokeColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.55)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 3)
-                            .stroke(strokeColor.opacity(0.82), lineWidth: 1.4)
-                    )
+            unitContent
+            .shadow(color: strokeColor.opacity(0.82), radius: 7)
+            .padding(.horizontal, 8)
+        }
+    }
 
+    @ViewBuilder
+    private var unitContent: some View {
+        switch placement {
+        case .top:
+            ZStack {
                 Text(label)
-                    .font(.system(size: placement == .top ? 24 : 20, weight: .black, design: .monospaced))
+                    .font(.system(size: 30, weight: .black, design: .monospaced))
                     .foregroundStyle(strokeColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.42)
+                    .position(x: 108, y: 38)
 
-                Text(decision.primaryValue)
-                    .font(NervStyle.monoSmall)
-                    .fontWeight(.black)
-                    .foregroundStyle(NervStyle.white.opacity(0.86))
-                    .lineLimit(1)
+                DecisionPlaque(text: decisionMarker, color: strokeColor, fontSize: 28)
+                    .frame(width: 88, height: 42)
+                    .position(x: 108, y: 78)
             }
-            .shadow(color: strokeColor.opacity(0.82), radius: 7)
-            .padding(.horizontal, 8)
+
+        case .bottomLeft, .bottomRight:
+            ZStack {
+                DecisionPlaque(text: decisionMarker, color: strokeColor, fontSize: 26)
+                    .frame(width: 84, height: 40)
+                    .position(x: 68, y: 33)
+
+                Text(label)
+                    .font(.system(size: 28, weight: .black, design: .monospaced))
+                    .foregroundStyle(strokeColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.34)
+                    .position(x: 68, y: 78)
+            }
         }
     }
 
@@ -286,6 +355,29 @@ private struct MagiUnitView: View {
         case .critical, .unavailable:
             return "否定"
         }
+    }
+}
+
+private struct DecisionPlaque: View {
+    let text: String
+    let color: Color
+    let fontSize: CGFloat
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: fontSize, weight: .black, design: .default))
+            .foregroundStyle(color)
+            .lineLimit(1)
+            .minimumScaleFactor(0.58)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.opacity(0.36))
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(color.opacity(0.82), lineWidth: 1.5)
+                    .shadow(color: color.opacity(0.9), radius: 6)
+            )
     }
 }
 
@@ -333,26 +425,20 @@ private struct MagiHubView: View {
 private struct MagiConnectorShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
+        let metrics = MagiConsoleLayoutMetrics()
         let centerX = rect.midX
-        let hubTop = rect.minY + 104
-        let hubBottom = rect.minY + 160
-        let lowerY = rect.minY + 158
-        let leftX = rect.minX + 72
-        let rightX = rect.maxX - 72
+        let topJoinY = rect.minY + metrics.topUnitCenter.y + metrics.topUnitSize.height / 2
+        let hubTopY = rect.minY + metrics.hubCenter.y - metrics.hubSize.height / 2
+        let hubBottomY = rect.minY + metrics.hubCenter.y + metrics.hubSize.height / 2
 
-        path.move(to: CGPoint(x: centerX, y: rect.minY + 92))
-        path.addLine(to: CGPoint(x: centerX, y: hubTop))
+        path.move(to: CGPoint(x: centerX - metrics.topUnitSize.width * 0.34, y: topJoinY))
+        path.addLine(to: CGPoint(x: centerX - metrics.hubSize.width * 0.2, y: hubTopY))
 
-        path.move(to: CGPoint(x: centerX, y: hubBottom))
-        path.addLine(to: CGPoint(x: centerX, y: rect.minY + 180))
+        path.move(to: CGPoint(x: centerX + metrics.topUnitSize.width * 0.34, y: topJoinY))
+        path.addLine(to: CGPoint(x: centerX + metrics.hubSize.width * 0.2, y: hubTopY))
 
-        path.move(to: CGPoint(x: centerX - 46, y: lowerY))
-        path.addLine(to: CGPoint(x: leftX, y: rect.minY + 180))
-        path.addLine(to: CGPoint(x: leftX, y: rect.maxY - 104))
-
-        path.move(to: CGPoint(x: centerX + 46, y: lowerY))
-        path.addLine(to: CGPoint(x: rightX, y: rect.minY + 180))
-        path.addLine(to: CGPoint(x: rightX, y: rect.maxY - 104))
+        path.move(to: CGPoint(x: centerX, y: hubBottomY))
+        path.addLine(to: CGPoint(x: centerX, y: rect.minY + metrics.casperCenter.y))
 
         return path
     }
@@ -366,7 +452,7 @@ private struct MagiUnitShape: Shape {
         case .top:
             topPath(in: rect)
         case .bottomLeft, .bottomRight:
-            rectanglePath(in: rect)
+            bottomPath(in: rect)
         }
     }
 
@@ -374,17 +460,46 @@ private struct MagiUnitShape: Shape {
         var path = Path()
         path.move(to: CGPoint(x: rect.minX, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + rect.height * 0.66))
-        path.addLine(to: CGPoint(x: rect.midX + rect.width * 0.30, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.midX - rect.width * 0.30, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + rect.height * 0.66))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + rect.height * 0.62))
+        path.addLine(to: CGPoint(x: rect.midX + rect.width * 0.34, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX - rect.width * 0.34, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + rect.height * 0.62))
         path.closeSubpath()
         return path
     }
 
-    private func rectanglePath(in rect: CGRect) -> Path {
+    private func bottomPath(in rect: CGRect) -> Path {
+        switch placement {
+        case .top:
+            return topPath(in: rect)
+        case .bottomLeft:
+            return bottomLeftPath(in: rect)
+        case .bottomRight:
+            return bottomRightPath(in: rect)
+        }
+    }
+
+    private func bottomLeftPath(in rect: CGRect) -> Path {
+        let bevel = MagiConsoleLayoutMetrics().bottomInnerCornerBevel
         var path = Path()
-        path.addRect(rect)
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX - bevel.width, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + bevel.height))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+
+    private func bottomRightPath(in rect: CGRect) -> Path {
+        let bevel = MagiConsoleLayoutMetrics().bottomInnerCornerBevel
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX + bevel.width, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + bevel.height))
+        path.closeSubpath()
         return path
     }
 }

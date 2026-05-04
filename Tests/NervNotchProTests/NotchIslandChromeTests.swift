@@ -67,7 +67,32 @@ final class NotchIslandChromeTests: XCTestCase {
         let metrics = MagiConsoleLayoutMetrics()
 
         XCTAssertEqual(metrics.sideInfoWidth, 154)
-        XCTAssertEqual(metrics.triadWidth, 300)
+        XCTAssertEqual(metrics.triadWidth, 344)
         XCTAssertEqual(metrics.sideInfoWidth, metrics.trailingInfoWidth)
+    }
+
+    func testMagiTriadUsesReferenceUnitProportions() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.topUnitSize, CGSize(width: 216, height: 118))
+        XCTAssertEqual(metrics.bottomUnitSize, CGSize(width: 136, height: 104))
+        XCTAssertEqual(metrics.hubSize, CGSize(width: 120, height: 58))
+        XCTAssertEqual(metrics.topUnitCenter, CGPoint(x: 172, y: 60))
+        XCTAssertEqual(metrics.hubCenter, CGPoint(x: 172, y: 145))
+    }
+
+    func testMagiBottomUnitsUseSymmetricInnerCornerBevels() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.bottomInnerCornerBevel, CGSize(width: 24, height: 29))
+    }
+
+    func testMagiBottomInnerBevelsShareHubLowerEdgeEndpoints() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.hubLowerLeftEdgeUpper, metrics.casperInnerBevelUpper)
+        XCTAssertEqual(metrics.hubLowerLeftEdgeLower, metrics.casperInnerBevelLower)
+        XCTAssertEqual(metrics.hubLowerRightEdgeUpper, metrics.melchiorInnerBevelUpper)
+        XCTAssertEqual(metrics.hubLowerRightEdgeLower, metrics.melchiorInnerBevelLower)
     }
 }
