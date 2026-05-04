@@ -2,8 +2,9 @@ import SwiftUI
 
 struct MagiConsoleTypography: Equatable {
     let englishFontName = "Share Tech Mono"
-    let topUnitLabelSize: CGFloat = 26
-    let bottomUnitLabelSize: CGFloat = 24
+    let topUnitLabelSize: CGFloat = 22
+    let bottomUnitLabelSize: CGFloat = 20
+    let metricValueSize: CGFloat = 18
 }
 
 struct MagiConsoleLayoutMetrics: Equatable {
@@ -14,26 +15,28 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let columnSpacing: CGFloat = 14
     let topUnitSize = CGSize(width: 216, height: 118)
     let bottomUnitSize = CGSize(width: 136, height: 104)
-    let hubSize = CGSize(width: 120, height: 58)
+    let hubSize = CGSize(width: 120, height: 72.5)
     let topUnitCenter = CGPoint(x: 184, y: 60)
-    let hubCenter = CGPoint(x: 184, y: 148)
-    let casperCenter = CGPoint(x: 85, y: 200)
-    let melchiorCenter = CGPoint(x: 283, y: 200)
+    let hubCenter = CGPoint(x: 184, y: 155.25)
+    let casperCenter = CGPoint(x: 99.5, y: 200)
+    let melchiorCenter = CGPoint(x: 268.5, y: 200)
     let sharedSlantRun = CGSize(width: 29, height: 29)
+    let hubLowerSlantScale: CGFloat = 1.5
     let topUnitVerticalSideHeight: CGFloat = 41
 
     var bottomInnerCornerBevel: CGSize {
-        sharedSlantRun
+        hubLowerSlantRun
     }
 
     var hubUpperSlantRun: CGSize {
-        let height = hubSize.height / 2
-        return CGSize(width: slantWidth(forHeight: height), height: height)
+        sharedSlantRun
     }
 
     var hubLowerSlantRun: CGSize {
-        let height = hubSize.height / 2
-        return CGSize(width: slantWidth(forHeight: height), height: height)
+        CGSize(
+            width: sharedSlantRun.width * hubLowerSlantScale,
+            height: sharedSlantRun.height * hubLowerSlantScale
+        )
     }
 
     var hubBottomEdgeLength: CGFloat {
@@ -86,7 +89,10 @@ struct MagiConsoleLayoutMetrics: Equatable {
     }
 
     var hubLowerLeftEdgeUpper: CGPoint {
-        CGPoint(x: hubCenter.x - hubSize.width / 2, y: hubCenter.y)
+        CGPoint(
+            x: hubCenter.x - hubSize.width / 2,
+            y: hubCenter.y - hubSize.height / 2 + hubUpperSlantRun.height
+        )
     }
 
     var hubLowerLeftEdgeLower: CGPoint {
@@ -97,7 +103,10 @@ struct MagiConsoleLayoutMetrics: Equatable {
     }
 
     var hubLowerRightEdgeUpper: CGPoint {
-        CGPoint(x: hubCenter.x + hubSize.width / 2, y: hubCenter.y)
+        CGPoint(
+            x: hubCenter.x + hubSize.width / 2,
+            y: hubCenter.y - hubSize.height / 2 + hubUpperSlantRun.height
+        )
     }
 
     var hubLowerRightEdgeLower: CGPoint {
@@ -383,15 +392,25 @@ private struct MagiUnitView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .position(x: 108, y: 38)
 
-                DecisionPlaque(text: decisionMarker, color: strokeColor, fontSize: 28)
-                    .frame(width: 88, height: 42)
+                DecisionPlaque(
+                    text: decision.primaryValue,
+                    color: strokeColor,
+                    fontName: typography.englishFontName,
+                    fontSize: typography.metricValueSize
+                )
+                    .frame(width: 110, height: 38)
                     .position(x: 108, y: 78)
             }
 
         case .bottomLeft, .bottomRight:
             ZStack {
-                DecisionPlaque(text: decisionMarker, color: strokeColor, fontSize: 26)
-                    .frame(width: 84, height: 40)
+                DecisionPlaque(
+                    text: decision.primaryValue,
+                    color: strokeColor,
+                    fontName: typography.englishFontName,
+                    fontSize: typography.metricValueSize
+                )
+                    .frame(width: 108, height: 36)
                     .position(x: 68, y: 33)
 
                 Text(label)
@@ -421,26 +440,18 @@ private struct MagiUnitView: View {
         }
     }
 
-    private var decisionMarker: String {
-        switch decision.level {
-        case .normal, .idle:
-            return "承認"
-        case .highLoad:
-            return "審議"
-        case .critical, .unavailable:
-            return "否定"
-        }
-    }
 }
 
 private struct DecisionPlaque: View {
     let text: String
     let color: Color
+    let fontName: String
     let fontSize: CGFloat
 
     var body: some View {
         Text(text)
-            .font(.system(size: fontSize, weight: .black, design: .default))
+            .font(.custom(fontName, size: fontSize))
+            .fontWeight(.black)
             .foregroundStyle(color)
             .lineLimit(1)
             .minimumScaleFactor(0.58)
@@ -588,14 +599,15 @@ private struct MagiHubShape: Shape {
         let metrics = MagiConsoleLayoutMetrics()
         let topInset = (rect.width - metrics.hubTopEdgeLength) / 2
         let bottomInset = (rect.width - metrics.hubBottomEdgeLength) / 2
+        let sideJoinY = rect.minY + metrics.hubUpperSlantRun.height
 
         var path = Path()
         path.move(to: CGPoint(x: rect.minX + topInset, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.maxX - topInset, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: sideJoinY))
         path.addLine(to: CGPoint(x: rect.maxX - bottomInset, y: rect.maxY))
         path.addLine(to: CGPoint(x: rect.minX + bottomInset, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.minX, y: sideJoinY))
         path.closeSubpath()
         return path
     }

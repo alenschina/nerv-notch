@@ -76,23 +76,24 @@ final class NotchIslandChromeTests: XCTestCase {
 
         XCTAssertEqual(metrics.topUnitSize, CGSize(width: 216, height: 118))
         XCTAssertEqual(metrics.bottomUnitSize, CGSize(width: 136, height: 104))
-        XCTAssertEqual(metrics.hubSize, CGSize(width: 120, height: 58))
+        XCTAssertEqual(metrics.hubSize, CGSize(width: 120, height: 72.5))
         XCTAssertEqual(metrics.topUnitCenter, CGPoint(x: 184, y: 60))
-        XCTAssertEqual(metrics.hubCenter, CGPoint(x: 184, y: 148))
+        XCTAssertEqual(metrics.hubCenter, CGPoint(x: 184, y: 155.25))
     }
 
     func testMagiOuterUnitEnglishLabelsUseShareTechMonoWithReducedSizes() {
         let typography = MagiConsoleTypography()
 
         XCTAssertEqual(typography.englishFontName, "Share Tech Mono")
-        XCTAssertEqual(typography.topUnitLabelSize, 26)
-        XCTAssertEqual(typography.bottomUnitLabelSize, 24)
+        XCTAssertEqual(typography.topUnitLabelSize, 22)
+        XCTAssertEqual(typography.bottomUnitLabelSize, 20)
+        XCTAssertEqual(typography.metricValueSize, 18)
     }
 
     func testMagiBottomUnitsUseSymmetricInnerCornerBevels() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.bottomInnerCornerBevel, CGSize(width: 29, height: 29))
+        XCTAssertEqual(metrics.bottomInnerCornerBevel, CGSize(width: 43.5, height: 43.5))
     }
 
     func testMagiBottomInnerBevelsShareHubLowerEdgeEndpoints() {
@@ -124,21 +125,22 @@ final class NotchIslandChromeTests: XCTestCase {
         let metrics = MagiConsoleLayoutMetrics()
 
         XCTAssertEqual(metrics.hubUpperSlantRun, metrics.sharedSlantRun)
-        XCTAssertEqual(metrics.hubUpperSlantRun.width, metrics.hubLowerSlantRun.width)
-        XCTAssertEqual(metrics.hubUpperSlantRun.height, metrics.hubLowerSlantRun.height)
+        XCTAssertEqual(metrics.hubLowerSlantRun.width, metrics.hubUpperSlantRun.width * metrics.hubLowerSlantScale)
+        XCTAssertEqual(metrics.hubLowerSlantRun.height, metrics.hubUpperSlantRun.height * metrics.hubLowerSlantScale)
     }
 
     func testMagiHubBottomEdgeAdaptsToSharedSlantSlope() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.hubLowerSlantRun, metrics.sharedSlantRun)
+        XCTAssertEqual(metrics.hubLowerSlantScale, 1.5)
+        XCTAssertEqual(metrics.hubLowerSlantRun, CGSize(width: 43.5, height: 43.5))
         XCTAssertEqual(metrics.hubBottomEdgeLength, metrics.hubSize.width - metrics.hubLowerSlantRun.width * 2)
     }
 
     func testMagiTriadSlantsShareTheSameSlope() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.bottomInnerCornerBevel, metrics.sharedSlantRun)
+        XCTAssertEqual(metrics.bottomInnerCornerBevel, metrics.hubLowerSlantRun)
         XCTAssertEqual(
             metrics.topUnitLowerSideRun.width * metrics.sharedSlantRun.height,
             metrics.topUnitLowerSideRun.height * metrics.sharedSlantRun.width,
