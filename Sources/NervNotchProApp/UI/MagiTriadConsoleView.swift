@@ -1,19 +1,89 @@
 import SwiftUI
 
+struct MagiConsoleTypography: Equatable {
+    let englishFontName = "Share Tech Mono"
+    let topUnitLabelSize: CGFloat = 26
+    let bottomUnitLabelSize: CGFloat = 24
+}
+
 struct MagiConsoleLayoutMetrics: Equatable {
     let sideInfoWidth: CGFloat = 154
     let trailingInfoWidth: CGFloat = 154
-    let triadWidth: CGFloat = 344
+    let triadWidth: CGFloat = 368
     let triadHeight: CGFloat = 258
     let columnSpacing: CGFloat = 14
     let topUnitSize = CGSize(width: 216, height: 118)
     let bottomUnitSize = CGSize(width: 136, height: 104)
     let hubSize = CGSize(width: 120, height: 58)
-    let topUnitCenter = CGPoint(x: 172, y: 60)
-    let hubCenter = CGPoint(x: 172, y: 145)
-    let casperCenter = CGPoint(x: 68, y: 197)
-    let melchiorCenter = CGPoint(x: 276, y: 197)
-    let bottomInnerCornerBevel = CGSize(width: 24, height: 29)
+    let topUnitCenter = CGPoint(x: 184, y: 60)
+    let hubCenter = CGPoint(x: 184, y: 148)
+    let casperCenter = CGPoint(x: 85, y: 200)
+    let melchiorCenter = CGPoint(x: 283, y: 200)
+    let sharedSlantRun = CGSize(width: 29, height: 29)
+    let topUnitVerticalSideHeight: CGFloat = 41
+
+    var bottomInnerCornerBevel: CGSize {
+        sharedSlantRun
+    }
+
+    var hubUpperSlantRun: CGSize {
+        let height = hubSize.height / 2
+        return CGSize(width: slantWidth(forHeight: height), height: height)
+    }
+
+    var hubLowerSlantRun: CGSize {
+        let height = hubSize.height / 2
+        return CGSize(width: slantWidth(forHeight: height), height: height)
+    }
+
+    var hubBottomEdgeLength: CGFloat {
+        hubSize.width - hubLowerSlantRun.width * 2
+    }
+
+    var hubTopEdgeLength: CGFloat {
+        hubSize.width - hubUpperSlantRun.width * 2
+    }
+
+    var topUnitLowerSideRun: CGSize {
+        let height = topUnitSize.height - topUnitVerticalSideHeight
+        return CGSize(width: slantWidth(forHeight: height), height: height)
+    }
+
+    var topUnitBottomEdgeLength: CGFloat {
+        topUnitSize.width - topUnitLowerSideRun.width * 2
+    }
+
+    var balthasarBottomLeftEdge: CGPoint {
+        CGPoint(
+            x: topUnitCenter.x - topUnitBottomEdgeLength / 2,
+            y: topUnitCenter.y + topUnitSize.height / 2
+        )
+    }
+
+    var balthasarBottomRightEdge: CGPoint {
+        CGPoint(
+            x: topUnitCenter.x + topUnitBottomEdgeLength / 2,
+            y: topUnitCenter.y + topUnitSize.height / 2
+        )
+    }
+
+    var hubUpperLeftEdge: CGPoint {
+        CGPoint(
+            x: hubCenter.x - hubTopEdgeLength / 2,
+            y: hubCenter.y - hubSize.height / 2
+        )
+    }
+
+    var hubUpperRightEdge: CGPoint {
+        CGPoint(
+            x: hubCenter.x + hubTopEdgeLength / 2,
+            y: hubCenter.y - hubSize.height / 2
+        )
+    }
+
+    private func slantWidth(forHeight height: CGFloat) -> CGFloat {
+        height * sharedSlantRun.width / sharedSlantRun.height
+    }
 
     var hubLowerLeftEdgeUpper: CGPoint {
         CGPoint(x: hubCenter.x - hubSize.width / 2, y: hubCenter.y)
@@ -21,7 +91,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
     var hubLowerLeftEdgeLower: CGPoint {
         CGPoint(
-            x: hubCenter.x - hubSize.width / 2 + hubSize.width * 0.2,
+            x: hubCenter.x - hubBottomEdgeLength / 2,
             y: hubCenter.y + hubSize.height / 2
         )
     }
@@ -32,7 +102,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
     var hubLowerRightEdgeLower: CGPoint {
         CGPoint(
-            x: hubCenter.x + hubSize.width / 2 - hubSize.width * 0.2,
+            x: hubCenter.x + hubBottomEdgeLength / 2,
             y: hubCenter.y + hubSize.height / 2
         )
     }
@@ -281,6 +351,7 @@ private struct MagiUnitView: View {
     let decision: MagiPanelDecision
     let label: String
     let placement: Placement
+    private let typography = MagiConsoleTypography()
 
     var body: some View {
         ZStack {
@@ -304,10 +375,12 @@ private struct MagiUnitView: View {
         case .top:
             ZStack {
                 Text(label)
-                    .font(.system(size: 30, weight: .black, design: .monospaced))
+                    .font(.custom(typography.englishFontName, size: typography.topUnitLabelSize))
+                    .fontWeight(.black)
                     .foregroundStyle(strokeColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.42)
+                    .frame(maxWidth: .infinity, alignment: .center)
                     .position(x: 108, y: 38)
 
                 DecisionPlaque(text: decisionMarker, color: strokeColor, fontSize: 28)
@@ -322,10 +395,12 @@ private struct MagiUnitView: View {
                     .position(x: 68, y: 33)
 
                 Text(label)
-                    .font(.system(size: 28, weight: .black, design: .monospaced))
+                    .font(.custom(typography.englishFontName, size: typography.bottomUnitLabelSize))
+                    .fontWeight(.black)
                     .foregroundStyle(strokeColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.34)
+                    .frame(maxWidth: .infinity, alignment: .center)
                     .position(x: 68, y: 78)
             }
         }
@@ -431,11 +506,11 @@ private struct MagiConnectorShape: Shape {
         let hubTopY = rect.minY + metrics.hubCenter.y - metrics.hubSize.height / 2
         let hubBottomY = rect.minY + metrics.hubCenter.y + metrics.hubSize.height / 2
 
-        path.move(to: CGPoint(x: centerX - metrics.topUnitSize.width * 0.34, y: topJoinY))
-        path.addLine(to: CGPoint(x: centerX - metrics.hubSize.width * 0.2, y: hubTopY))
+        path.move(to: CGPoint(x: centerX - metrics.topUnitBottomEdgeLength / 2, y: topJoinY))
+        path.addLine(to: CGPoint(x: centerX - metrics.hubTopEdgeLength / 2, y: hubTopY))
 
-        path.move(to: CGPoint(x: centerX + metrics.topUnitSize.width * 0.34, y: topJoinY))
-        path.addLine(to: CGPoint(x: centerX + metrics.hubSize.width * 0.2, y: hubTopY))
+        path.move(to: CGPoint(x: centerX + metrics.topUnitBottomEdgeLength / 2, y: topJoinY))
+        path.addLine(to: CGPoint(x: centerX + metrics.hubTopEdgeLength / 2, y: hubTopY))
 
         path.move(to: CGPoint(x: centerX, y: hubBottomY))
         path.addLine(to: CGPoint(x: centerX, y: rect.minY + metrics.casperCenter.y))
@@ -457,13 +532,17 @@ private struct MagiUnitShape: Shape {
     }
 
     private func topPath(in rect: CGRect) -> Path {
+        let metrics = MagiConsoleLayoutMetrics()
+        let bottomHalf = metrics.topUnitBottomEdgeLength / 2
+        let lowerSideY = rect.minY + metrics.topUnitVerticalSideHeight
+
         var path = Path()
         path.move(to: CGPoint(x: rect.minX, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + rect.height * 0.62))
-        path.addLine(to: CGPoint(x: rect.midX + rect.width * 0.34, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.midX - rect.width * 0.34, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + rect.height * 0.62))
+        path.addLine(to: CGPoint(x: rect.maxX, y: lowerSideY))
+        path.addLine(to: CGPoint(x: rect.midX + bottomHalf, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX - bottomHalf, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: lowerSideY))
         path.closeSubpath()
         return path
     }
@@ -506,12 +585,16 @@ private struct MagiUnitShape: Shape {
 
 private struct MagiHubShape: Shape {
     func path(in rect: CGRect) -> Path {
+        let metrics = MagiConsoleLayoutMetrics()
+        let topInset = (rect.width - metrics.hubTopEdgeLength) / 2
+        let bottomInset = (rect.width - metrics.hubBottomEdgeLength) / 2
+
         var path = Path()
-        path.move(to: CGPoint(x: rect.minX + rect.width * 0.20, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX - rect.width * 0.20, y: rect.minY))
+        path.move(to: CGPoint(x: rect.minX + topInset, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX - topInset, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.maxX - rect.width * 0.20, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX + rect.width * 0.20, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX - bottomInset, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX + bottomInset, y: rect.maxY))
         path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
         path.closeSubpath()
         return path
