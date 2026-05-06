@@ -85,11 +85,12 @@ final class NotchIslandChromeTests: XCTestCase {
         let typography = MagiConsoleTypography()
 
         XCTAssertEqual(typography.englishFontName, "Share Tech Mono")
-        XCTAssertEqual(typography.topUnitLabelSize, 14)
-        XCTAssertEqual(typography.bottomUnitLabelSize, 13)
+        XCTAssertEqual(typography.topUnitLabelSize, 18)
+        XCTAssertEqual(typography.bottomUnitLabelSize, 16)
+        XCTAssertEqual(typography.unitTitleFontName, "Helvetica Neue Condensed Bold")
         XCTAssertEqual(typography.unitSubtitleSize, 8)
+        XCTAssertEqual(typography.metricFontName, "DS-Digital")
         XCTAssertEqual(typography.metricValueSize, 20)
-        XCTAssertEqual(typography.statusTextSize, 7)
     }
 
     func testMagiOuterUnitsExposeMetricSubtitles() {
@@ -112,6 +113,10 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertLessThanOrEqual(topLayout.contentHeight, metrics.topUnitSize.height - topLayout.verticalPadding * 2)
         XCTAssertLessThanOrEqual(bottomLayout.contentWidth, metrics.bottomUnitSize.width - bottomLayout.horizontalPadding * 2)
         XCTAssertLessThanOrEqual(bottomLayout.contentHeight, metrics.bottomUnitSize.height - bottomLayout.verticalPadding * 2)
+        XCTAssertEqual(topLayout.statusHeight, 0)
+        XCTAssertEqual(bottomLayout.statusHeight, 0)
+        XCTAssertFalse(topLayout.titleAppearsBelowValue)
+        XCTAssertTrue(bottomLayout.titleAppearsBelowValue)
     }
 
     func testMagiBottomUnitsUseSymmetricInnerCornerBevels() {

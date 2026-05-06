@@ -2,11 +2,12 @@ import SwiftUI
 
 struct MagiConsoleTypography: Equatable {
     let englishFontName = "Share Tech Mono"
-    let topUnitLabelSize: CGFloat = 14
-    let bottomUnitLabelSize: CGFloat = 13
+    let topUnitLabelSize: CGFloat = 18
+    let bottomUnitLabelSize: CGFloat = 16
+    let unitTitleFontName = "Helvetica Neue Condensed Bold"
     let unitSubtitleSize: CGFloat = 8
+    let metricFontName = "DS-Digital"
     let metricValueSize: CGFloat = 20
-    let statusTextSize: CGFloat = 7
 }
 
 struct MagiUnitLabel: Equatable {
@@ -65,7 +66,12 @@ struct MagiUnitContentLayout: Equatable {
     }
 
     var titleHeight: CGFloat {
-        23
+        switch placement {
+        case .top:
+            return 34
+        case .bottom:
+            return 30
+        }
     }
 
     var valueHeight: CGFloat {
@@ -78,7 +84,11 @@ struct MagiUnitContentLayout: Equatable {
     }
 
     var statusHeight: CGFloat {
-        16
+        0
+    }
+
+    var titleAppearsBelowValue: Bool {
+        placement == .bottom
     }
 }
 
@@ -460,36 +470,44 @@ private struct MagiUnitView: View {
 
     private var unitContent: some View {
         VStack(spacing: 4) {
-            UnitTitleBlock(
-                label: label,
-                color: strokeColor,
-                fontName: typography.englishFontName,
-                titleSize: placement == .top ? typography.topUnitLabelSize : typography.bottomUnitLabelSize,
-                subtitleSize: typography.unitSubtitleSize,
-                titleScale: 0.50
-            )
-            .frame(height: contentLayout.titleHeight)
+            if contentLayout.titleAppearsBelowValue {
+                valueBlock
 
-            Spacer(minLength: 0)
+                Spacer(minLength: 0)
 
-            DecisionPlaque(
-                text: decision.primaryValue,
-                color: NervStyle.orange,
-                fontName: typography.englishFontName,
-                fontSize: typography.metricValueSize
-            )
-            .frame(height: contentLayout.valueHeight)
+                titleBlock
+            } else {
+                titleBlock
 
-            Text(compactStatusText)
-                .font(.custom(typography.englishFontName, size: typography.statusTextSize))
-                .fontWeight(.black)
-                .foregroundStyle(strokeColor.opacity(0.82))
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.55)
-                .frame(height: contentLayout.statusHeight)
+                Spacer(minLength: 0)
+
+                valueBlock
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var titleBlock: some View {
+        UnitTitleBlock(
+            label: label,
+            color: strokeColor,
+            fontName: typography.englishFontName,
+            titleFontName: typography.unitTitleFontName,
+            titleSize: placement == .top ? typography.topUnitLabelSize : typography.bottomUnitLabelSize,
+            subtitleSize: typography.unitSubtitleSize,
+            titleScale: 0.50
+        )
+        .frame(height: contentLayout.titleHeight)
+    }
+
+    private var valueBlock: some View {
+        DecisionPlaque(
+            text: decision.primaryValue,
+            color: NervStyle.orange,
+            fontName: typography.metricFontName,
+            fontSize: typography.metricValueSize
+        )
+        .frame(height: contentLayout.valueHeight)
     }
 
     private var contentPosition: CGPoint {
@@ -500,21 +518,6 @@ private struct MagiUnitView: View {
             return CGPoint(x: 63, y: 52)
         case .bottomRight:
             return CGPoint(x: 73, y: 52)
-        }
-    }
-
-    private var compactStatusText: String {
-        switch decision.level {
-        case .normal:
-            return "NORMAL"
-        case .idle:
-            return "IDLE"
-        case .highLoad:
-            return "HIGH LOAD"
-        case .critical:
-            return "CRITICAL"
-        case .unavailable:
-            return "NO DATA"
         }
     }
 
@@ -539,6 +542,7 @@ private struct UnitTitleBlock: View {
     let label: MagiUnitLabel
     let color: Color
     let fontName: String
+    let titleFontName: String
     let titleSize: CGFloat
     let subtitleSize: CGFloat
     let titleScale: CGFloat
@@ -546,8 +550,7 @@ private struct UnitTitleBlock: View {
     var body: some View {
         VStack(spacing: 0) {
             Text(label.title)
-                .font(.custom(fontName, size: titleSize))
-                .fontWeight(.black)
+                .font(titleFont)
                 .foregroundStyle(color)
                 .lineLimit(1)
                 .minimumScaleFactor(titleScale)
@@ -560,6 +563,10 @@ private struct UnitTitleBlock: View {
                 .minimumScaleFactor(0.5)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+    }
+
+    private var titleFont: Font {
+        .custom(titleFontName, size: titleSize)
     }
 }
 
