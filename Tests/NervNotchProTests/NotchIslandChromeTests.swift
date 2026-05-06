@@ -74,6 +74,8 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadOuterFrameStrokeHorizontalInset, 38)
         XCTAssertEqual(metrics.triadOuterFrameStrokeLineWidth, 1)
         XCTAssertEqual(metrics.triadOuterFrameStrokeWidth, 416)
+        XCTAssertEqual(metrics.sideAuxiliaryFrameWidth, 132)
+        XCTAssertEqual(metrics.sideAuxiliaryFrameStrokeWidth, 56)
         XCTAssertEqual(metrics.triadOuterFrameBottomPadding, 4)
         XCTAssertEqual(metrics.triadWarningStripHeight, 16)
         XCTAssertEqual(
@@ -93,6 +95,34 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadOuterFrameWidth, metrics.triadWidth + metrics.triadEmbeddedInfoReserveWidth * 2)
         XCTAssertLessThan(currentTotalWidth, previousTotalWidth)
         XCTAssertLessThan(metrics.triadOuterFrameBottomPadding, 8)
+    }
+
+    func testMagiConsoleAddsEmptyAuxiliaryFramesWithoutMovingCenterContent() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(
+            metrics.triadClusterWidth,
+            metrics.sideAuxiliaryFrameWidth * 2 + metrics.triadOuterFrameWidth + metrics.columnSpacing * 2
+        )
+        XCTAssertEqual(metrics.triadClusterWidth, 784)
+        XCTAssertEqual(metrics.triadOuterFrameWidth, 492)
+        XCTAssertEqual(metrics.triadLeadingEmbeddedInfoLeadingX, 80)
+        XCTAssertEqual(metrics.triadTrailingEmbeddedInfoTrailingX, 470)
+        XCTAssertEqual(
+            metrics.sideAuxiliaryFrameWarningStripWidth,
+            metrics.sideAuxiliaryFrameStrokeWidth - metrics.triadOuterFrameStrokeLineWidth * 2
+        )
+    }
+
+    func testMagiConsoleDrawsWarningBackgroundStripsOutsideContentLayout() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.sideWarningBackgroundWidth, 64)
+        XCTAssertEqual(metrics.sideWarningBackgroundStripeWidth, 36)
+        XCTAssertEqual(metrics.sideWarningBackgroundStripeHeight, 58)
+        XCTAssertGreaterThan(metrics.sideWarningBackgroundOpacity, 0)
+        XCTAssertLessThan(metrics.sideWarningBackgroundOpacity, 1)
+        XCTAssertEqual(metrics.triadClusterWidth, 784)
     }
 
     func testMagiRedFrameStrokeHugsContentWithoutMovingEmbeddedInfo() {

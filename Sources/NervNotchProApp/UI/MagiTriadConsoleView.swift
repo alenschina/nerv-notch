@@ -114,6 +114,11 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadOuterFrameStrokeHorizontalInset: CGFloat = 38
     let triadOuterFrameStrokeLineWidth: CGFloat = 1
     let triadEmbeddedInfoReserveWidth: CGFloat = 62
+    let sideAuxiliaryFrameWidth: CGFloat = 132
+    let sideWarningBackgroundWidth: CGFloat = 64
+    let sideWarningBackgroundStripeWidth: CGFloat = 36
+    let sideWarningBackgroundStripeHeight: CGFloat = 58
+    let sideWarningBackgroundOpacity: Double = 0.36
     let triadEmbeddedInfoWidth: CGFloat = 118
     let triadEmbeddedInfoRowCount = 9
     let triadEmbeddedInfoFontSize: CGFloat = 7.2
@@ -153,6 +158,18 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
     var triadWarningStripHorizontalInset: CGFloat {
         triadOuterFrameStrokeHorizontalInset + triadOuterFrameStrokeLineWidth
+    }
+
+    var sideAuxiliaryFrameStrokeWidth: CGFloat {
+        sideAuxiliaryFrameWidth - triadOuterFrameStrokeHorizontalInset * 2
+    }
+
+    var sideAuxiliaryFrameWarningStripWidth: CGFloat {
+        sideAuxiliaryFrameWidth - triadWarningStripHorizontalInset * 2
+    }
+
+    var triadClusterWidth: CGFloat {
+        sideAuxiliaryFrameWidth * 2 + triadOuterFrameWidth + columnSpacing * 2
     }
 
     var triadOuterFrameHeight: CGFloat {
@@ -346,12 +363,17 @@ struct MagiTriadConsoleView: View {
 
     var body: some View {
         ZStack {
+            MagiSideWarningBackgroundStrips()
+
             consoleGrid
 
             VStack(spacing: 12) {
                 topStatusArea
 
                 HStack(alignment: .top, spacing: metrics.columnSpacing) {
+                    MagiAuxiliaryFramedView()
+                        .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
+
                     MagiTriadFramedView(
                         balthasar: state.memory,
                         casper: state.network,
@@ -361,6 +383,9 @@ struct MagiTriadConsoleView: View {
                         trailingRows: rightRows
                     )
                     .frame(width: metrics.triadOuterFrameWidth, height: metrics.triadOuterFrameHeight)
+
+                    MagiAuxiliaryFramedView()
+                        .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
                 }
             }
             .padding(.horizontal, 18)
@@ -437,6 +462,71 @@ struct MagiTriadConsoleView: View {
             "Physical Connection",
             "L431-Basic Interface"
         ]
+    }
+}
+
+private struct MagiSideWarningBackgroundStrips: View {
+    private let metrics = MagiConsoleLayoutMetrics()
+
+    var body: some View {
+        HStack(spacing: 0) {
+            MagiSideWarningBackgroundStrip()
+                .frame(width: metrics.sideWarningBackgroundWidth)
+
+            Spacer(minLength: 0)
+
+            MagiSideWarningBackgroundStrip()
+                .frame(width: metrics.sideWarningBackgroundWidth)
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+private struct MagiSideWarningBackgroundStrip: View {
+    private let metrics = MagiConsoleLayoutMetrics()
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack {
+                Color.black.opacity(0.28)
+
+                NervStyle.orange
+                    .opacity(metrics.sideWarningBackgroundOpacity)
+
+                Path { path in
+                    let stripeWidth = metrics.sideWarningBackgroundStripeWidth
+                    let stripeHeight = metrics.sideWarningBackgroundStripeHeight
+                    var y = -stripeHeight
+
+                    while y < proxy.size.height + stripeHeight {
+                        path.move(to: CGPoint(x: 0, y: y + stripeHeight))
+                        path.addLine(to: CGPoint(x: proxy.size.width, y: y))
+                        path.addLine(to: CGPoint(x: proxy.size.width, y: y + stripeHeight * 0.45))
+                        path.addLine(to: CGPoint(x: 0, y: y + stripeHeight * 1.45))
+                        path.closeSubpath()
+                        y += stripeWidth
+                    }
+                }
+                .fill(Color.black.opacity(0.72))
+
+                Path { path in
+                    let rowHeight: CGFloat = 7
+                    var y: CGFloat = 0
+
+                    while y <= proxy.size.height {
+                        path.move(to: CGPoint(x: 0, y: y))
+                        path.addLine(to: CGPoint(x: proxy.size.width, y: y))
+                        y += rowHeight
+                    }
+                }
+                .stroke(Color.black.opacity(0.42), lineWidth: 1)
+            }
+            .overlay(
+                Rectangle()
+                    .stroke(NervStyle.orange.opacity(0.18), lineWidth: 1)
+            )
+            .clipped()
+        }
     }
 }
 
@@ -547,7 +637,7 @@ private struct MagiTriadFramedView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            MagiTriadOuterFrame()
+            MagiConsoleFramedChrome(strokeWidth: metrics.triadOuterFrameStrokeWidth)
 
             MagiTriadView(
                 balthasar: balthasar,
@@ -578,6 +668,14 @@ private struct MagiTriadFramedView: View {
     }
 }
 
+private struct MagiAuxiliaryFramedView: View {
+    private let metrics = MagiConsoleLayoutMetrics()
+
+    var body: some View {
+        MagiConsoleFramedChrome(strokeWidth: metrics.sideAuxiliaryFrameStrokeWidth)
+    }
+}
+
 private struct MagiTriadEmbeddedInfoColumn: View {
     let rows: [String]
 
@@ -603,14 +701,16 @@ private struct MagiTriadEmbeddedInfoColumn: View {
     }
 }
 
-private struct MagiTriadOuterFrame: View {
+private struct MagiConsoleFramedChrome: View {
+    let strokeWidth: CGFloat
+
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
         ZStack(alignment: .top) {
             Rectangle()
                 .strokeBorder(NervStyle.red.opacity(0.9), lineWidth: metrics.triadOuterFrameStrokeLineWidth)
-                .frame(width: metrics.triadOuterFrameStrokeWidth)
+                .frame(width: strokeWidth)
                 .shadow(color: NervStyle.red.opacity(0.55), radius: 4)
 
             MagiWarningStrip()
@@ -619,6 +719,7 @@ private struct MagiTriadOuterFrame: View {
                 .padding(.top, metrics.triadWarningStripTopInset)
         }
         .background(Color.black.opacity(0.18))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

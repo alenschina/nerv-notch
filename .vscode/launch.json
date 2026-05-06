@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:nerv-notch-pro}",
+            "name": "Debug NervNotchPro",
+            "target": "NervNotchPro",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug NervNotchPro"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:nerv-notch-pro}",
+            "name": "Release NervNotchPro",
+            "target": "NervNotchPro",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release NervNotchPro"
+        }
+    ]
+}
