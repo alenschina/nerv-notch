@@ -111,6 +111,8 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadWidth: CGFloat = 368
     let triadHeight: CGFloat = 258
     let triadOuterFrameHorizontalInset: CGFloat = 0
+    let triadOuterFrameStrokeHorizontalInset: CGFloat = 18
+    let triadOuterFrameStrokeLineWidth: CGFloat = 1
     let triadEmbeddedInfoReserveWidth: CGFloat = 62
     let triadEmbeddedInfoWidth: CGFloat = 118
     let triadEmbeddedInfoRowCount = 9
@@ -125,7 +127,6 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadOuterFrameBottomPadding: CGFloat = 4
     let triadWarningStripHeight: CGFloat = 16
     let triadWarningStripTopInset: CGFloat = 10
-    let triadWarningStripHorizontalInset: CGFloat = 4
     let columnSpacing: CGFloat = 14
     let topUnitSize = CGSize(width: 149, height: 108)
     let bottomUnitSize = CGSize(width: 136, height: 104)
@@ -144,6 +145,14 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
     var triadOuterFrameWidth: CGFloat {
         triadWidth + triadEmbeddedInfoReserveWidth * 2 - triadOuterFrameHorizontalInset * 2
+    }
+
+    var triadOuterFrameStrokeWidth: CGFloat {
+        triadOuterFrameWidth - triadOuterFrameStrokeHorizontalInset * 2
+    }
+
+    var triadWarningStripHorizontalInset: CGFloat {
+        triadOuterFrameStrokeHorizontalInset + triadOuterFrameStrokeLineWidth
     }
 
     var triadOuterFrameHeight: CGFloat {
@@ -600,7 +609,8 @@ private struct MagiTriadOuterFrame: View {
     var body: some View {
         ZStack(alignment: .top) {
             Rectangle()
-                .stroke(NervStyle.red.opacity(0.9), lineWidth: 1)
+                .strokeBorder(NervStyle.red.opacity(0.9), lineWidth: metrics.triadOuterFrameStrokeLineWidth)
+                .frame(width: metrics.triadOuterFrameStrokeWidth)
                 .shadow(color: NervStyle.red.opacity(0.55), radius: 4)
 
             MagiWarningStrip()
@@ -636,9 +646,10 @@ private struct MagiWarningStrip: View {
         .clipped()
         .overlay(
             Rectangle()
-                .stroke(NervStyle.orange.opacity(0.85), lineWidth: 1)
+                .strokeBorder(NervStyle.orange.opacity(0.85), lineWidth: 1)
         )
         .shadow(color: NervStyle.orange.opacity(0.65), radius: 3)
+        .clipped()
     }
 }
 

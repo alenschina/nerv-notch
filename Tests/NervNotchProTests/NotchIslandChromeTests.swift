@@ -71,8 +71,15 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadOuterFrameWidth, 492)
         XCTAssertEqual(metrics.triadOuterFrameHeight, 308)
         XCTAssertEqual(metrics.triadOuterFrameHorizontalInset, 0)
+        XCTAssertEqual(metrics.triadOuterFrameStrokeHorizontalInset, 18)
+        XCTAssertEqual(metrics.triadOuterFrameStrokeLineWidth, 1)
+        XCTAssertEqual(metrics.triadOuterFrameStrokeWidth, 456)
         XCTAssertEqual(metrics.triadOuterFrameBottomPadding, 4)
         XCTAssertEqual(metrics.triadWarningStripHeight, 16)
+        XCTAssertEqual(
+            metrics.triadWarningStripHorizontalInset,
+            metrics.triadOuterFrameStrokeHorizontalInset + metrics.triadOuterFrameStrokeLineWidth
+        )
         XCTAssertEqual(metrics.triadContentOffsetY, 46)
         XCTAssertEqual(metrics.trailingInfoWidth, 0)
     }
@@ -88,6 +95,19 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertLessThan(metrics.triadOuterFrameBottomPadding, 8)
     }
 
+    func testMagiRedFrameStrokeHugsContentWithoutMovingEmbeddedInfo() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.triadOuterFrameWidth, 492)
+        XCTAssertLessThan(metrics.triadOuterFrameStrokeWidth, metrics.triadOuterFrameWidth)
+        XCTAssertEqual(
+            metrics.triadOuterFrameStrokeWidth,
+            metrics.triadOuterFrameWidth - metrics.triadOuterFrameStrokeHorizontalInset * 2
+        )
+        XCTAssertEqual(metrics.triadLeadingEmbeddedInfoLeadingX, 80)
+        XCTAssertEqual(metrics.triadTrailingEmbeddedInfoTrailingX, 470)
+    }
+
     func testMagiEmbeddedSideInfoFitsInSideBlankAreas() {
         let metrics = MagiConsoleLayoutMetrics()
 
@@ -95,7 +115,7 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadEmbeddedInfoRowCount, 9)
         XCTAssertLessThanOrEqual(metrics.triadEmbeddedInfoFontSize, 8)
         XCTAssertLessThanOrEqual(metrics.triadEmbeddedInfoRowSpacing, 2)
-        XCTAssertLessThan(metrics.triadLeadingEmbeddedInfoTrailingX, metrics.balthasarLeftEdgeInOuterFrame)
+        XCTAssertLessThan(metrics.triadLeadingEmbeddedInfoTrailingX, metrics.triadOuterFrameWidth / 2)
         XCTAssertGreaterThan(metrics.triadTrailingEmbeddedInfoLeadingX, metrics.balthasarRightEdgeInOuterFrame)
         XCTAssertEqual(metrics.triadEmbeddedLeftInfoInset, 80)
         XCTAssertEqual(metrics.triadEmbeddedRightInfoInset, 22)
@@ -112,6 +132,10 @@ final class NotchIslandChromeTests: XCTestCase {
         let metrics = MagiConsoleLayoutMetrics()
 
         XCTAssertGreaterThan(metrics.triadWarningStripHorizontalInset, 0)
+        XCTAssertEqual(
+            metrics.triadOuterFrameWidth - metrics.triadWarningStripHorizontalInset * 2,
+            metrics.triadOuterFrameStrokeWidth - metrics.triadOuterFrameStrokeLineWidth * 2
+        )
         XCTAssertLessThan(
             metrics.triadWarningStripHorizontalInset * 2,
             metrics.triadOuterFrameWidth
