@@ -2,9 +2,84 @@ import SwiftUI
 
 struct MagiConsoleTypography: Equatable {
     let englishFontName = "Share Tech Mono"
-    let topUnitLabelSize: CGFloat = 22
-    let bottomUnitLabelSize: CGFloat = 20
-    let metricValueSize: CGFloat = 18
+    let topUnitLabelSize: CGFloat = 14
+    let bottomUnitLabelSize: CGFloat = 13
+    let unitSubtitleSize: CGFloat = 8
+    let metricValueSize: CGFloat = 20
+    let statusTextSize: CGFloat = 7
+}
+
+struct MagiUnitLabel: Equatable {
+    let title: String
+    let subtitle: String
+}
+
+struct MagiTriadUnitLabels: Equatable {
+    let balthasar = MagiUnitLabel(title: "BALTHASAR-2", subtitle: "MEMORY")
+    let casper = MagiUnitLabel(title: "CASPER-3", subtitle: "NETWORK")
+    let melchior = MagiUnitLabel(title: "MELCHIOR-1", subtitle: "CPU")
+}
+
+struct MagiUnitContentLayout: Equatable {
+    enum Placement {
+        case top
+        case bottom
+    }
+
+    let placement: Placement
+
+    var horizontalPadding: CGFloat {
+        switch placement {
+        case .top:
+            return 20
+        case .bottom:
+            return 12
+        }
+    }
+
+    var verticalPadding: CGFloat {
+        switch placement {
+        case .top:
+            return 14
+        case .bottom:
+            return 12
+        }
+    }
+
+    var contentWidth: CGFloat {
+        switch placement {
+        case .top:
+            return 106
+        case .bottom:
+            return 108
+        }
+    }
+
+    var contentHeight: CGFloat {
+        switch placement {
+        case .top:
+            return 86
+        case .bottom:
+            return 78
+        }
+    }
+
+    var titleHeight: CGFloat {
+        23
+    }
+
+    var valueHeight: CGFloat {
+        switch placement {
+        case .top:
+            return 31
+        case .bottom:
+            return 29
+        }
+    }
+
+    var statusHeight: CGFloat {
+        16
+    }
 }
 
 struct MagiConsoleLayoutMetrics: Equatable {
@@ -312,6 +387,7 @@ private struct MagiTriadView: View {
     let judgement: CentralDogmaJudgement
 
     private let metrics = MagiConsoleLayoutMetrics()
+    private let labels = MagiTriadUnitLabels()
 
     var body: some View {
         ZStack {
@@ -321,7 +397,7 @@ private struct MagiTriadView: View {
 
             MagiUnitView(
                 decision: balthasar,
-                label: "BALTHASAR-2",
+                label: labels.balthasar,
                 placement: .top
             )
             .frame(width: metrics.topUnitSize.width, height: metrics.topUnitSize.height)
@@ -333,7 +409,7 @@ private struct MagiTriadView: View {
 
             MagiUnitView(
                 decision: casper,
-                label: "CASPER-3",
+                label: labels.casper,
                 placement: .bottomLeft
             )
             .frame(width: metrics.bottomUnitSize.width, height: metrics.bottomUnitSize.height)
@@ -341,7 +417,7 @@ private struct MagiTriadView: View {
 
             MagiUnitView(
                 decision: melchior,
-                label: "MELCHIOR-1",
+                label: labels.melchior,
                 placement: .bottomRight
             )
             .frame(width: metrics.bottomUnitSize.width, height: metrics.bottomUnitSize.height)
@@ -358,9 +434,12 @@ private struct MagiUnitView: View {
     }
 
     let decision: MagiPanelDecision
-    let label: String
+    let label: MagiUnitLabel
     let placement: Placement
     private let typography = MagiConsoleTypography()
+    private var contentLayout: MagiUnitContentLayout {
+        MagiUnitContentLayout(placement: placement == .top ? .top : .bottom)
+    }
 
     var body: some View {
         ZStack {
@@ -373,55 +452,69 @@ private struct MagiUnitView: View {
                 )
 
             unitContent
-            .shadow(color: strokeColor.opacity(0.82), radius: 7)
-            .padding(.horizontal, 8)
+                .frame(width: contentLayout.contentWidth, height: contentLayout.contentHeight)
+                .position(contentPosition)
+                .shadow(color: strokeColor.opacity(0.82), radius: 7)
         }
     }
 
-    @ViewBuilder
     private var unitContent: some View {
+        VStack(spacing: 4) {
+            UnitTitleBlock(
+                label: label,
+                color: strokeColor,
+                fontName: typography.englishFontName,
+                titleSize: placement == .top ? typography.topUnitLabelSize : typography.bottomUnitLabelSize,
+                subtitleSize: typography.unitSubtitleSize,
+                titleScale: 0.50
+            )
+            .frame(height: contentLayout.titleHeight)
+
+            Spacer(minLength: 0)
+
+            DecisionPlaque(
+                text: decision.primaryValue,
+                color: NervStyle.orange,
+                fontName: typography.englishFontName,
+                fontSize: typography.metricValueSize
+            )
+            .frame(height: contentLayout.valueHeight)
+
+            Text(compactStatusText)
+                .font(.custom(typography.englishFontName, size: typography.statusTextSize))
+                .fontWeight(.black)
+                .foregroundStyle(strokeColor.opacity(0.82))
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.55)
+                .frame(height: contentLayout.statusHeight)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var contentPosition: CGPoint {
         switch placement {
         case .top:
-            ZStack {
-                Text(label)
-                    .font(.custom(typography.englishFontName, size: typography.topUnitLabelSize))
-                    .fontWeight(.black)
-                    .foregroundStyle(strokeColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.42)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .position(x: 108, y: 38)
+            return CGPoint(x: 74.5, y: 58)
+        case .bottomLeft:
+            return CGPoint(x: 63, y: 52)
+        case .bottomRight:
+            return CGPoint(x: 73, y: 52)
+        }
+    }
 
-                DecisionPlaque(
-                    text: decision.primaryValue,
-                    color: strokeColor,
-                    fontName: typography.englishFontName,
-                    fontSize: typography.metricValueSize
-                )
-                    .frame(width: 110, height: 38)
-                    .position(x: 108, y: 78)
-            }
-
-        case .bottomLeft, .bottomRight:
-            ZStack {
-                DecisionPlaque(
-                    text: decision.primaryValue,
-                    color: strokeColor,
-                    fontName: typography.englishFontName,
-                    fontSize: typography.metricValueSize
-                )
-                    .frame(width: 108, height: 36)
-                    .position(x: 68, y: 33)
-
-                Text(label)
-                    .font(.custom(typography.englishFontName, size: typography.bottomUnitLabelSize))
-                    .fontWeight(.black)
-                    .foregroundStyle(strokeColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.34)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .position(x: 68, y: 78)
-            }
+    private var compactStatusText: String {
+        switch decision.level {
+        case .normal:
+            return "NORMAL"
+        case .idle:
+            return "IDLE"
+        case .highLoad:
+            return "HIGH LOAD"
+        case .critical:
+            return "CRITICAL"
+        case .unavailable:
+            return "NO DATA"
         }
     }
 
@@ -442,6 +535,34 @@ private struct MagiUnitView: View {
 
 }
 
+private struct UnitTitleBlock: View {
+    let label: MagiUnitLabel
+    let color: Color
+    let fontName: String
+    let titleSize: CGFloat
+    let subtitleSize: CGFloat
+    let titleScale: CGFloat
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(label.title)
+                .font(.custom(fontName, size: titleSize))
+                .fontWeight(.black)
+                .foregroundStyle(color)
+                .lineLimit(1)
+                .minimumScaleFactor(titleScale)
+
+            Text(label.subtitle)
+                .font(.custom(fontName, size: subtitleSize))
+                .fontWeight(.black)
+                .foregroundStyle(color.opacity(0.78))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+    }
+}
+
 private struct DecisionPlaque: View {
     let text: String
     let color: Color
@@ -454,16 +575,11 @@ private struct DecisionPlaque: View {
             .fontWeight(.black)
             .foregroundStyle(color)
             .lineLimit(1)
-            .minimumScaleFactor(0.58)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .minimumScaleFactor(0.42)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black.opacity(0.36))
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(color.opacity(0.82), lineWidth: 1.5)
-                    .shadow(color: color.opacity(0.9), radius: 6)
-            )
+            .background(Color.black.opacity(0.22))
     }
 }
 

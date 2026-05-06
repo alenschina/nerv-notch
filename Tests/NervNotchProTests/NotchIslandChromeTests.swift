@@ -81,13 +81,37 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.hubCenter, CGPoint(x: 184, y: 155.25))
     }
 
-    func testMagiOuterUnitEnglishLabelsUseShareTechMonoWithReducedSizes() {
+    func testMagiOuterUnitTypographyUsesCompactNonOverflowingSizes() {
         let typography = MagiConsoleTypography()
 
         XCTAssertEqual(typography.englishFontName, "Share Tech Mono")
-        XCTAssertEqual(typography.topUnitLabelSize, 22)
-        XCTAssertEqual(typography.bottomUnitLabelSize, 20)
-        XCTAssertEqual(typography.metricValueSize, 18)
+        XCTAssertEqual(typography.topUnitLabelSize, 14)
+        XCTAssertEqual(typography.bottomUnitLabelSize, 13)
+        XCTAssertEqual(typography.unitSubtitleSize, 8)
+        XCTAssertEqual(typography.metricValueSize, 20)
+        XCTAssertEqual(typography.statusTextSize, 7)
+    }
+
+    func testMagiOuterUnitsExposeMetricSubtitles() {
+        let labels = MagiTriadUnitLabels()
+
+        XCTAssertEqual(labels.balthasar.title, "BALTHASAR-2")
+        XCTAssertEqual(labels.balthasar.subtitle, "MEMORY")
+        XCTAssertEqual(labels.casper.title, "CASPER-3")
+        XCTAssertEqual(labels.casper.subtitle, "NETWORK")
+        XCTAssertEqual(labels.melchior.title, "MELCHIOR-1")
+        XCTAssertEqual(labels.melchior.subtitle, "CPU")
+    }
+
+    func testMagiUnitContentLayoutsStayInsideUnitBounds() {
+        let metrics = MagiConsoleLayoutMetrics()
+        let topLayout = MagiUnitContentLayout(placement: .top)
+        let bottomLayout = MagiUnitContentLayout(placement: .bottom)
+
+        XCTAssertLessThanOrEqual(topLayout.contentWidth, metrics.topUnitSize.width - topLayout.horizontalPadding * 2)
+        XCTAssertLessThanOrEqual(topLayout.contentHeight, metrics.topUnitSize.height - topLayout.verticalPadding * 2)
+        XCTAssertLessThanOrEqual(bottomLayout.contentWidth, metrics.bottomUnitSize.width - bottomLayout.horizontalPadding * 2)
+        XCTAssertLessThanOrEqual(bottomLayout.contentHeight, metrics.bottomUnitSize.height - bottomLayout.verticalPadding * 2)
     }
 
     func testMagiBottomUnitsUseSymmetricInnerCornerBevels() {
