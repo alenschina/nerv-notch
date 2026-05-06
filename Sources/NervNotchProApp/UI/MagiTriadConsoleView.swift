@@ -2,12 +2,12 @@ import SwiftUI
 
 struct MagiConsoleTypography: Equatable {
     let englishFontName = "Share Tech Mono"
-    let topUnitLabelSize: CGFloat = 34
-    let bottomUnitLabelSize: CGFloat = 22
+    let topUnitLabelSize: CGFloat = 32
+    let bottomUnitLabelSize: CGFloat = 21
     let unitTitleFontName = "Helvetica Neue Condensed Bold"
-    let unitSubtitleSize: CGFloat = 8
+    let unitSubtitleSize: CGFloat = 7
     let metricFontName = "DS-Digital-Bold"
-    let metricValueSize: CGFloat = 20
+    let metricValueSize: CGFloat = 18
 }
 
 struct MagiUnitLabel: Equatable {
@@ -119,6 +119,9 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let sideWarningBackgroundStripeWidth: CGFloat = 36
     let sideWarningBackgroundStripeHeight: CGFloat = 58
     let sideWarningBackgroundOpacity: Double = 0.36
+    let consoleContentHorizontalPadding: CGFloat = 18
+    let leftAuxiliaryFrameWarningStripClearance: CGFloat = 5
+    let leftAuxiliaryFrameToTriadStrokeGap: CGFloat = 5
     let consoleContentTopPadding: CGFloat = 46
     let consoleContentBottomPadding: CGFloat = 20
     let triadEmbeddedInfoWidth: CGFloat = 118
@@ -168,6 +171,62 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
     var sideAuxiliaryFrameWarningStripWidth: CGFloat {
         sideAuxiliaryFrameWidth - triadWarningStripHorizontalInset * 2
+    }
+
+    var consoleWidth: CGFloat {
+        consoleContentHorizontalPadding * 2 + triadClusterWidth
+    }
+
+    var triadOuterFrameStrokeLeftXInConsole: CGFloat {
+        consoleContentHorizontalPadding
+        + sideAuxiliaryFrameWidth
+        + columnSpacing
+        + triadOuterFrameStrokeHorizontalInset
+    }
+
+    var triadOuterFrameStrokeRightXInConsole: CGFloat {
+        triadOuterFrameStrokeLeftXInConsole + triadOuterFrameStrokeWidth
+    }
+
+    var leftAuxiliaryFrameStrokeLeftXInConsole: CGFloat {
+        sideWarningBackgroundWidth + leftAuxiliaryFrameWarningStripClearance
+    }
+
+    var leftAuxiliaryFrameStrokeRightXInConsole: CGFloat {
+        triadOuterFrameStrokeLeftXInConsole - leftAuxiliaryFrameToTriadStrokeGap
+    }
+
+    var leftAuxiliaryFrameStrokeWidth: CGFloat {
+        leftAuxiliaryFrameStrokeRightXInConsole - leftAuxiliaryFrameStrokeLeftXInConsole
+    }
+
+    var leftAuxiliaryFrameStrokeOffsetX: CGFloat {
+        let auxiliaryFrameCenterX = consoleContentHorizontalPadding + sideAuxiliaryFrameWidth / 2
+        let desiredStrokeCenterX = (leftAuxiliaryFrameStrokeLeftXInConsole + leftAuxiliaryFrameStrokeRightXInConsole) / 2
+        return desiredStrokeCenterX - auxiliaryFrameCenterX
+    }
+
+    var rightAuxiliaryFrameStrokeLeftXInConsole: CGFloat {
+        triadOuterFrameStrokeRightXInConsole + leftAuxiliaryFrameToTriadStrokeGap
+    }
+
+    var rightAuxiliaryFrameStrokeRightXInConsole: CGFloat {
+        consoleWidth - sideWarningBackgroundWidth - leftAuxiliaryFrameWarningStripClearance
+    }
+
+    var rightAuxiliaryFrameStrokeWidth: CGFloat {
+        rightAuxiliaryFrameStrokeRightXInConsole - rightAuxiliaryFrameStrokeLeftXInConsole
+    }
+
+    var rightAuxiliaryFrameStrokeOffsetX: CGFloat {
+        let auxiliaryFrameCenterX = consoleContentHorizontalPadding
+        + sideAuxiliaryFrameWidth
+        + columnSpacing
+        + triadOuterFrameWidth
+        + columnSpacing
+        + sideAuxiliaryFrameWidth / 2
+        let desiredStrokeCenterX = (rightAuxiliaryFrameStrokeLeftXInConsole + rightAuxiliaryFrameStrokeRightXInConsole) / 2
+        return desiredStrokeCenterX - auxiliaryFrameCenterX
     }
 
     var triadClusterWidth: CGFloat {
@@ -379,7 +438,10 @@ struct MagiTriadConsoleView: View {
 
             VStack {
                 HStack(alignment: .top, spacing: metrics.columnSpacing) {
-                    MagiAuxiliaryFramedView()
+                    MagiAuxiliaryFramedView(
+                        strokeWidth: metrics.leftAuxiliaryFrameStrokeWidth,
+                        strokeOffsetX: metrics.leftAuxiliaryFrameStrokeOffsetX
+                    )
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
 
                     MagiTriadFramedView(
@@ -392,11 +454,14 @@ struct MagiTriadConsoleView: View {
                     )
                     .frame(width: metrics.triadOuterFrameWidth, height: metrics.triadOuterFrameHeight)
 
-                    MagiAuxiliaryFramedView()
+                    MagiAuxiliaryFramedView(
+                        strokeWidth: metrics.rightAuxiliaryFrameStrokeWidth,
+                        strokeOffsetX: metrics.rightAuxiliaryFrameStrokeOffsetX
+                    )
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
                 }
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, metrics.consoleContentHorizontalPadding)
             .padding(.top, metrics.consoleContentTopPadding)
             .padding(.bottom, metrics.consoleContentBottomPadding)
         }
@@ -640,10 +705,16 @@ private struct MagiTriadFramedView: View {
 }
 
 private struct MagiAuxiliaryFramedView: View {
+    var strokeWidth: CGFloat?
+    var strokeOffsetX: CGFloat = 0
+
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
-        MagiConsoleFramedChrome(strokeWidth: metrics.sideAuxiliaryFrameStrokeWidth)
+        MagiConsoleFramedChrome(
+            strokeWidth: strokeWidth ?? metrics.sideAuxiliaryFrameStrokeWidth,
+            strokeOffsetX: strokeOffsetX
+        )
     }
 }
 
@@ -674,20 +745,27 @@ private struct MagiTriadEmbeddedInfoColumn: View {
 
 private struct MagiConsoleFramedChrome: View {
     let strokeWidth: CGFloat
+    var strokeOffsetX: CGFloat = 0
 
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
         ZStack(alignment: .top) {
-            Rectangle()
-                .strokeBorder(NervStyle.red.opacity(0.9), lineWidth: metrics.triadOuterFrameStrokeLineWidth)
-                .frame(width: strokeWidth)
-                .shadow(color: NervStyle.red.opacity(0.55), radius: 4)
+            ZStack(alignment: .top) {
+                Rectangle()
+                    .strokeBorder(NervStyle.red.opacity(0.9), lineWidth: metrics.triadOuterFrameStrokeLineWidth)
+                    .frame(width: strokeWidth)
+                    .shadow(color: NervStyle.red.opacity(0.55), radius: 4)
 
-            MagiWarningStrip()
-                .frame(height: metrics.triadWarningStripHeight)
-                .padding(.horizontal, metrics.triadWarningStripHorizontalInset)
-                .padding(.top, metrics.triadWarningStripTopInset)
+                MagiWarningStrip()
+                    .frame(
+                        width: max(0, strokeWidth - metrics.triadOuterFrameStrokeLineWidth * 2),
+                        height: metrics.triadWarningStripHeight
+                    )
+                    .padding(.top, metrics.triadWarningStripTopInset)
+            }
+            .frame(width: strokeWidth)
+            .offset(x: strokeOffsetX)
         }
         .background(Color.black.opacity(0.18))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -902,12 +980,12 @@ private struct MagiHubView: View {
 
             VStack(spacing: 1) {
                 Text("MAGI")
-                    .font(.system(size: 25, weight: .black, design: .serif))
+                    .font(.system(size: 20, weight: .black, design: .serif))
                     .foregroundStyle(NervStyle.white)
                     .lineLimit(1)
 
                 Text(judgement.title)
-                    .font(.system(size: 7, weight: .black, design: .monospaced))
+                    .font(.system(size: 6.5, weight: .black, design: .monospaced))
                     .foregroundStyle(hubColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.55)

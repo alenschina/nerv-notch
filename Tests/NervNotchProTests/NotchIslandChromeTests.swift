@@ -129,6 +129,32 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadClusterWidth, 784)
     }
 
+    func testMagiLeftAuxiliaryFrameClearsWarningStripAndTouchesTriadWithFivePointGap() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(
+            metrics.leftAuxiliaryFrameStrokeLeftXInConsole - metrics.sideWarningBackgroundWidth,
+            5
+        )
+        XCTAssertEqual(
+            metrics.triadOuterFrameStrokeLeftXInConsole - metrics.leftAuxiliaryFrameStrokeRightXInConsole,
+            5
+        )
+    }
+
+    func testMagiRightAuxiliaryFrameClearsWarningStripAndTouchesTriadWithFivePointGap() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(
+            metrics.rightAuxiliaryFrameStrokeLeftXInConsole - metrics.triadOuterFrameStrokeRightXInConsole,
+            5
+        )
+        XCTAssertEqual(
+            metrics.consoleWidth - metrics.sideWarningBackgroundWidth - metrics.rightAuxiliaryFrameStrokeRightXInConsole,
+            5
+        )
+    }
+
     func testMagiConsolePlacesFramedContentBelowPhysicalNotchAfterRemovingStatusBanners() {
         let metrics = MagiConsoleLayoutMetrics()
 
@@ -200,12 +226,12 @@ final class NotchIslandChromeTests: XCTestCase {
         let typography = MagiConsoleTypography()
 
         XCTAssertEqual(typography.englishFontName, "Share Tech Mono")
-        XCTAssertEqual(typography.topUnitLabelSize, 34)
-        XCTAssertEqual(typography.bottomUnitLabelSize, 22)
+        XCTAssertEqual(typography.topUnitLabelSize, 32)
+        XCTAssertEqual(typography.bottomUnitLabelSize, 21)
         XCTAssertEqual(typography.unitTitleFontName, "Helvetica Neue Condensed Bold")
-        XCTAssertEqual(typography.unitSubtitleSize, 8)
+        XCTAssertEqual(typography.unitSubtitleSize, 7)
         XCTAssertEqual(typography.metricFontName, "DS-Digital-Bold")
-        XCTAssertEqual(typography.metricValueSize, 20)
+        XCTAssertEqual(typography.metricValueSize, 18)
     }
 
     func testMagiOuterUnitsExposeMetricSubtitles() {
