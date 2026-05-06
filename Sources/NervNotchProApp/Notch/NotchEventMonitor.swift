@@ -1,9 +1,32 @@
 import AppKit
 import CoreGraphics
 
+/// Emits pointer enter/exit events only on region transitions so hover state can reset when the cursor leaves the notch island.
+struct NotchPointerRegionTracker: Equatable, Sendable {
+    private var wasInNotch = false
+    private var wasInOpenedPanel = false
+
+    mutating func update(isInNotch: Bool, isInOpenedPanel: Bool) -> [NotchInteractionStateMachine.Event] {
+        var events: [NotchInteractionStateMachine.Event] = []
+
+        if isInNotch != wasInNotch {
+            events.append(isInNotch ? .mouseEnteredNotch : .mouseExitedNotch)
+        }
+
+        if isInOpenedPanel != wasInOpenedPanel {
+            events.append(isInOpenedPanel ? .mouseEnteredPanel : .mouseExitedPanel)
+        }
+
+        wasInNotch = isInNotch
+        wasInOpenedPanel = isInOpenedPanel
+        return events
+    }
+}
+
 final class NotchEventMonitor {
     private var localMonitor: Any?
     private var globalMonitor: Any?
+    private var regionTracker = NotchPointerRegionTracker()
     private let geometry: NotchGeometry
     private let openedPanelSize: CGSize
     private let onEvent: (NotchInteractionStateMachine.Event) -> Void
@@ -55,12 +78,10 @@ final class NotchEventMonitor {
                 onEvent(.outsideClicked)
             }
         case .mouseMoved:
-            if geometry.isPointInNotch(point) {
-                onEvent(.mouseEnteredNotch)
-            } else if geometry.isPointInOpenedPanel(point, size: openedPanelSize) {
-                onEvent(.mouseEnteredPanel)
-            } else {
-                onEvent(.mouseExitedPanel)
+            let inNotch = geometry.isPointInNotch(point)
+            let inOpenedPanel = geometry.isPointInOpenedPanel(point, size: openedPanelSize)
+            for event in regionTracker.update(isInNotch: inNotch, isInOpenedPanel: inOpenedPanel) {
+                onEvent(event)
             }
         default:
             break

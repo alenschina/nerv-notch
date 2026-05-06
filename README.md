@@ -30,6 +30,6 @@ Run:
 - MAGI decision panels
 - Central Dogma judgement
 - Click-to-open and outside-click-to-close notch panel
-- Hover for 2 seconds to open
+- Hover for about 1 second to open
 
 This project is a local fan-oriented prototype and does not bundle copyrighted image assets.
