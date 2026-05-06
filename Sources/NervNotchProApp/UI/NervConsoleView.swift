@@ -8,7 +8,7 @@ struct NotchIslandLayout: Equatable {
     let expandedHeaderTopPadding: CGFloat = 11
     let expandedHeaderSpacing: CGFloat = 6
     let expandedHeaderFontSize: CGFloat = 15
-    let expandedHeaderIconSize: CGFloat = 20
+    let expandedHeaderIconSize: CGFloat = 22
     let expandedHeaderFontName = "SourceHanSerifCN-Bold"
 
     var compactSize: CGSize {
@@ -143,7 +143,7 @@ struct NervConsoleView: View {
     }
 
     private var expandedHeader: some View {
-        HStack(spacing: layout.expandedHeaderSpacing) {
+        HStack(alignment: .center, spacing: layout.expandedHeaderSpacing) {
             nervLeadingIcon(sideLength: layout.expandedHeaderIconSize)
 
             Text("NERV コントロールセンター")
@@ -153,6 +153,8 @@ struct NervConsoleView: View {
                 .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
                 .lineLimit(1)
         }
+        // Match row height to the square icon so the label centers with the glyph box (custom CJK line metrics often read low in a default HStack).
+        .frame(height: layout.expandedHeaderIconSize, alignment: .center)
     }
 
     @ViewBuilder

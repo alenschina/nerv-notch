@@ -115,7 +115,15 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadOuterFrameStrokeLineWidth: CGFloat = 1
     let triadEmbeddedInfoReserveWidth: CGFloat = 62
     let sideAuxiliaryFrameWidth: CGFloat = 132
+    /// Horizontal band reserved from each console edge for warning chrome; auxiliary red strokes align to this band.
     let sideWarningBackgroundWidth: CGFloat = 64
+    /// The painted diagonal warning panels are this much narrower per side than `sideWarningBackgroundWidth` so red frames stay put.
+    let sideWarningBackgroundPaintedNarrowing: CGFloat = 5
+
+    var sideWarningBackgroundPaintedWidth: CGFloat {
+        max(0, sideWarningBackgroundWidth - sideWarningBackgroundPaintedNarrowing)
+    }
+
     let sideWarningBackgroundStripeWidth: CGFloat = 36
     let sideWarningBackgroundStripeHeight: CGFloat = 58
     let sideWarningBackgroundOpacity: Double = 0.36
@@ -535,12 +543,12 @@ private struct MagiSideWarningBackgroundStrips: View {
     var body: some View {
         HStack(spacing: 0) {
             MagiSideWarningBackgroundStrip()
-                .frame(width: metrics.sideWarningBackgroundWidth)
+                .frame(width: metrics.sideWarningBackgroundPaintedWidth)
 
             Spacer(minLength: 0)
 
             MagiSideWarningBackgroundStrip()
-                .frame(width: metrics.sideWarningBackgroundWidth)
+                .frame(width: metrics.sideWarningBackgroundPaintedWidth)
         }
         .allowsHitTesting(false)
     }

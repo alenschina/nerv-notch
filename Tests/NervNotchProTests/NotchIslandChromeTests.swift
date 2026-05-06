@@ -98,7 +98,7 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(layout.expandedHeaderLeadingPadding, 69)
         XCTAssertEqual(layout.expandedHeaderSpacing, 6)
         XCTAssertEqual(layout.expandedHeaderFontSize, 15)
-        XCTAssertEqual(layout.expandedHeaderIconSize, 20)
+        XCTAssertEqual(layout.expandedHeaderIconSize, 22)
         XCTAssertEqual(layout.expandedHeaderFontName, "SourceHanSerifCN-Bold")
     }
 
@@ -175,6 +175,8 @@ final class NotchIslandChromeTests: XCTestCase {
         let metrics = MagiConsoleLayoutMetrics()
 
         XCTAssertEqual(metrics.sideWarningBackgroundWidth, 64)
+        XCTAssertEqual(metrics.sideWarningBackgroundPaintedNarrowing, 5)
+        XCTAssertEqual(metrics.sideWarningBackgroundPaintedWidth, 59)
         XCTAssertEqual(metrics.sideWarningBackgroundStripeWidth, 36)
         XCTAssertEqual(metrics.sideWarningBackgroundStripeHeight, 58)
         XCTAssertGreaterThan(metrics.sideWarningBackgroundOpacity, 0)
