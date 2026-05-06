@@ -22,6 +22,25 @@ Run:
 ./scripts/run-dev.sh
 ```
 
+Package a local macOS app bundle:
+
+```bash
+./scripts/package-app.sh
+open dist/NervNotchPro.app
+```
+
+By default the package script creates `dist/NervNotchPro.app` and applies an ad-hoc signature for local use. For a signed build, pass your Developer ID identity:
+
+```bash
+SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
+PRODUCT_BUNDLE_IDENTIFIER="com.example.NervNotchPro" \
+VERSION="0.1.0" \
+BUILD_NUMBER="1" \
+./scripts/package-app.sh
+```
+
+For distribution outside your own machine, sign with a Developer ID certificate, then notarize and staple the app before shipping a zip or DMG.
+
 ## MVP Scope
 
 - CPU telemetry

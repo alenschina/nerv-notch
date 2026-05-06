@@ -42,7 +42,8 @@ enum NervIslandIcon {
     static let resourceName = "nerv-island-icon"
 
     static var image: NSImage? {
-        guard let url = Bundle.module.url(forResource: resourceName, withExtension: "png") else {
+        guard let url = Bundle.main.url(forResource: resourceName, withExtension: "png")
+            ?? Bundle.module.url(forResource: resourceName, withExtension: "png") else {
             return nil
         }
         return NSImage(contentsOf: url)
