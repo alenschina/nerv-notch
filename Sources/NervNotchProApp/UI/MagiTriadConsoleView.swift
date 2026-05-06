@@ -118,7 +118,10 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadEmbeddedInfoLineHeight: CGFloat = 8.2
     let triadEmbeddedInfoRowSpacing: CGFloat = 1.4
     let triadEmbeddedInfoTopInset: CGFloat = 42
-    let triadEmbeddedInfoTrailingInset: CGFloat = 10
+    /// Inset from the outer red frame’s left edge to the left embedded info column’s leading edge.
+    let triadEmbeddedLeftInfoInset: CGFloat = 80
+    /// Inset from the outer red frame’s right edge to the right embedded info column’s trailing edge.
+    let triadEmbeddedRightInfoInset: CGFloat = 22
     let triadOuterFrameBottomPadding: CGFloat = 4
     let triadWarningStripHeight: CGFloat = 16
     let triadWarningStripTopInset: CGFloat = 10
@@ -173,7 +176,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
     }
 
     var triadLeadingEmbeddedInfoLeadingX: CGFloat {
-        triadEmbeddedInfoTrailingInset
+        triadEmbeddedLeftInfoInset
     }
 
     var triadLeadingEmbeddedInfoTrailingX: CGFloat {
@@ -181,7 +184,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
     }
 
     var triadTrailingEmbeddedInfoLeadingX: CGFloat {
-        triadOuterFrameWidth - triadEmbeddedInfoTrailingInset - triadEmbeddedInfoWidth
+        triadOuterFrameWidth - triadEmbeddedRightInfoInset - triadEmbeddedInfoWidth
     }
 
     var triadTrailingEmbeddedInfoTrailingX: CGFloat {

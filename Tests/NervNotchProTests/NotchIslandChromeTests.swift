@@ -88,7 +88,7 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertLessThan(metrics.triadOuterFrameBottomPadding, 8)
     }
 
-    func testMagiEmbeddedSideInfoFitsSymmetricallyInSideBlankAreas() {
+    func testMagiEmbeddedSideInfoFitsInSideBlankAreas() {
         let metrics = MagiConsoleLayoutMetrics()
 
         XCTAssertEqual(metrics.triadEmbeddedInfoWidth, 118)
@@ -97,13 +97,12 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertLessThanOrEqual(metrics.triadEmbeddedInfoRowSpacing, 2)
         XCTAssertLessThan(metrics.triadLeadingEmbeddedInfoTrailingX, metrics.balthasarLeftEdgeInOuterFrame)
         XCTAssertGreaterThan(metrics.triadTrailingEmbeddedInfoLeadingX, metrics.balthasarRightEdgeInOuterFrame)
-        XCTAssertEqual(
-            metrics.triadLeadingEmbeddedInfoLeadingX,
-            metrics.triadEmbeddedInfoTrailingInset
-        )
+        XCTAssertEqual(metrics.triadEmbeddedLeftInfoInset, 80)
+        XCTAssertEqual(metrics.triadEmbeddedRightInfoInset, 22)
+        XCTAssertEqual(metrics.triadLeadingEmbeddedInfoLeadingX, metrics.triadEmbeddedLeftInfoInset)
         XCTAssertEqual(
             metrics.triadOuterFrameWidth - metrics.triadTrailingEmbeddedInfoTrailingX,
-            metrics.triadEmbeddedInfoTrailingInset
+            metrics.triadEmbeddedRightInfoInset
         )
         XCTAssertLessThan(metrics.triadEmbeddedInfoBottomY, metrics.casperTopYInOuterFrame)
         XCTAssertLessThan(metrics.triadEmbeddedInfoBottomY, metrics.melchiorTopYInOuterFrame)
