@@ -12,6 +12,7 @@ final class EmergencyHoneycombViewTests: XCTestCase {
         XCTAssertEqual(layout.contentInset, SynchronizationRateLayout(containerSize: .zero).contentInset)
         XCTAssertEqual(layout.titleTopPadding, SynchronizationRateLayout(containerSize: .zero).titleTopPadding)
         XCTAssertEqual(layout.titleAlignment, .center)
+        XCTAssertEqual(layout.honeycombScale, 0.94)
         XCTAssertEqual(layout.primaryCellLabel, "454:32")
         XCTAssertEqual(Set(layout.cells.map(\.column)).count, 3)
         XCTAssertEqual(layout.cells.count, 16)

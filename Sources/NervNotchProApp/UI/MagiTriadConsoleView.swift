@@ -988,6 +988,7 @@ struct EmergencyHoneycombLayout: Equatable {
     let titleText = "EMERGENCY｜警告"
     let titleTopPadding: CGFloat = 34
     let titleAlignment: Alignment = .center
+    let honeycombScale: CGFloat = 0.94
     let primaryCellLabel = "454:32"
     let connectedBorderLineWidth: CGFloat = 4
     let cellDividerLineWidth: CGFloat = 1.2
@@ -1032,7 +1033,7 @@ struct EmergencyHoneycombLayout: Equatable {
         let unitBounds = normalizedCellBounds(sideLength: 1)
         let widthBound = containerSize.width / unitBounds.width
         let heightBound = availableHeight / unitBounds.height
-        return max(1, min(widthBound, heightBound))
+        return max(1, min(widthBound, heightBound) * honeycombScale)
     }
 
     private var availableHeight: CGFloat {
