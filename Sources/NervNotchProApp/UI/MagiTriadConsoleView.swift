@@ -441,7 +441,11 @@ struct MagiTriadConsoleView: View {
                     MagiAuxiliaryFramedView(
                         strokeWidth: metrics.leftAuxiliaryFrameStrokeWidth,
                         strokeOffsetX: metrics.leftAuxiliaryFrameStrokeOffsetX
-                    )
+                    ) {
+                        SynchronizationRateView(
+                            rateText: SynchronizationRateLayout.rateText(cpuLoadText: state.cpu.primaryValue)
+                        )
+                    }
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
 
                     MagiTriadFramedView(
@@ -704,17 +708,286 @@ private struct MagiTriadFramedView: View {
     }
 }
 
-private struct MagiAuxiliaryFramedView: View {
+struct SynchronizationRateLayout: Equatable {
+    let containerSize: CGSize
+    let contentInset: CGFloat = 7
+    let waveCount = 13
+    let phaseVelocity: CGFloat = 1.35
+    let titleText = "SYNCHRONIZATION RATE / 同步率"
+    let titleTopPadding: CGFloat = 34
+
+    static func rateText(cpuLoadText: String) -> String {
+        let trimmedValue = cpuLoadText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedValue.hasSuffix("%") else {
+            return "--"
+        }
+
+        let numericText = String(trimmedValue.dropLast())
+        guard let cpuLoad = Double(numericText) else {
+            return "--"
+        }
+
+        let synchronizedRate = min(100, max(0, 100 - cpuLoad))
+        if synchronizedRate.rounded() == synchronizedRate {
+            return "\(Int(synchronizedRate))%"
+        }
+
+        return "\(String(format: "%.1f", synchronizedRate))%"
+    }
+
+    var waveTopY: CGFloat {
+        containerSize.height * 0.24
+    }
+
+    var waveBottomY: CGFloat {
+        containerSize.height * 0.70
+    }
+
+    var rateBaselineY: CGFloat {
+        containerSize.height * 0.78
+    }
+
+    var bottomTickY: CGFloat {
+        containerSize.height - 17
+    }
+
+    func phase(at time: TimeInterval) -> CGFloat {
+        CGFloat(time) * phaseVelocity
+    }
+}
+
+private struct SynchronizationRateView: View {
+    let rateText: String
+
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            GeometryReader { proxy in
+                let layout = SynchronizationRateLayout(containerSize: proxy.size)
+                let phase = layout.phase(at: timeline.date.timeIntervalSinceReferenceDate)
+
+                ZStack {
+                    SynchronizationScanlineField()
+
+                    VStack(spacing: 0) {
+                        Text(layout.titleText)
+                            .font(.system(size: 6.4, weight: .black, design: .monospaced))
+                            .foregroundStyle(NervStyle.orange)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.28)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
+
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, layout.contentInset)
+                    .padding(.top, layout.titleTopPadding)
+
+                    SynchronizationGuideLines(layout: layout)
+
+                    ForEach(0..<layout.waveCount, id: \.self) { index in
+                        SynchronizationWaveShape(
+                            phase: phase,
+                            lineIndex: index,
+                            lineCount: layout.waveCount
+                        )
+                        .stroke(
+                            waveColor(for: index, count: layout.waveCount),
+                            style: StrokeStyle(lineWidth: 0.95, lineCap: .round, lineJoin: .round)
+                        )
+                        .shadow(color: waveColor(for: index, count: layout.waveCount).opacity(0.45), radius: 2)
+                        .padding(.horizontal, layout.contentInset + 2)
+                        .padding(.vertical, 2)
+                    }
+                    .mask(
+                        Rectangle()
+                            .padding(.horizontal, layout.contentInset)
+                            .padding(.top, layout.waveTopY - 6)
+                            .padding(.bottom, proxy.size.height - layout.waveBottomY - 6)
+                    )
+
+                    Text("同步率 \(rateText)")
+                        .font(.system(size: 15, weight: .black, design: .monospaced))
+                        .foregroundStyle(NervStyle.red)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.34)
+                        .shadow(color: NervStyle.red.opacity(0.95), radius: 5)
+                        .frame(width: max(0, proxy.size.width - layout.contentInset * 2))
+                        .position(x: proxy.size.width / 2, y: layout.rateBaselineY)
+
+                    SynchronizationTickMarks(layout: layout)
+                }
+                .background(Color.black.opacity(0.28))
+                .clipped()
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    private func waveColor(for index: Int, count: Int) -> Color {
+        let midpoint = Double(max(count - 1, 1)) / 2
+        let distance = abs(Double(index) - midpoint) / midpoint
+
+        if index.isMultiple(of: 3) {
+            return NervStyle.orange.opacity(0.16 + (1 - distance) * 0.18)
+        }
+
+        return Color(red: 0.36, green: 0.12, blue: 0.92).opacity(0.18 + (1 - distance) * 0.24)
+    }
+}
+
+private struct SynchronizationGuideLines: View {
+    let layout: SynchronizationRateLayout
+
+    var body: some View {
+        GeometryReader { proxy in
+            Path { path in
+                let left = layout.contentInset
+                let right = proxy.size.width - layout.contentInset
+                let topRuleY = layout.waveTopY - 18
+                let bottomRuleY = layout.rateBaselineY + 16
+
+                path.move(to: CGPoint(x: left, y: topRuleY))
+                path.addLine(to: CGPoint(x: right, y: topRuleY))
+                path.move(to: CGPoint(x: left, y: bottomRuleY))
+                path.addLine(to: CGPoint(x: right, y: bottomRuleY))
+
+                let guideCount = 5
+                for index in 1..<guideCount {
+                    let x = left + (right - left) * CGFloat(index) / CGFloat(guideCount)
+                    path.move(to: CGPoint(x: x, y: topRuleY + 2))
+                    path.addLine(to: CGPoint(x: x, y: bottomRuleY - 3))
+                }
+            }
+            .stroke(NervStyle.orange.opacity(0.34), style: StrokeStyle(lineWidth: 0.75, dash: [5, 5]))
+
+            Path { path in
+                let left = layout.contentInset
+                let right = proxy.size.width - layout.contentInset
+
+                path.move(to: CGPoint(x: left, y: layout.waveTopY - 18))
+                path.addLine(to: CGPoint(x: right, y: layout.waveTopY - 18))
+                path.move(to: CGPoint(x: left, y: layout.rateBaselineY + 16))
+                path.addLine(to: CGPoint(x: right, y: layout.rateBaselineY + 16))
+            }
+            .stroke(NervStyle.orange.opacity(0.78), lineWidth: 1)
+            .shadow(color: NervStyle.orange.opacity(0.4), radius: 2)
+        }
+    }
+}
+
+private struct SynchronizationTickMarks: View {
+    let layout: SynchronizationRateLayout
+
+    var body: some View {
+        GeometryReader { proxy in
+            Path { path in
+                let left = layout.contentInset
+                let right = proxy.size.width - layout.contentInset
+                let tickCount = 6
+
+                for index in 0...tickCount {
+                    let x = left + (right - left) * CGFloat(index) / CGFloat(tickCount)
+                    path.move(to: CGPoint(x: x, y: layout.bottomTickY))
+                    path.addLine(to: CGPoint(x: x, y: layout.bottomTickY + 10))
+                }
+            }
+            .stroke(NervStyle.orange.opacity(0.72), lineWidth: 1)
+            .shadow(color: NervStyle.orange.opacity(0.45), radius: 2)
+        }
+    }
+}
+
+private struct SynchronizationScanlineField: View {
+    var body: some View {
+        GeometryReader { proxy in
+            Path { path in
+                var y: CGFloat = 0
+                while y <= proxy.size.height {
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: proxy.size.width, y: y))
+                    y += 4
+                }
+            }
+            .stroke(NervStyle.orange.opacity(0.08), lineWidth: 0.7)
+        }
+    }
+}
+
+private struct SynchronizationWaveShape: Shape {
+    let phase: CGFloat
+    let lineIndex: Int
+    let lineCount: Int
+
+    func path(in rect: CGRect) -> Path {
+        let top = rect.height * 0.24
+        let bottom = rect.height * 0.70
+        let centerY = (top + bottom) / 2
+        let amplitude = max(8, (bottom - top) * 0.46)
+        let width = max(rect.width, 1)
+        let sampleCount = max(Int(width * 2), 36)
+        let frequency: CGFloat = 1.05
+        let lineOffset = CGFloat(lineIndex) / CGFloat(max(lineCount - 1, 1))
+        let localPhase = phase + lineOffset * .pi * 2
+
+        var path = Path()
+
+        for sample in 0...sampleCount {
+            let progress = CGFloat(sample) / CGFloat(sampleCount)
+            let x = rect.minX + progress * rect.width
+            let angle = progress * .pi * 2 * frequency + localPhase
+            let modulation = sin(Double(progress * .pi * 2 + localPhase * 0.35))
+            let y = centerY + sin(Double(angle)) * Double(amplitude) * (0.78 + modulation * 0.12)
+            let point = CGPoint(x: x, y: CGFloat(y))
+
+            if sample == 0 {
+                path.move(to: point)
+            } else {
+                path.addLine(to: point)
+            }
+        }
+
+        return path
+    }
+}
+
+private struct MagiAuxiliaryFramedView<Content: View>: View {
     var strokeWidth: CGFloat?
     var strokeOffsetX: CGFloat = 0
+    private let content: Content
 
     private let metrics = MagiConsoleLayoutMetrics()
 
+    init(
+        strokeWidth: CGFloat? = nil,
+        strokeOffsetX: CGFloat = 0,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.strokeWidth = strokeWidth
+        self.strokeOffsetX = strokeOffsetX
+        self.content = content()
+    }
+
     var body: some View {
+        let resolvedStrokeWidth = strokeWidth ?? metrics.sideAuxiliaryFrameStrokeWidth
+
         MagiConsoleFramedChrome(
-            strokeWidth: strokeWidth ?? metrics.sideAuxiliaryFrameStrokeWidth,
+            strokeWidth: resolvedStrokeWidth,
             strokeOffsetX: strokeOffsetX
         )
+        .overlay {
+            content
+                .frame(width: max(0, resolvedStrokeWidth - 2), height: metrics.triadOuterFrameHeight - 2)
+                .offset(x: strokeOffsetX)
+                .padding(.top, 1)
+        }
+    }
+}
+
+private extension MagiAuxiliaryFramedView where Content == EmptyView {
+    init(strokeWidth: CGFloat? = nil, strokeOffsetX: CGFloat = 0) {
+        self.init(strokeWidth: strokeWidth, strokeOffsetX: strokeOffsetX) {
+            EmptyView()
+        }
     }
 }
 
