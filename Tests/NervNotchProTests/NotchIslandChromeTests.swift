@@ -71,9 +71,9 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadOuterFrameWidth, 492)
         XCTAssertEqual(metrics.triadOuterFrameHeight, 308)
         XCTAssertEqual(metrics.triadOuterFrameHorizontalInset, 0)
-        XCTAssertEqual(metrics.triadOuterFrameStrokeHorizontalInset, 18)
+        XCTAssertEqual(metrics.triadOuterFrameStrokeHorizontalInset, 38)
         XCTAssertEqual(metrics.triadOuterFrameStrokeLineWidth, 1)
-        XCTAssertEqual(metrics.triadOuterFrameStrokeWidth, 456)
+        XCTAssertEqual(metrics.triadOuterFrameStrokeWidth, 416)
         XCTAssertEqual(metrics.triadOuterFrameBottomPadding, 4)
         XCTAssertEqual(metrics.triadWarningStripHeight, 16)
         XCTAssertEqual(

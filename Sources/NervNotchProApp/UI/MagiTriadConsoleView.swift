@@ -111,7 +111,7 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadWidth: CGFloat = 368
     let triadHeight: CGFloat = 258
     let triadOuterFrameHorizontalInset: CGFloat = 0
-    let triadOuterFrameStrokeHorizontalInset: CGFloat = 18
+    let triadOuterFrameStrokeHorizontalInset: CGFloat = 38
     let triadOuterFrameStrokeLineWidth: CGFloat = 1
     let triadEmbeddedInfoReserveWidth: CGFloat = 62
     let triadEmbeddedInfoWidth: CGFloat = 118
