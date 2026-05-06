@@ -66,9 +66,57 @@ final class NotchIslandChromeTests: XCTestCase {
     func testMagiConsoleLayoutKeepsTriadCenteredBetweenSymmetricInfoColumns() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.sideInfoWidth, 154)
+        XCTAssertEqual(metrics.sideInfoWidth, 0)
         XCTAssertEqual(metrics.triadWidth, 368)
-        XCTAssertEqual(metrics.sideInfoWidth, metrics.trailingInfoWidth)
+        XCTAssertEqual(metrics.triadOuterFrameWidth, 492)
+        XCTAssertEqual(metrics.triadOuterFrameHeight, 308)
+        XCTAssertEqual(metrics.triadOuterFrameHorizontalInset, 0)
+        XCTAssertEqual(metrics.triadOuterFrameBottomPadding, 4)
+        XCTAssertEqual(metrics.triadWarningStripHeight, 16)
+        XCTAssertEqual(metrics.triadContentOffsetY, 46)
+        XCTAssertEqual(metrics.trailingInfoWidth, 0)
+    }
+
+    func testMagiOuterFrameEmbedsSideInfoWhileKeepingOverallConsoleCompact() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        let previousTotalWidth: CGFloat = metrics.sideInfoWidth + metrics.columnSpacing + 332 + metrics.columnSpacing + 154
+        let currentTotalWidth = metrics.triadOuterFrameWidth
+
+        XCTAssertEqual(metrics.triadOuterFrameWidth, metrics.triadWidth + metrics.triadEmbeddedInfoReserveWidth * 2)
+        XCTAssertLessThan(currentTotalWidth, previousTotalWidth)
+        XCTAssertLessThan(metrics.triadOuterFrameBottomPadding, 8)
+    }
+
+    func testMagiEmbeddedSideInfoFitsSymmetricallyInSideBlankAreas() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.triadEmbeddedInfoWidth, 118)
+        XCTAssertEqual(metrics.triadEmbeddedInfoRowCount, 9)
+        XCTAssertLessThanOrEqual(metrics.triadEmbeddedInfoFontSize, 8)
+        XCTAssertLessThanOrEqual(metrics.triadEmbeddedInfoRowSpacing, 2)
+        XCTAssertLessThan(metrics.triadLeadingEmbeddedInfoTrailingX, metrics.balthasarLeftEdgeInOuterFrame)
+        XCTAssertGreaterThan(metrics.triadTrailingEmbeddedInfoLeadingX, metrics.balthasarRightEdgeInOuterFrame)
+        XCTAssertEqual(
+            metrics.triadLeadingEmbeddedInfoLeadingX,
+            metrics.triadEmbeddedInfoTrailingInset
+        )
+        XCTAssertEqual(
+            metrics.triadOuterFrameWidth - metrics.triadTrailingEmbeddedInfoTrailingX,
+            metrics.triadEmbeddedInfoTrailingInset
+        )
+        XCTAssertLessThan(metrics.triadEmbeddedInfoBottomY, metrics.casperTopYInOuterFrame)
+        XCTAssertLessThan(metrics.triadEmbeddedInfoBottomY, metrics.melchiorTopYInOuterFrame)
+    }
+
+    func testMagiWarningStripStaysInsideTriadOuterFrame() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertGreaterThan(metrics.triadWarningStripHorizontalInset, 0)
+        XCTAssertLessThan(
+            metrics.triadWarningStripHorizontalInset * 2,
+            metrics.triadOuterFrameWidth
+        )
     }
 
     func testMagiTriadUsesReferenceUnitProportions() {

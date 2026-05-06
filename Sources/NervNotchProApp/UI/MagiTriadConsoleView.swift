@@ -106,10 +106,23 @@ struct MagiUnitContentLayout: Equatable {
 }
 
 struct MagiConsoleLayoutMetrics: Equatable {
-    let sideInfoWidth: CGFloat = 154
-    let trailingInfoWidth: CGFloat = 154
+    let sideInfoWidth: CGFloat = 0
+    let trailingInfoWidth: CGFloat = 0
     let triadWidth: CGFloat = 368
     let triadHeight: CGFloat = 258
+    let triadOuterFrameHorizontalInset: CGFloat = 0
+    let triadEmbeddedInfoReserveWidth: CGFloat = 62
+    let triadEmbeddedInfoWidth: CGFloat = 118
+    let triadEmbeddedInfoRowCount = 9
+    let triadEmbeddedInfoFontSize: CGFloat = 7.2
+    let triadEmbeddedInfoLineHeight: CGFloat = 8.2
+    let triadEmbeddedInfoRowSpacing: CGFloat = 1.4
+    let triadEmbeddedInfoTopInset: CGFloat = 42
+    let triadEmbeddedInfoTrailingInset: CGFloat = 10
+    let triadOuterFrameBottomPadding: CGFloat = 4
+    let triadWarningStripHeight: CGFloat = 16
+    let triadWarningStripTopInset: CGFloat = 10
+    let triadWarningStripHorizontalInset: CGFloat = 4
     let columnSpacing: CGFloat = 14
     let topUnitSize = CGSize(width: 149, height: 108)
     let bottomUnitSize = CGSize(width: 136, height: 104)
@@ -121,6 +134,77 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let sharedSlantRun = CGSize(width: 29, height: 29)
     let hubLowerSlantScale: CGFloat = 1.5
     let topUnitVerticalSideHeight: CGFloat = 64.5
+
+    var triadContentOffsetY: CGFloat {
+        triadWarningStripTopInset + triadWarningStripHeight + 20
+    }
+
+    var triadOuterFrameWidth: CGFloat {
+        triadWidth + triadEmbeddedInfoReserveWidth * 2 - triadOuterFrameHorizontalInset * 2
+    }
+
+    var triadOuterFrameHeight: CGFloat {
+        triadHeight + triadContentOffsetY + triadOuterFrameBottomPadding
+    }
+
+    var triadContentOriginXInOuterFrame: CGFloat {
+        (triadOuterFrameWidth - triadWidth) / 2
+    }
+
+    var balthasarLeftEdgeInOuterFrame: CGFloat {
+        triadContentOriginXInOuterFrame + topUnitCenter.x - topUnitSize.width / 2
+    }
+
+    var balthasarRightEdgeInOuterFrame: CGFloat {
+        triadContentOriginXInOuterFrame + topUnitCenter.x + topUnitSize.width / 2
+    }
+
+    var casperTopYInOuterFrame: CGFloat {
+        triadContentOffsetY + casperCenter.y - bottomUnitSize.height / 2
+    }
+
+    var melchiorTopYInOuterFrame: CGFloat {
+        triadContentOffsetY + melchiorCenter.y - bottomUnitSize.height / 2
+    }
+
+    var triadEmbeddedInfoContentHeight: CGFloat {
+        CGFloat(triadEmbeddedInfoRowCount) * triadEmbeddedInfoLineHeight
+        + CGFloat(triadEmbeddedInfoRowCount - 1) * triadEmbeddedInfoRowSpacing
+    }
+
+    var triadLeadingEmbeddedInfoLeadingX: CGFloat {
+        triadEmbeddedInfoTrailingInset
+    }
+
+    var triadLeadingEmbeddedInfoTrailingX: CGFloat {
+        triadLeadingEmbeddedInfoLeadingX + triadEmbeddedInfoWidth
+    }
+
+    var triadTrailingEmbeddedInfoLeadingX: CGFloat {
+        triadOuterFrameWidth - triadEmbeddedInfoTrailingInset - triadEmbeddedInfoWidth
+    }
+
+    var triadTrailingEmbeddedInfoTrailingX: CGFloat {
+        triadTrailingEmbeddedInfoLeadingX + triadEmbeddedInfoWidth
+    }
+
+    var triadEmbeddedInfoBottomY: CGFloat {
+        triadEmbeddedInfoTopInset + triadEmbeddedInfoContentHeight
+    }
+
+    var triadLeadingEmbeddedInfoCenter: CGPoint {
+        CGPoint(
+            x: triadLeadingEmbeddedInfoLeadingX + triadEmbeddedInfoWidth / 2,
+            y: triadEmbeddedInfoTopInset + triadEmbeddedInfoContentHeight / 2
+        )
+    }
+
+    var triadTrailingEmbeddedInfoCenter: CGPoint {
+        CGPoint(
+            x: triadTrailingEmbeddedInfoLeadingX + triadEmbeddedInfoWidth / 2,
+            y: triadEmbeddedInfoTopInset + triadEmbeddedInfoContentHeight / 2
+        )
+    }
 
     var bottomInnerCornerBevel: CGSize {
         hubLowerSlantRun
@@ -256,25 +340,15 @@ struct MagiTriadConsoleView: View {
                 topStatusArea
 
                 HStack(alignment: .top, spacing: metrics.columnSpacing) {
-                    MagiConsoleInfoColumn(
-                        alignment: .leading,
-                        rows: leftRows,
-                        width: metrics.sideInfoWidth
-                    )
-
-                    MagiTriadView(
+                    MagiTriadFramedView(
                         balthasar: state.memory,
                         casper: state.network,
                         melchior: state.cpu,
-                        judgement: state.judgement
+                        judgement: state.judgement,
+                        leadingRows: leftRows,
+                        trailingRows: rightRows
                     )
-                    .frame(width: metrics.triadWidth, height: metrics.triadHeight)
-
-                    MagiConsoleInfoColumn(
-                        alignment: .leading,
-                        rows: rightRows,
-                        width: metrics.trailingInfoWidth
-                    )
+                    .frame(width: metrics.triadOuterFrameWidth, height: metrics.triadOuterFrameHeight)
                 }
             }
             .padding(.horizontal, 18)
@@ -446,6 +520,122 @@ private struct MagiTriadView: View {
             .frame(width: metrics.bottomUnitSize.width, height: metrics.bottomUnitSize.height)
             .position(metrics.melchiorCenter)
         }
+    }
+}
+
+private struct MagiTriadFramedView: View {
+    let balthasar: MagiPanelDecision
+    let casper: MagiPanelDecision
+    let melchior: MagiPanelDecision
+    let judgement: CentralDogmaJudgement
+    let leadingRows: [String]
+    let trailingRows: [String]
+
+    private let metrics = MagiConsoleLayoutMetrics()
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            MagiTriadOuterFrame()
+
+            MagiTriadView(
+                balthasar: balthasar,
+                casper: casper,
+                melchior: melchior,
+                judgement: judgement
+            )
+            .frame(width: metrics.triadWidth, height: metrics.triadHeight)
+            .offset(y: metrics.triadContentOffsetY)
+
+            MagiTriadEmbeddedInfoColumn(rows: leadingRows)
+                .frame(
+                    width: metrics.triadEmbeddedInfoWidth,
+                    height: metrics.triadEmbeddedInfoContentHeight,
+                    alignment: .topLeading
+                )
+                .position(metrics.triadLeadingEmbeddedInfoCenter)
+
+            MagiTriadEmbeddedInfoColumn(rows: trailingRows)
+                .frame(
+                    width: metrics.triadEmbeddedInfoWidth,
+                    height: metrics.triadEmbeddedInfoContentHeight,
+                    alignment: .topLeading
+                )
+                .position(metrics.triadTrailingEmbeddedInfoCenter)
+        }
+        .frame(width: metrics.triadOuterFrameWidth, height: metrics.triadOuterFrameHeight)
+    }
+}
+
+private struct MagiTriadEmbeddedInfoColumn: View {
+    let rows: [String]
+
+    private let metrics = MagiConsoleLayoutMetrics()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: metrics.triadEmbeddedInfoRowSpacing) {
+            ForEach(rows, id: \.self) { row in
+                Text(row)
+                    .font(.system(size: metrics.triadEmbeddedInfoFontSize, weight: .black, design: .monospaced))
+                    .foregroundStyle(NervStyle.orange)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.62)
+                    .frame(
+                        maxWidth: .infinity,
+                        minHeight: metrics.triadEmbeddedInfoLineHeight,
+                        maxHeight: metrics.triadEmbeddedInfoLineHeight,
+                        alignment: .leading
+                    )
+            }
+        }
+        .shadow(color: NervStyle.orange.opacity(0.68), radius: 3)
+    }
+}
+
+private struct MagiTriadOuterFrame: View {
+    private let metrics = MagiConsoleLayoutMetrics()
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            Rectangle()
+                .stroke(NervStyle.red.opacity(0.9), lineWidth: 1)
+                .shadow(color: NervStyle.red.opacity(0.55), radius: 4)
+
+            MagiWarningStrip()
+                .frame(height: metrics.triadWarningStripHeight)
+                .padding(.horizontal, metrics.triadWarningStripHorizontalInset)
+                .padding(.top, metrics.triadWarningStripTopInset)
+        }
+        .background(Color.black.opacity(0.18))
+    }
+}
+
+private struct MagiWarningStrip: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let stripeWidth: CGFloat = 18
+            ZStack {
+                NervStyle.orange
+
+                Path { path in
+                    var x = -stripeWidth
+                    while x < proxy.size.width + stripeWidth {
+                        path.move(to: CGPoint(x: x, y: proxy.size.height))
+                        path.addLine(to: CGPoint(x: x + stripeWidth * 0.45, y: 0))
+                        path.addLine(to: CGPoint(x: x + stripeWidth, y: 0))
+                        path.addLine(to: CGPoint(x: x + stripeWidth * 0.55, y: proxy.size.height))
+                        path.closeSubpath()
+                        x += stripeWidth
+                    }
+                }
+                .fill(Color.black.opacity(0.88))
+            }
+        }
+        .clipped()
+        .overlay(
+            Rectangle()
+                .stroke(NervStyle.orange.opacity(0.85), lineWidth: 1)
+        )
+        .shadow(color: NervStyle.orange.opacity(0.65), radius: 3)
     }
 }
 
