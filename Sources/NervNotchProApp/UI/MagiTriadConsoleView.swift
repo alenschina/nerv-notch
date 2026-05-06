@@ -3,7 +3,7 @@ import SwiftUI
 struct MagiConsoleTypography: Equatable {
     let englishFontName = "Share Tech Mono"
     let topUnitLabelSize: CGFloat = 32
-    let bottomUnitLabelSize: CGFloat = 21
+    let bottomUnitLabelSize: CGFloat = 32
     let unitTitleFontName = "Helvetica Neue Condensed Bold"
     let unitSubtitleSize: CGFloat = 7
     let metricFontName = "DS-Digital-Bold"
@@ -70,7 +70,7 @@ struct MagiUnitContentLayout: Equatable {
         case .top:
             return 44
         case .bottom:
-            return 40
+            return 44
         }
     }
 
@@ -717,6 +717,8 @@ struct SynchronizationRateLayout: Equatable {
     let phaseVelocity: CGFloat = 1.35
     let titleText = "SYNCHRONIZATION RATE / 同步率"
     let titleTopPadding: CGFloat = 34
+    let rateLabelFontName = "SourceHanSerifCN-Bold"
+    let rateValueFontName = "DS-Digital-Bold"
 
     static func rateText(cpuLoadText: String) -> String {
         let trimmedValue = cpuLoadText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -807,14 +809,20 @@ private struct SynchronizationRateView: View {
                             .padding(.bottom, proxy.size.height - layout.waveBottomY - 6)
                     )
 
-                    Text("同步率 \(rateText)")
-                        .font(.system(size: 15, weight: .black, design: .monospaced))
-                        .foregroundStyle(NervStyle.red)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.34)
-                        .shadow(color: NervStyle.red.opacity(0.95), radius: 5)
-                        .frame(width: max(0, proxy.size.width - layout.contentInset * 2))
-                        .position(x: proxy.size.width / 2, y: layout.rateBaselineY)
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        Text("同步率")
+                            .font(.custom(layout.rateLabelFontName, size: 15))
+
+                        Text(rateText)
+                            .font(.custom(layout.rateValueFontName, size: 17))
+                    }
+                    .fontWeight(.black)
+                    .foregroundStyle(NervStyle.red)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.34)
+                    .shadow(color: NervStyle.red.opacity(0.95), radius: 5)
+                    .frame(width: max(0, proxy.size.width - layout.contentInset * 2))
+                    .position(x: proxy.size.width / 2, y: layout.rateBaselineY)
 
                     SynchronizationTickMarks(layout: layout)
                 }

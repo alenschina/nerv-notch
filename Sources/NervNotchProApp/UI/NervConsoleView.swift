@@ -5,6 +5,11 @@ struct NotchIslandLayout: Equatable {
     let compactNotchSize: CGSize
     private let hoverExpansionWidth: CGFloat = 16
     private let magiMetrics = MagiConsoleLayoutMetrics()
+    let expandedHeaderTopPadding: CGFloat = 11
+    let expandedHeaderSpacing: CGFloat = 6
+    let expandedHeaderFontSize: CGFloat = 15
+    let expandedHeaderIconSize: CGFloat = 20
+    let expandedHeaderFontName = "SourceHanSerifCN-Bold"
 
     var compactSize: CGSize {
         compactSize(isHovering: false)
@@ -26,6 +31,10 @@ struct NotchIslandLayout: Equatable {
             + magiMetrics.triadOuterFrameHeight
             + magiMetrics.consoleContentBottomPadding
         )
+    }
+
+    var expandedHeaderLeadingPadding: CGFloat {
+        magiMetrics.leftAuxiliaryFrameStrokeLeftXInConsole
     }
 }
 
@@ -97,21 +106,19 @@ struct NervConsoleView: View {
     }
 
     private var expandedConsole: some View {
-        MagiTriadConsoleView(state: viewModel.magiState)
+        ZStack(alignment: .topLeading) {
+            MagiTriadConsoleView(state: viewModel.magiState)
+
+            expandedHeader
+                .padding(.top, layout.expandedHeaderTopPadding)
+                .padding(.leading, layout.expandedHeaderLeadingPadding)
+        }
     }
 
     private var compactIsland: some View {
         ZStack(alignment: .leading) {
-            if let icon = NervIslandIcon.image {
-                Image(nsImage: icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(
-                        width: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height),
-                        height: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height)
-                    )
-                    .padding(.leading, 14)
-            }
+            nervLeadingIcon(sideLength: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height))
+                .padding(.leading, 14)
 
             HStack(spacing: 10) {
                 Text("NERV")
@@ -133,6 +140,29 @@ struct NervConsoleView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
+    }
+
+    private var expandedHeader: some View {
+        HStack(spacing: layout.expandedHeaderSpacing) {
+            nervLeadingIcon(sideLength: layout.expandedHeaderIconSize)
+
+            Text("NERV コントロールセンター")
+                .font(.custom(layout.expandedHeaderFontName, size: layout.expandedHeaderFontSize))
+                .fontWeight(.bold)
+                .foregroundStyle(NervStyle.orange)
+                .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
+                .lineLimit(1)
+        }
+    }
+
+    @ViewBuilder
+    private func nervLeadingIcon(sideLength: CGFloat) -> some View {
+        if let icon = NervIslandIcon.image {
+            Image(nsImage: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: sideLength, height: sideLength)
+        }
     }
 
     private var compactStatusColor: Color {

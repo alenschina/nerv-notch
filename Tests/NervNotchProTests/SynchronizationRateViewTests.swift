@@ -11,6 +11,8 @@ final class SynchronizationRateViewTests: XCTestCase {
 
         XCTAssertEqual(SynchronizationRateLayout.rateText(cpuLoadText: "42%"), "58%")
         XCTAssertEqual(layout.titleText, "SYNCHRONIZATION RATE / 同步率")
+        XCTAssertEqual(layout.rateLabelFontName, "SourceHanSerifCN-Bold")
+        XCTAssertEqual(layout.rateValueFontName, "DS-Digital-Bold")
         XCTAssertEqual(layout.contentInset, 7)
         XCTAssertGreaterThan(layout.titleTopPadding, metrics.triadWarningStripTopInset + metrics.triadWarningStripHeight)
         XCTAssertEqual(layout.waveCount, 13)

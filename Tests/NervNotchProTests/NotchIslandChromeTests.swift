@@ -76,6 +76,32 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertNotNil(NervIslandIcon.image)
     }
 
+    func testExpandedConsoleShowsLeadingNervHeaderWithOrangeWarningTitle() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/UI/NervConsoleView.swift")
+        let consoleSource = try String(contentsOf: sourceFile)
+        let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertTrue(consoleSource.contains("Text(\"NERV コントロールセンター\")"))
+        XCTAssertTrue(consoleSource.contains("private var expandedHeader: some View"))
+        XCTAssertTrue(consoleSource.contains("foregroundStyle(NervStyle.orange)"))
+        XCTAssertTrue(consoleSource.contains("nervLeadingIcon(sideLength: layout.expandedHeaderIconSize)"))
+        XCTAssertTrue(consoleSource.contains(".font(.custom(layout.expandedHeaderFontName, size: layout.expandedHeaderFontSize))"))
+        XCTAssertTrue(consoleSource.contains(".fontWeight(.bold)"))
+        XCTAssertEqual(layout.expandedHeaderTopPadding, 11)
+        XCTAssertEqual(layout.expandedHeaderLeadingPadding, metrics.leftAuxiliaryFrameStrokeLeftXInConsole)
+        XCTAssertEqual(layout.expandedHeaderLeadingPadding, 69)
+        XCTAssertEqual(layout.expandedHeaderSpacing, 6)
+        XCTAssertEqual(layout.expandedHeaderFontSize, 15)
+        XCTAssertEqual(layout.expandedHeaderIconSize, 20)
+        XCTAssertEqual(layout.expandedHeaderFontName, "SourceHanSerifCN-Bold")
+    }
+
     func testLayoutExtendsCompactIslandWidthWhileHovering() {
         let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
 
@@ -254,7 +280,7 @@ final class NotchIslandChromeTests: XCTestCase {
 
         XCTAssertEqual(typography.englishFontName, "Share Tech Mono")
         XCTAssertEqual(typography.topUnitLabelSize, 32)
-        XCTAssertEqual(typography.bottomUnitLabelSize, 21)
+        XCTAssertEqual(typography.bottomUnitLabelSize, 32)
         XCTAssertEqual(typography.unitTitleFontName, "Helvetica Neue Condensed Bold")
         XCTAssertEqual(typography.unitSubtitleSize, 7)
         XCTAssertEqual(typography.metricFontName, "DS-Digital-Bold")
@@ -286,7 +312,7 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(topLayout.statusHeight, 0)
         XCTAssertEqual(bottomLayout.statusHeight, 0)
         XCTAssertEqual(topLayout.titleHeight, 44)
-        XCTAssertEqual(bottomLayout.titleHeight, 40)
+        XCTAssertEqual(bottomLayout.titleHeight, 44)
         XCTAssertEqual(topLayout.valueHorizontalInset, 20)
         XCTAssertEqual(bottomLayout.valueHorizontalInset, 16)
         XCTAssertEqual(topLayout.valueWidth, topLayout.contentWidth - topLayout.valueHorizontalInset * 2)
