@@ -461,7 +461,9 @@ struct MagiTriadConsoleView: View {
                     MagiAuxiliaryFramedView(
                         strokeWidth: metrics.rightAuxiliaryFrameStrokeWidth,
                         strokeOffsetX: metrics.rightAuxiliaryFrameStrokeOffsetX
-                    )
+                    ) {
+                        EmergencyHoneycombView()
+                    }
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
                 }
             }
@@ -946,6 +948,351 @@ private struct SynchronizationWaveShape: Shape {
             }
         }
 
+        return path
+    }
+}
+
+struct EmergencyHoneycombCell: Equatable {
+    enum Role: Equatable {
+        case primary
+        case emergency
+        case technical
+    }
+
+    let column: Int
+    let row: Int
+    let center: CGPoint
+    let sideLength: CGFloat
+    let label: String
+    let role: Role
+
+    var frame: CGRect {
+        CGRect(
+            x: center.x - sideLength,
+            y: center.y - hexHeight / 2,
+            width: sideLength * 2,
+            height: hexHeight
+        )
+    }
+
+    var hexHeight: CGFloat {
+        sqrt(3) * sideLength
+    }
+}
+
+struct EmergencyHoneycombLayout: Equatable {
+    let containerSize: CGSize
+    let topPadding: CGFloat = 33
+    let bottomPadding: CGFloat = 10
+    let titleText = "EMERGENCY"
+    let primaryCellLabel = "454:32"
+    let connectedBorderLineWidth: CGFloat = 4
+    let cellDividerLineWidth: CGFloat = 1.2
+
+    private let columnCount = 3
+    private let rowCount = 7
+
+    var cells: [EmergencyHoneycombCell] {
+        let sideLength = resolvedSideLength
+        let hexHeight = sqrt(3) * sideLength
+        let bounds = normalizedCellBounds(sideLength: sideLength)
+        let originX = -bounds.minX + max(0, (containerSize.width - bounds.width) / 2)
+        let originY = topPadding - bounds.minY + max(0, (availableHeight - bounds.height) / 2)
+
+        return includedCoordinates.map { coordinate in
+                let column = coordinate.column
+                let row = coordinate.row
+                let x = originX + sideLength + CGFloat(column) * sideLength * 1.5
+                let y = originY + hexHeight / 2 + CGFloat(row) * hexHeight + CGFloat(column) * hexHeight / 2
+                let label = labelFor(column: column, row: row)
+
+                return EmergencyHoneycombCell(
+                    column: column,
+                    row: row,
+                    center: CGPoint(x: x, y: y),
+                    sideLength: sideLength,
+                    label: label.text,
+                    role: label.role
+                )
+        }
+    }
+
+    var contiguousNeighborPairCount: Int {
+        contiguousNeighborErrors.count
+    }
+
+    var maximumContiguousNeighborError: CGFloat {
+        contiguousNeighborErrors.max() ?? 0
+    }
+
+    private var resolvedSideLength: CGFloat {
+        let unitBounds = normalizedCellBounds(sideLength: 1)
+        let widthBound = containerSize.width / unitBounds.width
+        let heightBound = availableHeight / unitBounds.height
+        return max(1, min(widthBound, heightBound))
+    }
+
+    private var availableHeight: CGFloat {
+        max(1, containerSize.height - topPadding - bottomPadding)
+    }
+
+    private var contiguousNeighborErrors: [CGFloat] {
+        let expectedDistance = sqrt(3) * resolvedSideLength
+        var errors: [CGFloat] = []
+
+        for leftIndex in cells.indices {
+            for rightIndex in cells.index(after: leftIndex)..<cells.endIndex {
+                let distance = hypot(
+                    cells[leftIndex].center.x - cells[rightIndex].center.x,
+                    cells[leftIndex].center.y - cells[rightIndex].center.y
+                )
+                let error = abs(distance - expectedDistance)
+
+                if error <= 0.001 {
+                    errors.append(error)
+                }
+            }
+        }
+
+        return errors
+    }
+
+    private var includedCoordinates: [(column: Int, row: Int)] {
+        (0..<columnCount).flatMap { column in
+            (0..<rowCount).compactMap { row in
+                shouldIncludeCell(column: column, row: row) ? (column, row) : nil
+            }
+        }
+    }
+
+    private func normalizedCellBounds(sideLength: CGFloat) -> CGRect {
+        let hexHeight = sqrt(3) * sideLength
+        let frames = includedCoordinates.map { coordinate in
+            let center = CGPoint(
+                x: sideLength + CGFloat(coordinate.column) * sideLength * 1.5,
+                y: hexHeight / 2 + CGFloat(coordinate.row) * hexHeight + CGFloat(coordinate.column) * hexHeight / 2
+            )
+
+            return CGRect(
+                x: center.x - sideLength,
+                y: center.y - hexHeight / 2,
+                width: sideLength * 2,
+                height: hexHeight
+            )
+        }
+
+        return frames.reduce(frames[0]) { partialResult, frame in
+            partialResult.union(frame)
+        }
+    }
+
+    private func shouldIncludeCell(column: Int, row: Int) -> Bool {
+        (column, row) != (0, 0) && (column, row) != (2, 6)
+    }
+
+    private func labelFor(column: Int, row: Int) -> (text: String, role: EmergencyHoneycombCell.Role) {
+        switch (column, row) {
+        case (0, 0), (1, 1), (2, 1), (0, 3), (2, 4), (0, 6):
+            return ("EMERGENCY", .emergency)
+        case (1, 3):
+            return (primaryCellLabel, .primary)
+        case (0, 1):
+            return ("LOCK", .technical)
+        case (1, 0):
+            return ("INT", .technical)
+        case (2, 0):
+            return ("MODE", .technical)
+        case (0, 2):
+            return ("AUDIO", .technical)
+        case (1, 2):
+            return ("NERV", .technical)
+        case (2, 2):
+            return ("DUMMY", .technical)
+        case (0, 4):
+            return ("SYNC", .technical)
+        case (1, 4):
+            return ("PILOT", .technical)
+        case (2, 5):
+            return ("CUT", .technical)
+        case (1, 5):
+            return ("AUTO", .technical)
+        default:
+            return ("DANGER", .technical)
+        }
+    }
+}
+
+private struct EmergencyHoneycombView: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let layout = EmergencyHoneycombLayout(containerSize: proxy.size)
+
+            ZStack {
+                Color.black.opacity(0.42)
+
+                VStack(spacing: 0) {
+                    Text(layout.titleText)
+                        .font(.system(size: 7, weight: .black, design: .monospaced))
+                        .foregroundStyle(NervStyle.red)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.45)
+                        .shadow(color: NervStyle.red.opacity(0.85), radius: 4)
+
+                    Spacer(minLength: 0)
+                }
+                .padding(.top, 12)
+                .padding(.horizontal, 3)
+
+                ForEach(Array(layout.cells.enumerated()), id: \.offset) { _, cell in
+                    EmergencyHoneycombCellView(cell: cell)
+                        .frame(width: cell.frame.width, height: cell.frame.height)
+                        .position(cell.center)
+                }
+
+                EmergencyHoneycombStrokeLayer(
+                    cells: layout.cells,
+                    color: NervStyle.red.opacity(0.82),
+                    lineWidth: layout.connectedBorderLineWidth
+                )
+                .shadow(color: NervStyle.red.opacity(0.65), radius: 3)
+
+                EmergencyHoneycombStrokeLayer(
+                    cells: layout.cells,
+                    color: Color.black.opacity(0.96),
+                    lineWidth: layout.cellDividerLineWidth
+                )
+            }
+            .clipped()
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+private struct EmergencyHoneycombStrokeLayer: View {
+    let cells: [EmergencyHoneycombCell]
+    let color: Color
+    let lineWidth: CGFloat
+
+    var body: some View {
+        ForEach(Array(cells.enumerated()), id: \.offset) { _, cell in
+            EmergencyHoneycombHexagon()
+                .stroke(color, lineWidth: lineWidth)
+                .frame(width: cell.frame.width, height: cell.frame.height)
+                .position(cell.center)
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+private struct EmergencyHoneycombCellView: View {
+    let cell: EmergencyHoneycombCell
+
+    var body: some View {
+        ZStack {
+            EmergencyHoneycombHexagon()
+                .fill(fillColor)
+                .shadow(color: NervStyle.red.opacity(cell.role == .primary ? 0.7 : 0.34), radius: cell.role == .primary ? 5 : 2)
+
+            cellContent
+        }
+    }
+
+    @ViewBuilder
+    private var cellContent: some View {
+        switch cell.role {
+        case .primary:
+            VStack(spacing: 0) {
+                Text("NERV")
+                    .font(.system(size: 4.4, weight: .black, design: .monospaced))
+                Text(cell.label)
+                    .font(.custom("DS-Digital-Bold", size: 8.4))
+                    .minimumScaleFactor(0.55)
+                Text("ALERT")
+                    .font(.system(size: 4.2, weight: .black, design: .monospaced))
+            }
+            .lineLimit(1)
+            .foregroundStyle(Color.black.opacity(0.95))
+            .padding(.horizontal, 3)
+        case .emergency:
+            VStack(spacing: 1) {
+                Triangle()
+                    .fill(Color.black.opacity(0.95))
+                    .frame(width: 7, height: 5)
+                Text(cell.label)
+                    .font(.system(size: 4.8, weight: .black, design: .monospaced))
+                    .minimumScaleFactor(0.4)
+                Triangle()
+                    .fill(Color.black.opacity(0.95))
+                    .rotationEffect(.degrees(180))
+                    .frame(width: 7, height: 5)
+            }
+            .lineLimit(1)
+            .foregroundStyle(Color.black.opacity(0.94))
+            .padding(.horizontal, 2)
+        case .technical:
+            VStack(spacing: 1) {
+                technicalGlyph
+                Text(cell.label)
+                    .font(.system(size: 4.6, weight: .black, design: .monospaced))
+                    .minimumScaleFactor(0.45)
+            }
+            .lineLimit(1)
+            .foregroundStyle(Color.black.opacity(0.92))
+            .padding(.horizontal, 3)
+        }
+    }
+
+    private var technicalGlyph: some View {
+        HStack(alignment: .bottom, spacing: 1) {
+            ForEach(0..<4, id: \.self) { index in
+                Rectangle()
+                    .frame(width: 1.6, height: CGFloat(index + 1) * 2)
+            }
+        }
+        .frame(height: 9)
+    }
+
+    private var fillColor: Color {
+        switch cell.role {
+        case .primary:
+            return NervStyle.red
+        case .emergency:
+            return NervStyle.red.opacity(0.94)
+        case .technical:
+            return NervStyle.red.opacity(0.84)
+        }
+    }
+}
+
+private struct EmergencyHoneycombHexagon: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let quarterWidth = rect.width * 0.25
+        let points = [
+            CGPoint(x: rect.minX + quarterWidth, y: rect.minY),
+            CGPoint(x: rect.maxX - quarterWidth, y: rect.minY),
+            CGPoint(x: rect.maxX, y: rect.midY),
+            CGPoint(x: rect.maxX - quarterWidth, y: rect.maxY),
+            CGPoint(x: rect.minX + quarterWidth, y: rect.maxY),
+            CGPoint(x: rect.minX, y: rect.midY)
+        ]
+
+        path.move(to: points[0])
+        for point in points.dropFirst() {
+            path.addLine(to: point)
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+private struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
         return path
     }
 }
