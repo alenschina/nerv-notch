@@ -85,8 +85,8 @@ final class NotchIslandChromeTests: XCTestCase {
         let typography = MagiConsoleTypography()
 
         XCTAssertEqual(typography.englishFontName, "Share Tech Mono")
-        XCTAssertEqual(typography.topUnitLabelSize, 18)
-        XCTAssertEqual(typography.bottomUnitLabelSize, 16)
+        XCTAssertEqual(typography.topUnitLabelSize, 34)
+        XCTAssertEqual(typography.bottomUnitLabelSize, 22)
         XCTAssertEqual(typography.unitTitleFontName, "Helvetica Neue Condensed Bold")
         XCTAssertEqual(typography.unitSubtitleSize, 8)
         XCTAssertEqual(typography.metricFontName, "DS-Digital")
@@ -109,12 +109,15 @@ final class NotchIslandChromeTests: XCTestCase {
         let topLayout = MagiUnitContentLayout(placement: .top)
         let bottomLayout = MagiUnitContentLayout(placement: .bottom)
 
+        XCTAssertEqual(topLayout.contentWidth, 136)
         XCTAssertLessThanOrEqual(topLayout.contentWidth, metrics.topUnitSize.width - topLayout.horizontalPadding * 2)
         XCTAssertLessThanOrEqual(topLayout.contentHeight, metrics.topUnitSize.height - topLayout.verticalPadding * 2)
         XCTAssertLessThanOrEqual(bottomLayout.contentWidth, metrics.bottomUnitSize.width - bottomLayout.horizontalPadding * 2)
         XCTAssertLessThanOrEqual(bottomLayout.contentHeight, metrics.bottomUnitSize.height - bottomLayout.verticalPadding * 2)
         XCTAssertEqual(topLayout.statusHeight, 0)
         XCTAssertEqual(bottomLayout.statusHeight, 0)
+        XCTAssertEqual(topLayout.titleHeight, 54)
+        XCTAssertEqual(bottomLayout.titleHeight, 40)
         XCTAssertFalse(topLayout.titleAppearsBelowValue)
         XCTAssertTrue(bottomLayout.titleAppearsBelowValue)
     }

@@ -2,8 +2,8 @@ import SwiftUI
 
 struct MagiConsoleTypography: Equatable {
     let englishFontName = "Share Tech Mono"
-    let topUnitLabelSize: CGFloat = 18
-    let bottomUnitLabelSize: CGFloat = 16
+    let topUnitLabelSize: CGFloat = 34
+    let bottomUnitLabelSize: CGFloat = 22
     let unitTitleFontName = "Helvetica Neue Condensed Bold"
     let unitSubtitleSize: CGFloat = 8
     let metricFontName = "DS-Digital"
@@ -32,7 +32,7 @@ struct MagiUnitContentLayout: Equatable {
     var horizontalPadding: CGFloat {
         switch placement {
         case .top:
-            return 20
+            return 6
         case .bottom:
             return 12
         }
@@ -50,7 +50,7 @@ struct MagiUnitContentLayout: Equatable {
     var contentWidth: CGFloat {
         switch placement {
         case .top:
-            return 106
+            return 136
         case .bottom:
             return 108
         }
@@ -68,9 +68,9 @@ struct MagiUnitContentLayout: Equatable {
     var titleHeight: CGFloat {
         switch placement {
         case .top:
-            return 34
+            return 54
         case .bottom:
-            return 30
+            return 40
         }
     }
 
