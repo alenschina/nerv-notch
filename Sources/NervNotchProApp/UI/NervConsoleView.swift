@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct NotchIslandLayout: Equatable {
@@ -25,6 +26,21 @@ struct NotchIslandLayout: Equatable {
             + magiMetrics.triadOuterFrameHeight
             + magiMetrics.consoleContentBottomPadding
         )
+    }
+}
+
+enum NervIslandIcon {
+    static let resourceName = "nerv-island-icon"
+
+    static var image: NSImage? {
+        guard let url = Bundle.module.url(forResource: resourceName, withExtension: "png") else {
+            return nil
+        }
+        return NSImage(contentsOf: url)
+    }
+
+    static func dimension(forCompactHeight compactHeight: CGFloat) -> CGFloat {
+        max(16, compactHeight - 8)
     }
 }
 
@@ -85,22 +101,36 @@ struct NervConsoleView: View {
     }
 
     private var compactIsland: some View {
-        HStack(spacing: 10) {
-            Text("NERV")
-                .font(.system(size: 11, weight: .black, design: .monospaced))
-                .foregroundStyle(NervStyle.red)
+        ZStack(alignment: .leading) {
+            if let icon = NervIslandIcon.image {
+                Image(nsImage: icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(
+                        width: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height),
+                        height: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height)
+                    )
+                    .padding(.leading, 14)
+            }
 
-            Rectangle()
-                .fill(NervStyle.red.opacity(0.75))
-                .frame(width: 1, height: min(16, max(8, layout.compactSize.height - 14)))
+            HStack(spacing: 10) {
+                Text("NERV")
+                    .font(.system(size: 11, weight: .black, design: .monospaced))
+                    .foregroundStyle(NervStyle.red)
 
-            Text(viewModel.magiState.judgement.title)
-                .font(NervStyle.monoSmall)
-                .foregroundStyle(compactStatusColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                Rectangle()
+                    .fill(NervStyle.red.opacity(0.75))
+                    .frame(width: 1, height: min(16, max(8, layout.compactSize.height - 14)))
+
+                Text(viewModel.magiState.judgement.title)
+                    .font(NervStyle.monoSmall)
+                    .foregroundStyle(compactStatusColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .padding(.horizontal, 14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
     }

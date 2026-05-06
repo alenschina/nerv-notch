@@ -12,7 +12,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "NervNotchProApp",
-            path: "Sources/NervNotchProApp"
+            path: "Sources/NervNotchProApp",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
             name: "NervNotchProTests",

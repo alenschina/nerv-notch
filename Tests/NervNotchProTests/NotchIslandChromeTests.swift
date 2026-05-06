@@ -1,3 +1,4 @@
+import AppKit
 import XCTest
 @testable import NervNotchProApp
 
@@ -47,6 +48,32 @@ final class NotchIslandChromeTests: XCTestCase {
         let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
 
         XCTAssertEqual(layout.compactSize.width, 274)
+    }
+
+    func testCompactIslandUsesBundledNervIconOnLeadingEdge() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let resourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/Resources/nerv-island-icon.png")
+        let packageFile = projectRoot.appendingPathComponent("Package.swift")
+        let sourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/UI/NervConsoleView.swift")
+
+        let packageSource = try String(contentsOf: packageFile)
+        let consoleSource = try String(contentsOf: sourceFile)
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: resourceFile.path))
+        XCTAssertTrue(packageSource.contains(#".process("Resources")"#))
+        XCTAssertTrue(consoleSource.contains("ZStack(alignment: .leading)"))
+        XCTAssertTrue(consoleSource.contains("Image(nsImage: icon)"))
+        XCTAssertTrue(consoleSource.contains(".padding(.leading, 14)"))
+        XCTAssertNotNil(Bundle.module.url(forResource: "nerv-island-icon", withExtension: "png"))
+        XCTAssertNotNil(Bundle.module.image(forResource: "nerv-island-icon"))
+        XCTAssertEqual(NervIslandIcon.resourceName, "nerv-island-icon")
+        XCTAssertEqual(NervIslandIcon.dimension(forCompactHeight: 32), 24)
+        XCTAssertNotNil(NervIslandIcon.image)
     }
 
     func testLayoutExtendsCompactIslandWidthWhileHovering() {
