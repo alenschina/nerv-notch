@@ -74,11 +74,11 @@ final class NotchIslandChromeTests: XCTestCase {
     func testMagiTriadUsesReferenceUnitProportions() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.topUnitSize, CGSize(width: 149, height: 118))
+        XCTAssertEqual(metrics.topUnitSize, CGSize(width: 149, height: 108))
         XCTAssertEqual(metrics.bottomUnitSize, CGSize(width: 136, height: 104))
         XCTAssertEqual(metrics.hubSize, CGSize(width: 120, height: 72.5))
-        XCTAssertEqual(metrics.topUnitCenter, CGPoint(x: 184, y: 60))
-        XCTAssertEqual(metrics.hubCenter, CGPoint(x: 184, y: 155.25))
+        XCTAssertEqual(metrics.topUnitCenter, CGPoint(x: 184, y: 55))
+        XCTAssertEqual(metrics.hubCenter, CGPoint(x: 184, y: 145.25))
     }
 
     func testMagiOuterUnitTypographyUsesCompactNonOverflowingSizes() {
@@ -89,7 +89,7 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(typography.bottomUnitLabelSize, 22)
         XCTAssertEqual(typography.unitTitleFontName, "Helvetica Neue Condensed Bold")
         XCTAssertEqual(typography.unitSubtitleSize, 8)
-        XCTAssertEqual(typography.metricFontName, "DS-Digital")
+        XCTAssertEqual(typography.metricFontName, "DS-Digital-Bold")
         XCTAssertEqual(typography.metricValueSize, 20)
     }
 
@@ -111,12 +111,13 @@ final class NotchIslandChromeTests: XCTestCase {
 
         XCTAssertEqual(topLayout.contentWidth, 136)
         XCTAssertLessThanOrEqual(topLayout.contentWidth, metrics.topUnitSize.width - topLayout.horizontalPadding * 2)
+        XCTAssertEqual(topLayout.contentHeight, 80)
         XCTAssertLessThanOrEqual(topLayout.contentHeight, metrics.topUnitSize.height - topLayout.verticalPadding * 2)
         XCTAssertLessThanOrEqual(bottomLayout.contentWidth, metrics.bottomUnitSize.width - bottomLayout.horizontalPadding * 2)
         XCTAssertLessThanOrEqual(bottomLayout.contentHeight, metrics.bottomUnitSize.height - bottomLayout.verticalPadding * 2)
         XCTAssertEqual(topLayout.statusHeight, 0)
         XCTAssertEqual(bottomLayout.statusHeight, 0)
-        XCTAssertEqual(topLayout.titleHeight, 54)
+        XCTAssertEqual(topLayout.titleHeight, 44)
         XCTAssertEqual(bottomLayout.titleHeight, 40)
         XCTAssertFalse(topLayout.titleAppearsBelowValue)
         XCTAssertTrue(bottomLayout.titleAppearsBelowValue)

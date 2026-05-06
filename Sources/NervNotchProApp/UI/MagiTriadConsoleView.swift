@@ -6,7 +6,7 @@ struct MagiConsoleTypography: Equatable {
     let bottomUnitLabelSize: CGFloat = 22
     let unitTitleFontName = "Helvetica Neue Condensed Bold"
     let unitSubtitleSize: CGFloat = 8
-    let metricFontName = "DS-Digital"
+    let metricFontName = "DS-Digital-Bold"
     let metricValueSize: CGFloat = 20
 }
 
@@ -59,7 +59,7 @@ struct MagiUnitContentLayout: Equatable {
     var contentHeight: CGFloat {
         switch placement {
         case .top:
-            return 86
+            return 80
         case .bottom:
             return 78
         }
@@ -68,7 +68,7 @@ struct MagiUnitContentLayout: Equatable {
     var titleHeight: CGFloat {
         switch placement {
         case .top:
-            return 54
+            return 44
         case .bottom:
             return 40
         }
@@ -98,16 +98,16 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let triadWidth: CGFloat = 368
     let triadHeight: CGFloat = 258
     let columnSpacing: CGFloat = 14
-    let topUnitSize = CGSize(width: 149, height: 118)
+    let topUnitSize = CGSize(width: 149, height: 108)
     let bottomUnitSize = CGSize(width: 136, height: 104)
     let hubSize = CGSize(width: 120, height: 72.5)
-    let topUnitCenter = CGPoint(x: 184, y: 60)
-    let hubCenter = CGPoint(x: 184, y: 155.25)
-    let casperCenter = CGPoint(x: 99.5, y: 200)
-    let melchiorCenter = CGPoint(x: 268.5, y: 200)
+    let topUnitCenter = CGPoint(x: 184, y: 55)
+    let hubCenter = CGPoint(x: 184, y: 145.25)
+    let casperCenter = CGPoint(x: 99.5, y: 190)
+    let melchiorCenter = CGPoint(x: 268.5, y: 190)
     let sharedSlantRun = CGSize(width: 29, height: 29)
     let hubLowerSlantScale: CGFloat = 1.5
-    let topUnitVerticalSideHeight: CGFloat = 74.5
+    let topUnitVerticalSideHeight: CGFloat = 64.5
 
     var bottomInnerCornerBevel: CGSize {
         hubLowerSlantRun
