@@ -125,6 +125,17 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.triadClusterWidth, 784)
     }
 
+    func testMagiConsolePlacesFramedContentBelowPhysicalNotchAfterRemovingStatusBanners() {
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertEqual(metrics.consoleContentTopPadding, 56)
+        XCTAssertEqual(metrics.consoleContentBottomPadding, 14)
+        XCTAssertGreaterThanOrEqual(metrics.consoleContentTopPadding, CGFloat(32 + 20))
+        XCTAssertEqual(metrics.consoleFramedContentTopY, metrics.consoleContentTopPadding)
+        XCTAssertEqual(metrics.consoleFramedContentBottomY, metrics.consoleContentTopPadding + metrics.triadOuterFrameHeight)
+        XCTAssertLessThanOrEqual(metrics.consoleFramedContentBottomY, CGFloat(420) - metrics.consoleContentBottomPadding)
+    }
+
     func testMagiRedFrameStrokeHugsContentWithoutMovingEmbeddedInfo() {
         let metrics = MagiConsoleLayoutMetrics()
 

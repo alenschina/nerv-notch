@@ -119,6 +119,8 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let sideWarningBackgroundStripeWidth: CGFloat = 36
     let sideWarningBackgroundStripeHeight: CGFloat = 58
     let sideWarningBackgroundOpacity: Double = 0.36
+    let consoleContentTopPadding: CGFloat = 56
+    let consoleContentBottomPadding: CGFloat = 14
     let triadEmbeddedInfoWidth: CGFloat = 118
     let triadEmbeddedInfoRowCount = 9
     let triadEmbeddedInfoFontSize: CGFloat = 7.2
@@ -174,6 +176,14 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
     var triadOuterFrameHeight: CGFloat {
         triadHeight + triadContentOffsetY + triadOuterFrameBottomPadding
+    }
+
+    var consoleFramedContentTopY: CGFloat {
+        consoleContentTopPadding
+    }
+
+    var consoleFramedContentBottomY: CGFloat {
+        consoleFramedContentTopY + triadOuterFrameHeight
     }
 
     var triadContentOriginXInOuterFrame: CGFloat {
@@ -367,9 +377,7 @@ struct MagiTriadConsoleView: View {
 
             consoleGrid
 
-            VStack(spacing: 12) {
-                topStatusArea
-
+            VStack {
                 HStack(alignment: .top, spacing: metrics.columnSpacing) {
                     MagiAuxiliaryFramedView()
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
@@ -389,7 +397,8 @@ struct MagiTriadConsoleView: View {
                 }
             }
             .padding(.horizontal, 18)
-            .padding(.vertical, 14)
+            .padding(.top, metrics.consoleContentTopPadding)
+            .padding(.bottom, metrics.consoleContentBottomPadding)
         }
         .background(
             RadialGradient(
@@ -403,22 +412,6 @@ struct MagiTriadConsoleView: View {
                 endRadius: 390
             )
         )
-    }
-
-    private var topStatusArea: some View {
-        VStack(spacing: 7) {
-            HStack(spacing: 8) {
-                MagiConsoleStatusBanner(text: "DIRECT LINK CONNECTION: MAGI 01")
-                MagiConsoleStatusBanner(text: "ACCESS MODE: SUPERVISER")
-            }
-
-            HStack(spacing: 8) {
-                MagiConsoleStatusBanner(text: "RESULT OF THE DELIBERATION", isEmphasized: false)
-                    .frame(width: 250)
-                MagiConsoleStatusBanner(text: "MOTION: \(state.judgement.title)", isEmphasized: true)
-            }
-        }
-        .frame(maxWidth: 650)
     }
 
     private var consoleGrid: some View {
@@ -527,28 +520,6 @@ private struct MagiSideWarningBackgroundStrip: View {
             )
             .clipped()
         }
-    }
-}
-
-private struct MagiConsoleStatusBanner: View {
-    let text: String
-    var isEmphasized = true
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: isEmphasized ? 15 : 12, weight: .black, design: .monospaced))
-            .foregroundStyle(NervStyle.orange)
-            .lineLimit(1)
-            .minimumScaleFactor(0.55)
-            .padding(.horizontal, 10)
-            .padding(.vertical, isEmphasized ? 8 : 7)
-            .frame(maxWidth: .infinity)
-            .background(Color.black.opacity(0.42))
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .stroke(NervStyle.orange.opacity(0.78), lineWidth: 1.5)
-                    .shadow(color: NervStyle.orange.opacity(0.85), radius: 5)
-            )
     }
 }
 
