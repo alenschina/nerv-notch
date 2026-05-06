@@ -7,7 +7,7 @@ struct MagiConsoleTypography: Equatable {
     let unitTitleFontName = "Helvetica Neue Condensed Bold"
     let unitSubtitleSize: CGFloat = 7
     let metricFontName = "DS-Digital-Bold"
-    let metricValueSize: CGFloat = 18
+    let metricValueSize: CGFloat = 20
 }
 
 struct MagiUnitLabel: Equatable {
@@ -969,18 +969,11 @@ private struct SynchronizationWaveShape: Shape {
 }
 
 struct EmergencyHoneycombCell: Equatable {
-    enum Role: Equatable {
-        case primary
-        case emergency
-        case technical
-    }
-
     let column: Int
     let row: Int
     let center: CGPoint
     let sideLength: CGFloat
     let label: String
-    let role: Role
 
     var frame: CGRect {
         CGRect(
@@ -1001,11 +994,10 @@ struct EmergencyHoneycombLayout: Equatable {
     let contentInset: CGFloat = 7
     let topPadding: CGFloat = 50
     let bottomPadding: CGFloat = 10
-    let titleText = "EMERGENCY｜警告"
+    let titleText = "EMERGENCY / 警告"
     let titleTopPadding: CGFloat = 34
     let titleAlignment: Alignment = .center
     let honeycombScale: CGFloat = 0.94
-    let primaryCellLabel = "454:32"
     let connectedBorderLineWidth: CGFloat = 4
     let cellDividerLineWidth: CGFloat = 1.2
 
@@ -1024,15 +1016,13 @@ struct EmergencyHoneycombLayout: Equatable {
                 let row = coordinate.row
                 let x = originX + sideLength + CGFloat(column) * sideLength * 1.5
                 let y = originY + hexHeight / 2 + CGFloat(row) * hexHeight + CGFloat(column) * hexHeight / 2
-                let label = labelFor(column: column, row: row)
 
                 return EmergencyHoneycombCell(
                     column: column,
                     row: row,
                     center: CGPoint(x: x, y: y),
                     sideLength: sideLength,
-                    label: label.text,
-                    role: label.role
+                    label: "EMERGENCY"
                 )
         }
     }
@@ -1114,37 +1104,6 @@ struct EmergencyHoneycombLayout: Equatable {
             return true
         }
     }
-
-    private func labelFor(column: Int, row: Int) -> (text: String, role: EmergencyHoneycombCell.Role) {
-        switch (column, row) {
-        case (0, 0), (1, 1), (2, 1), (0, 3), (2, 4), (0, 6):
-            return ("EMERGENCY", .emergency)
-        case (1, 3):
-            return (primaryCellLabel, .primary)
-        case (0, 1):
-            return ("LOCK", .technical)
-        case (1, 0):
-            return ("INT", .technical)
-        case (2, 0):
-            return ("MODE", .technical)
-        case (0, 2):
-            return ("AUDIO", .technical)
-        case (1, 2):
-            return ("NERV", .technical)
-        case (2, 2):
-            return ("DUMMY", .technical)
-        case (0, 4):
-            return ("SYNC", .technical)
-        case (1, 4):
-            return ("PILOT", .technical)
-        case (2, 5):
-            return ("CUT", .technical)
-        case (1, 5):
-            return ("AUTO", .technical)
-        default:
-            return ("DANGER", .technical)
-        }
-    }
 }
 
 private struct EmergencyHoneycombView: View {
@@ -1157,7 +1116,7 @@ private struct EmergencyHoneycombView: View {
 
                 VStack(spacing: 0) {
                     Text(layout.titleText)
-                        .font(.system(size: 6.4, weight: .black, design: .monospaced))
+                        .font(.system(size: 7.6, weight: .black, design: .monospaced))
                         .foregroundStyle(NervStyle.orange)
                         .lineLimit(1)
                         .minimumScaleFactor(0.28)
@@ -1217,76 +1176,28 @@ private struct EmergencyHoneycombCellView: View {
         ZStack {
             EmergencyHoneycombHexagon()
                 .fill(fillColor)
-                .shadow(color: NervStyle.red.opacity(cell.role == .primary ? 0.7 : 0.34), radius: cell.role == .primary ? 5 : 2)
+                .shadow(color: NervStyle.red.opacity(0.42), radius: 3)
 
-            cellContent
-        }
-    }
-
-    @ViewBuilder
-    private var cellContent: some View {
-        switch cell.role {
-        case .primary:
-            VStack(spacing: 0) {
-                Text("NERV")
-                    .font(.system(size: 4.4, weight: .black, design: .monospaced))
-                Text(cell.label)
-                    .font(.custom("DS-Digital-Bold", size: 8.4))
-                    .minimumScaleFactor(0.55)
-                Text("ALERT")
-                    .font(.system(size: 4.2, weight: .black, design: .monospaced))
-            }
-            .lineLimit(1)
-            .foregroundStyle(Color.black.opacity(0.95))
-            .padding(.horizontal, 3)
-        case .emergency:
-            VStack(spacing: 1) {
+            VStack(spacing: 2) {
                 Triangle()
                     .fill(Color.black.opacity(0.95))
-                    .frame(width: 7, height: 5)
+                    .frame(width: 9, height: 6)
                 Text(cell.label)
-                    .font(.system(size: 4.8, weight: .black, design: .monospaced))
-                    .minimumScaleFactor(0.4)
+                    .font(.system(size: 6.2, weight: .black, design: .monospaced))
+                    .minimumScaleFactor(0.38)
                 Triangle()
                     .fill(Color.black.opacity(0.95))
                     .rotationEffect(.degrees(180))
-                    .frame(width: 7, height: 5)
+                    .frame(width: 9, height: 6)
             }
             .lineLimit(1)
             .foregroundStyle(Color.black.opacity(0.94))
             .padding(.horizontal, 2)
-        case .technical:
-            VStack(spacing: 1) {
-                technicalGlyph
-                Text(cell.label)
-                    .font(.system(size: 4.6, weight: .black, design: .monospaced))
-                    .minimumScaleFactor(0.45)
-            }
-            .lineLimit(1)
-            .foregroundStyle(Color.black.opacity(0.92))
-            .padding(.horizontal, 3)
         }
-    }
-
-    private var technicalGlyph: some View {
-        HStack(alignment: .bottom, spacing: 1) {
-            ForEach(0..<4, id: \.self) { index in
-                Rectangle()
-                    .frame(width: 1.6, height: CGFloat(index + 1) * 2)
-            }
-        }
-        .frame(height: 9)
     }
 
     private var fillColor: Color {
-        switch cell.role {
-        case .primary:
-            return NervStyle.red
-        case .emergency:
-            return NervStyle.red.opacity(0.94)
-        case .technical:
-            return NervStyle.red.opacity(0.84)
-        }
+        NervStyle.red.opacity(0.94)
     }
 }
 

@@ -286,7 +286,7 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(typography.unitTitleFontName, "Helvetica Neue Condensed Bold")
         XCTAssertEqual(typography.unitSubtitleSize, 7)
         XCTAssertEqual(typography.metricFontName, "DS-Digital-Bold")
-        XCTAssertEqual(typography.metricValueSize, 18)
+        XCTAssertEqual(typography.metricValueSize, 20)
     }
 
     func testMagiOuterUnitsExposeMetricSubtitles() {

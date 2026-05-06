@@ -13,7 +13,7 @@ final class EmergencyHoneycombViewTests: XCTestCase {
         XCTAssertEqual(layout.titleTopPadding, SynchronizationRateLayout(containerSize: .zero).titleTopPadding)
         XCTAssertEqual(layout.titleAlignment, .center)
         XCTAssertEqual(layout.honeycombScale, 0.94)
-        XCTAssertEqual(layout.primaryCellLabel, "454:32")
+        XCTAssertTrue(layout.cells.allSatisfy { $0.label == "EMERGENCY" })
         XCTAssertEqual(Set(layout.cells.map(\.column)).count, 3)
         XCTAssertEqual(layout.cells.count, 16)
         XCTAssertFalse(layout.cells.contains { $0.column == 0 && $0.row == 0 })
