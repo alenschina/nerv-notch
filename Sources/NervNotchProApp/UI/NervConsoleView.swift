@@ -3,6 +3,7 @@ import SwiftUI
 struct NotchIslandLayout: Equatable {
     let compactNotchSize: CGSize
     private let hoverExpansionWidth: CGFloat = 16
+    private let magiMetrics = MagiConsoleLayoutMetrics()
 
     var compactSize: CGSize {
         compactSize(isHovering: false)
@@ -18,7 +19,12 @@ struct NotchIslandLayout: Equatable {
     }
 
     var expandedSize: CGSize {
-        CGSize(width: 820, height: 420)
+        CGSize(
+            width: 820,
+            height: magiMetrics.consoleContentTopPadding
+            + magiMetrics.triadOuterFrameHeight
+            + magiMetrics.consoleContentBottomPadding
+        )
     }
 }
 

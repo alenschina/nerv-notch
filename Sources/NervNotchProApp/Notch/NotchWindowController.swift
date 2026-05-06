@@ -35,9 +35,10 @@ final class NotchWindowController: NSWindowController {
         hostingController.view.frame = panel.contentView?.bounds ?? .zero
         hostingController.view.autoresizingMask = [.width, .height]
 
+        let layout = NotchIslandLayout(compactNotchSize: geometry.effectiveNotchSize)
         eventMonitor = NotchEventMonitor(
             geometry: geometry,
-            openedPanelSize: CGSize(width: 820, height: 420)
+            openedPanelSize: layout.expandedSize
         ) { [weak viewModel] event in
             Task { @MainActor in
                 viewModel?.handleInteraction(event)

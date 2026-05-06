@@ -119,8 +119,8 @@ struct MagiConsoleLayoutMetrics: Equatable {
     let sideWarningBackgroundStripeWidth: CGFloat = 36
     let sideWarningBackgroundStripeHeight: CGFloat = 58
     let sideWarningBackgroundOpacity: Double = 0.36
-    let consoleContentTopPadding: CGFloat = 6
-    let consoleContentBottomPadding: CGFloat = 14
+    let consoleContentTopPadding: CGFloat = 46
+    let consoleContentBottomPadding: CGFloat = 20
     let triadEmbeddedInfoWidth: CGFloat = 118
     let triadEmbeddedInfoRowCount = 9
     let triadEmbeddedInfoFontSize: CGFloat = 7.2

@@ -58,9 +58,13 @@ final class NotchIslandChromeTests: XCTestCase {
 
     func testLayoutKeepsExpandedConsoleSizeIndependentFromPhysicalNotch() {
         let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+        let metrics = MagiConsoleLayoutMetrics()
+        let expectedHeight = metrics.consoleContentTopPadding
+        + metrics.triadOuterFrameHeight
+        + metrics.consoleContentBottomPadding
 
         XCTAssertEqual(layout.expandedSize.width, 820)
-        XCTAssertEqual(layout.expandedSize.height, 420)
+        XCTAssertEqual(layout.expandedSize.height, expectedHeight)
     }
 
     func testMagiConsoleLayoutKeepsTriadCenteredBetweenSymmetricInfoColumns() {
@@ -128,8 +132,8 @@ final class NotchIslandChromeTests: XCTestCase {
     func testMagiConsolePlacesFramedContentBelowPhysicalNotchAfterRemovingStatusBanners() {
         let metrics = MagiConsoleLayoutMetrics()
 
-        XCTAssertEqual(metrics.consoleContentTopPadding, 6)
-        XCTAssertEqual(metrics.consoleContentBottomPadding, 14)
+        XCTAssertEqual(metrics.consoleContentTopPadding, 46)
+        XCTAssertEqual(metrics.consoleContentBottomPadding, 20)
         XCTAssertEqual(metrics.consoleFramedContentTopY, metrics.consoleContentTopPadding)
         XCTAssertEqual(metrics.consoleFramedContentBottomY, metrics.consoleContentTopPadding + metrics.triadOuterFrameHeight)
         XCTAssertLessThanOrEqual(metrics.consoleFramedContentBottomY, CGFloat(420) - metrics.consoleContentBottomPadding)

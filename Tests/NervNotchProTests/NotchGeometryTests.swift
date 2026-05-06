@@ -51,12 +51,17 @@ final class NotchGeometryTests: XCTestCase {
             usesSimulatedNotch: false
         )
 
-        let panel = geometry.openedPanelScreenRect(size: CGSize(width: 820, height: 420))
+        let metrics = MagiConsoleLayoutMetrics()
+        let expectedHeight = metrics.consoleContentTopPadding
+        + metrics.triadOuterFrameHeight
+        + metrics.consoleContentBottomPadding
+
+        let panel = geometry.openedPanelScreenRect(size: CGSize(width: 820, height: expectedHeight))
 
         XCTAssertEqual(panel.origin.x, 446)
-        XCTAssertEqual(panel.origin.y, 612)
+        XCTAssertEqual(panel.origin.y, 1032 - expectedHeight)
         XCTAssertEqual(panel.width, 820)
-        XCTAssertEqual(panel.height, 420)
+        XCTAssertEqual(panel.height, expectedHeight)
     }
 
     func testHitTestingUsesPaddingAroundNotch() {
