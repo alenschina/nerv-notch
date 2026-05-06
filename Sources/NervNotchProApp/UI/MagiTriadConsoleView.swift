@@ -982,9 +982,12 @@ struct EmergencyHoneycombCell: Equatable {
 
 struct EmergencyHoneycombLayout: Equatable {
     let containerSize: CGSize
-    let topPadding: CGFloat = 33
+    let contentInset: CGFloat = 7
+    let topPadding: CGFloat = 50
     let bottomPadding: CGFloat = 10
-    let titleText = "EMERGENCY"
+    let titleText = "EMERGENCY｜警告"
+    let titleTopPadding: CGFloat = 34
+    let titleAlignment: Alignment = .center
     let primaryCellLabel = "454:32"
     let connectedBorderLineWidth: CGFloat = 4
     let cellDividerLineWidth: CGFloat = 1.2
@@ -1087,7 +1090,12 @@ struct EmergencyHoneycombLayout: Equatable {
     }
 
     private func shouldIncludeCell(column: Int, row: Int) -> Bool {
-        (column, row) != (0, 0) && (column, row) != (2, 6)
+        switch (column, row) {
+        case (0, 0), (1, 0), (0, 1), (2, 0), (2, 6):
+            return false
+        default:
+            return true
+        }
     }
 
     private func labelFor(column: Int, row: Int) -> (text: String, role: EmergencyHoneycombCell.Role) {
@@ -1132,16 +1140,17 @@ private struct EmergencyHoneycombView: View {
 
                 VStack(spacing: 0) {
                     Text(layout.titleText)
-                        .font(.system(size: 7, weight: .black, design: .monospaced))
-                        .foregroundStyle(NervStyle.red)
+                        .font(.system(size: 6.4, weight: .black, design: .monospaced))
+                        .foregroundStyle(NervStyle.orange)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.45)
-                        .shadow(color: NervStyle.red.opacity(0.85), radius: 4)
+                        .minimumScaleFactor(0.28)
+                        .frame(maxWidth: .infinity, alignment: layout.titleAlignment)
+                        .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
 
                     Spacer(minLength: 0)
                 }
-                .padding(.top, 12)
-                .padding(.horizontal, 3)
+                .padding(.horizontal, layout.contentInset)
+                .padding(.top, layout.titleTopPadding)
 
                 ForEach(Array(layout.cells.enumerated()), id: \.offset) { _, cell in
                     EmergencyHoneycombCellView(cell: cell)
