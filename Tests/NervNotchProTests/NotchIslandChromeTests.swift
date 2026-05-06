@@ -119,6 +119,10 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(bottomLayout.statusHeight, 0)
         XCTAssertEqual(topLayout.titleHeight, 44)
         XCTAssertEqual(bottomLayout.titleHeight, 40)
+        XCTAssertEqual(topLayout.valueHorizontalInset, 20)
+        XCTAssertEqual(bottomLayout.valueHorizontalInset, 16)
+        XCTAssertEqual(topLayout.valueWidth, topLayout.contentWidth - topLayout.valueHorizontalInset * 2)
+        XCTAssertEqual(bottomLayout.valueWidth, bottomLayout.contentWidth - bottomLayout.valueHorizontalInset * 2)
         XCTAssertFalse(topLayout.titleAppearsBelowValue)
         XCTAssertTrue(bottomLayout.titleAppearsBelowValue)
     }

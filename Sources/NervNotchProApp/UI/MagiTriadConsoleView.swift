@@ -83,6 +83,19 @@ struct MagiUnitContentLayout: Equatable {
         }
     }
 
+    var valueHorizontalInset: CGFloat {
+        switch placement {
+        case .top:
+            return 20
+        case .bottom:
+            return 16
+        }
+    }
+
+    var valueWidth: CGFloat {
+        contentWidth - valueHorizontalInset * 2
+    }
+
     var statusHeight: CGFloat {
         0
     }
@@ -461,11 +474,18 @@ private struct MagiUnitView: View {
                         .shadow(color: strokeColor.opacity(0.85), radius: 8)
                 )
 
+            clippedUnitContent
+        }
+    }
+
+    private var clippedUnitContent: some View {
+        ZStack {
             unitContent
                 .frame(width: contentLayout.contentWidth, height: contentLayout.contentHeight)
                 .position(contentPosition)
                 .shadow(color: strokeColor.opacity(0.82), radius: 7)
         }
+        .clipShape(unitShape)
     }
 
     private var unitContent: some View {
@@ -507,6 +527,7 @@ private struct MagiUnitView: View {
             fontName: typography.metricFontName,
             fontSize: typography.metricValueSize
         )
+        .frame(width: contentLayout.valueWidth)
         .frame(height: contentLayout.valueHeight)
     }
 
