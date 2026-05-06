@@ -863,16 +863,12 @@ private struct MagiConnectorShape: Shape {
         let centerX = rect.midX
         let topJoinY = rect.minY + metrics.topUnitCenter.y + metrics.topUnitSize.height / 2
         let hubTopY = rect.minY + metrics.hubCenter.y - metrics.hubSize.height / 2
-        let hubBottomY = rect.minY + metrics.hubCenter.y + metrics.hubSize.height / 2
 
         path.move(to: CGPoint(x: centerX - metrics.topUnitBottomEdgeLength / 2, y: topJoinY))
         path.addLine(to: CGPoint(x: centerX - metrics.hubTopEdgeLength / 2, y: hubTopY))
 
         path.move(to: CGPoint(x: centerX + metrics.topUnitBottomEdgeLength / 2, y: topJoinY))
         path.addLine(to: CGPoint(x: centerX + metrics.hubTopEdgeLength / 2, y: hubTopY))
-
-        path.move(to: CGPoint(x: centerX, y: hubBottomY))
-        path.addLine(to: CGPoint(x: centerX, y: rect.minY + metrics.casperCenter.y))
 
         return path
     }

@@ -213,6 +213,19 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(metrics.hubLowerRightEdgeLower, metrics.melchiorInnerBevelLower)
     }
 
+    func testMagiConnectorDoesNotDrawLowerVerticalStem() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/UI/MagiTriadConsoleView.swift")
+        let source = try String(contentsOf: sourceFile)
+
+        XCTAssertFalse(source.contains("path.addLine(to: CGPoint(x: centerX, y: rect.minY + metrics.casperCenter.y))"))
+    }
+
     func testMagiSharedSlantSlopeIsFortyFiveDegrees() {
         let metrics = MagiConsoleLayoutMetrics()
 
