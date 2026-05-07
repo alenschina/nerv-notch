@@ -39,7 +39,31 @@ final class SettingsWindowControllerTests: XCTestCase {
         let model = SettingsNavigationModel()
 
         XCTAssertEqual(model.selection, .general)
+        XCTAssertTrue(model.isSidebarVisible)
         XCTAssertEqual(SettingsPane.general.title, "通用")
         XCTAssertEqual(SettingsPane.general.systemImageName, "gearshape")
+    }
+
+    func testSettingsSidebarVisibilityCanBeToggledWithoutChangingSelection() {
+        var model = SettingsNavigationModel()
+
+        model.toggleSidebar()
+
+        XCTAssertFalse(model.isSidebarVisible)
+        XCTAssertEqual(model.selection, .general)
+    }
+
+    func testSettingsRootUsesFixedTrailingSidebarToggleInsteadOfSystemSplitToggle() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/Settings/SettingsWindowController.swift")
+        let settingsSource = try String(contentsOf: sourceFile)
+
+        XCTAssertFalse(settingsSource.contains("NavigationSplitView"))
+        XCTAssertTrue(settingsSource.contains("SettingsSidebarToggleButton"))
+        XCTAssertTrue(settingsSource.contains(".frame(maxWidth: .infinity, alignment: .trailing)"))
     }
 }

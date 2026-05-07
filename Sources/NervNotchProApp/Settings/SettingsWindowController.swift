@@ -34,6 +34,11 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 
 struct SettingsNavigationModel: Equatable {
     var selection: SettingsPane = .general
+    var isSidebarVisible = true
+
+    mutating func toggleSidebar() {
+        isSidebarVisible.toggle()
+    }
 }
 
 @MainActor
@@ -83,20 +88,78 @@ struct SettingsRootView: View {
     @State private var navigation = SettingsNavigationModel()
 
     var body: some View {
-        NavigationSplitView {
-            List(SettingsPane.allCases, selection: $navigation.selection) { pane in
-                Label(pane.title, systemImage: pane.systemImageName)
-                    .tag(pane)
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+
+                SettingsSidebarToggleButton(isSidebarVisible: navigation.isSidebarVisible) {
+                    withAnimation(.easeInOut(duration: 0.18)) {
+                        navigation.toggleSidebar()
+                    }
+                }
             }
-            .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(min: 160, ideal: 180, max: 220)
-        } detail: {
-            switch navigation.selection {
-            case .general:
-                GeneralSettingsView(actions: actions)
+            .frame(height: 44)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.horizontal, 12)
+            .background(.bar)
+
+            Divider()
+
+            HStack(spacing: 0) {
+                if navigation.isSidebarVisible {
+                    SettingsSidebarView(selection: $navigation.selection)
+                        .frame(width: 180)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
+
+                    Divider()
+                }
+
+                SettingsDetailView(selection: navigation.selection, actions: actions)
             }
         }
         .frame(minWidth: 560, minHeight: 360)
+    }
+}
+
+private struct SettingsSidebarToggleButton: View {
+    let isSidebarVisible: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "sidebar.left")
+                .font(.system(size: 14, weight: .medium))
+                .frame(width: 28, height: 28)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(isSidebarVisible ? "收起左侧面板" : "展开左侧面板")
+        .accessibilityLabel(isSidebarVisible ? "收起左侧面板" : "展开左侧面板")
+    }
+}
+
+private struct SettingsSidebarView: View {
+    @Binding var selection: SettingsPane
+
+    var body: some View {
+        List(SettingsPane.allCases, selection: $selection) { pane in
+            Label(pane.title, systemImage: pane.systemImageName)
+                .tag(pane)
+        }
+        .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
+    }
+}
+
+private struct SettingsDetailView: View {
+    let selection: SettingsPane
+    let actions: SettingsActions
+
+    var body: some View {
+        switch selection {
+        case .general:
+            GeneralSettingsView(actions: actions)
+        }
     }
 }
 
