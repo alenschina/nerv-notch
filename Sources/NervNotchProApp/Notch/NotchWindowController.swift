@@ -9,7 +9,12 @@ final class NotchWindowController: NSWindowController {
     private var eventMonitor: NotchEventMonitor?
     private var timer: Timer?
 
-    init(screen: NSScreen, viewModel: NotchViewModel, usesSimulatedNotch: Bool) {
+    init(
+        screen: NSScreen,
+        viewModel: NotchViewModel,
+        usesSimulatedNotch: Bool,
+        onOpenSettings: @escaping () -> Void = {}
+    ) {
         self.viewModel = viewModel
 
         let notchSize = screen.physicalNotchSize
@@ -27,7 +32,8 @@ final class NotchWindowController: NSWindowController {
         let hostingController = NSHostingController(
             rootView: NervConsoleView(
                 viewModel: viewModel,
-                compactNotchSize: geometry.effectiveNotchSize
+                compactNotchSize: geometry.effectiveNotchSize,
+                onOpenSettings: onOpenSettings
             )
         )
         panel.contentViewController = hostingController

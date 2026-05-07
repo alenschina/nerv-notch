@@ -6,6 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var timer: Timer?
     private let settings = AppSettings()
     private let sampler = TelemetrySampler()
+    @MainActor private lazy var settingsWindowController = SettingsWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -23,7 +24,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let controller = NotchWindowController(
                 screen: screen,
                 viewModel: viewModel,
-                usesSimulatedNotch: settings.usesSimulatedNotch
+                usesSimulatedNotch: settings.usesSimulatedNotch,
+                onOpenSettings: { [weak self] in
+                    self?.openSettings()
+                }
             )
             controller.showWindow(nil)
             windowController = controller
@@ -48,5 +52,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let viewModel else { return }
         let snapshot = sampler.sample()
         viewModel.apply(snapshot)
+    }
+
+    @MainActor
+    private func openSettings() {
+        settingsWindowController.showSettings()
     }
 }

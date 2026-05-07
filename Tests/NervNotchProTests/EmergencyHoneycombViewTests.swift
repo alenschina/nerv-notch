@@ -8,7 +8,7 @@ final class EmergencyHoneycombViewTests: XCTestCase {
             width: metrics.rightAuxiliaryFrameStrokeWidth - 2,
             height: metrics.triadOuterFrameHeight - 2
         ))
-        XCTAssertEqual(layout.titleText, "EMERGENCY｜警告")
+        XCTAssertEqual(layout.titleText, "EMERGENCY / 警告")
         XCTAssertEqual(layout.contentInset, SynchronizationRateLayout(containerSize: .zero).contentInset)
         XCTAssertEqual(layout.titleTopPadding, SynchronizationRateLayout(containerSize: .zero).titleTopPadding)
         XCTAssertEqual(layout.titleAlignment, .center)

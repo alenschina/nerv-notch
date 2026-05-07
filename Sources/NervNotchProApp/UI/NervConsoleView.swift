@@ -36,6 +36,14 @@ struct NotchIslandLayout: Equatable {
     var expandedHeaderLeadingPadding: CGFloat {
         magiMetrics.leftAuxiliaryFrameStrokeLeftXInConsole
     }
+
+    var expandedHeaderTrailingPadding: CGFloat {
+        expandedHeaderLeadingPadding
+    }
+
+    var expandedSettingsButtonSize: CGFloat {
+        expandedHeaderIconSize
+    }
 }
 
 enum NervIslandIcon {
@@ -57,10 +65,16 @@ enum NervIslandIcon {
 struct NervConsoleView: View {
     @ObservedObject var viewModel: NotchViewModel
     let layout: NotchIslandLayout
+    let onOpenSettings: () -> Void
 
-    init(viewModel: NotchViewModel, compactNotchSize: CGSize = NotchGeometry.simulatedNotchSize) {
+    init(
+        viewModel: NotchViewModel,
+        compactNotchSize: CGSize = NotchGeometry.simulatedNotchSize,
+        onOpenSettings: @escaping () -> Void = {}
+    ) {
         self.viewModel = viewModel
         self.layout = NotchIslandLayout(compactNotchSize: compactNotchSize)
+        self.onOpenSettings = onOpenSettings
     }
 
     var body: some View {
@@ -113,6 +127,11 @@ struct NervConsoleView: View {
             expandedHeader
                 .padding(.top, layout.expandedHeaderTopPadding)
                 .padding(.leading, layout.expandedHeaderLeadingPadding)
+
+            expandedSettingsButton
+                .padding(.top, layout.expandedHeaderTopPadding)
+                .padding(.trailing, layout.expandedHeaderTrailingPadding)
+                .frame(maxWidth: .infinity, alignment: .topTrailing)
         }
     }
 
@@ -145,6 +164,22 @@ struct NervConsoleView: View {
         }
         // Match row height to the square icon so the label centers with the glyph box (custom CJK line metrics often read low in a default HStack).
         .frame(height: layout.expandedHeaderIconSize, alignment: .center)
+    }
+
+    private var expandedSettingsButton: some View {
+        Button(action: onOpenSettings) {
+            Image(systemName: "gearshape")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(NervStyle.orange)
+                .frame(
+                    width: layout.expandedSettingsButtonSize,
+                    height: layout.expandedSettingsButtonSize
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help("Settings")
+        .accessibilityLabel("Settings")
     }
 
     @ViewBuilder

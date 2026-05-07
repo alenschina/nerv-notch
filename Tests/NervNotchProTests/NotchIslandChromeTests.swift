@@ -102,6 +102,26 @@ final class NotchIslandChromeTests: XCTestCase {
         XCTAssertEqual(layout.expandedHeaderFontName, "SourceHanSerifCN-Bold")
     }
 
+    func testExpandedConsoleShowsTrailingSettingsButtonSymmetricWithHeaderIcon() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/UI/NervConsoleView.swift")
+        let consoleSource = try String(contentsOf: sourceFile)
+        let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
+        let metrics = MagiConsoleLayoutMetrics()
+
+        XCTAssertTrue(consoleSource.contains("let onOpenSettings: () -> Void"))
+        XCTAssertTrue(consoleSource.contains("Button(action: onOpenSettings)"))
+        XCTAssertTrue(consoleSource.contains("Image(systemName: \"gearshape\")"))
+        XCTAssertTrue(consoleSource.contains("private var expandedSettingsButton: some View"))
+        XCTAssertEqual(layout.expandedHeaderTrailingPadding, metrics.leftAuxiliaryFrameStrokeLeftXInConsole)
+        XCTAssertEqual(layout.expandedHeaderTrailingPadding, layout.expandedHeaderLeadingPadding)
+        XCTAssertEqual(layout.expandedSettingsButtonSize, layout.expandedHeaderIconSize)
+    }
+
     func testLayoutExtendsCompactIslandWidthWhileHovering() {
         let layout = NotchIslandLayout(compactNotchSize: CGSize(width: 210, height: 32))
 
