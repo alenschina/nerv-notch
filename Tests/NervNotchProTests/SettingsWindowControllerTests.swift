@@ -16,6 +16,14 @@ final class SettingsWindowControllerTests: XCTestCase {
         XCTAssertTrue(window.contentViewController is NSHostingController<SettingsRootView>)
     }
 
+    func testSettingsWindowAppearsAboveExpandedIslandPanel() {
+        let controller = SettingsWindowController(onQuit: {})
+
+        let window = controller.makeWindowForTesting()
+
+        XCTAssertGreaterThan(window.level.rawValue, (NSWindow.Level.mainMenu + 3).rawValue)
+    }
+
     func testQuitActionCanBeInjectedForSettingsView() {
         var didQuit = false
         let actions = SettingsActions(onQuitApplication: {

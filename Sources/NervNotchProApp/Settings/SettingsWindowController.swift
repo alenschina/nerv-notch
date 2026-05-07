@@ -38,6 +38,8 @@ struct SettingsNavigationModel: Equatable {
 
 @MainActor
 final class SettingsWindowController {
+    static let windowLevel = NSWindow.Level.mainMenu + 4
+
     private let actions: SettingsActions
     private var window: NSWindow?
 
@@ -50,6 +52,7 @@ final class SettingsWindowController {
         self.window = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
     }
 
     func makeWindowForTesting() -> NSWindow {
@@ -65,6 +68,7 @@ final class SettingsWindowController {
         )
         window.title = "NervNotchPro Settings"
         window.isReleasedWhenClosed = false
+        window.level = Self.windowLevel
         window.contentMinSize = NSSize(width: 560, height: 360)
         window.center()
         window.contentViewController = NSHostingController(
