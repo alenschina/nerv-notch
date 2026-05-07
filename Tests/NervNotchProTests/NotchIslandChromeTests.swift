@@ -66,7 +66,7 @@ final class NotchIslandChromeTests: XCTestCase {
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: resourceFile.path))
         XCTAssertTrue(packageSource.contains(#".process("Resources")"#))
-        XCTAssertTrue(consoleSource.contains("ZStack(alignment: .leading)"))
+        XCTAssertTrue(consoleSource.contains("nervLeadingIcon(sideLength: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height))"))
         XCTAssertTrue(consoleSource.contains("Image(nsImage: icon)"))
         XCTAssertTrue(consoleSource.contains(".padding(.leading, 14)"))
         XCTAssertNotNil(Bundle.module.url(forResource: "nerv-island-icon", withExtension: "png"))
