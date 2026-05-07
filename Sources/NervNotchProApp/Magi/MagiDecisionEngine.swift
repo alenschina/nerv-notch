@@ -6,6 +6,30 @@ struct MagiDecisionState: Equatable, Sendable {
     let memory: MagiPanelDecision
     let network: MagiPanelDecision
     let judgement: CentralDogmaJudgement
+
+    static let defaultValue = MagiDecisionState(
+        sampledAt: Date(),
+        cpu: MagiPanelDecision(
+            codeName: "MELCHIOR-01", title: "CPU LOAD",
+            primaryValue: "0%", secondaryValue: "N/A",
+            level: .normal, statusText: "NORMAL", decisionText: "LOAD ACCEPTABLE"
+        ),
+        memory: MagiPanelDecision(
+            codeName: "BALTHASAR-02", title: "MEMORY",
+            primaryValue: "0%", secondaryValue: "N/A",
+            level: .normal, statusText: "NORMAL", decisionText: "MEMORY STABLE"
+        ),
+        network: MagiPanelDecision(
+            codeName: "CASPER-03", title: "NETWORK",
+            primaryValue: "0 KB/s", secondaryValue: "NO SIGNAL",
+            level: .normal, statusText: "ACTIVE", decisionText: "COMM LINK ACTIVE"
+        ),
+        judgement: CentralDogmaJudgement(
+            level: .synchronized,
+            title: "SYNCHRONIZED",
+            summary: "MAGI SYSTEMS NOMINAL"
+        )
+    )
 }
 
 struct MagiPanelDecision: Equatable, Sendable {

@@ -17,9 +17,7 @@ final class NotchViewModel: ObservableObject {
             hoverDelay: settings.hoverDelay,
             closeGracePeriod: settings.closeGracePeriod
         )
-        self.magiState = decisionEngine.evaluate(
-            SystemSnapshot(sampledAt: Date(), cpu: nil, memory: nil, network: nil)
-        )
+        self.magiState = .defaultValue
     }
 
     func apply(_ snapshot: SystemSnapshot) {
