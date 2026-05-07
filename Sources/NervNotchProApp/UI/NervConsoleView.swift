@@ -117,27 +117,16 @@ struct NervConsoleView: View {
     }
 
     private var compactIsland: some View {
-        ZStack(alignment: .leading) {
+        HStack {
             nervLeadingIcon(sideLength: NervIslandIcon.dimension(forCompactHeight: layout.compactSize.height))
                 .padding(.leading, 14)
 
-            HStack(spacing: 10) {
-                Text("NERV")
-                    .font(.system(size: 11, weight: .black, design: .monospaced))
-                    .foregroundStyle(NervStyle.red)
+            Spacer()
 
-                Rectangle()
-                    .fill(NervStyle.red.opacity(0.75))
-                    .frame(width: 1, height: min(16, max(8, layout.compactSize.height - 14)))
-
-                Text(viewModel.magiState.judgement.title)
-                    .font(NervStyle.monoSmall)
-                    .foregroundStyle(compactStatusColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            .padding(.horizontal, 14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Circle()
+                .stroke(compactStatusColor, lineWidth: 1.5)
+                .frame(width: 10, height: 10)
+                .padding(.trailing, 14)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
