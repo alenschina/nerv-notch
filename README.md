@@ -4,6 +4,8 @@
 
 A macOS notch status island with a NERV/MAGI command-console aesthetic. Displays real-time CPU, memory, network, disk I/O, swap, and battery telemetry in a floating panel anchored to the MacBook notch. Written in Swift, zero third-party dependencies.
 
+![NERV Notch](docs/screenshot.png)
+
 ## Features
 
 - **Real-time telemetry** — CPU, memory, network throughput, disk space & I/O, swap, battery

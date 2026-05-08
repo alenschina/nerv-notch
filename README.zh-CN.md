@@ -4,6 +4,8 @@
 
 macOS 刘海悬浮岛，采用 NERV/MAGI 指挥终端美学风格。将实时 CPU、内存、网络、磁盘 I/O、Swap 和电池遥测数据嵌入 MacBook 刘海区域的浮动面板中。纯 Swift 编写，零第三方依赖。
 
+![NERV Notch](docs/screenshot.png)
+
 ## 功能
 
 - **实时遥测** — CPU 使用率、内存、网络吞吐、磁盘空间与 I/O、Swap、电池
