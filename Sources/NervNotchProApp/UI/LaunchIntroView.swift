@@ -110,7 +110,7 @@ struct LaunchIntroView: View {
 
     private var bootTextLayer: some View {
         Text(displayedText)
-            .font(.system(size: 18, weight: .medium, design: .monospaced))
+            .font(.custom(LaunchIntroTypography.fontName, size: 18))
             .foregroundStyle(NervStyle.orange)
             .shadow(color: NervStyle.orange.opacity(0.55), radius: 4)
             .lineSpacing(8)
@@ -131,17 +131,17 @@ struct LaunchIntroView: View {
 
             VStack(spacing: 0) {
                 classifiedStrip
-                Text("机密")
-                    .font(.custom("SourceHanSerifCN-Bold", size: 128))
+                Text("使徒来袭")
+                    .font(.custom(LaunchIntroTypography.fontName, size: 96))
                     .foregroundStyle(NervStyle.red)
-                    .tracking(34)
+                    .tracking(12)
                     .shadow(color: NervStyle.red.opacity(0.5), radius: 7)
-                    .padding(.leading, 34)
-                    .frame(width: 360, height: 142)
+                    .padding(.leading, 12)
+                    .frame(width: 480, height: 142)
                     .background(Color.black)
                 classifiedStrip
             }
-            .frame(width: 360)
+            .frame(width: 480)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .animation(.easeInOut(duration: 0.7), value: phase)
@@ -197,4 +197,8 @@ struct LaunchIntroView: View {
 private enum LaunchIntroPhase {
     case bootText
     case logo
+}
+
+private enum LaunchIntroTypography {
+    static let fontName = "SourceHanSerifCN-Bold"
 }
