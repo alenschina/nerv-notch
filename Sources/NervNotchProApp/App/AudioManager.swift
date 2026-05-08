@@ -2,19 +2,21 @@ import AVFoundation
 import Combine
 import Foundation
 
+import SwiftUI
+
 @MainActor
-final class AudioManager {
+final class AudioManager: ObservableObject {
     static let shared = AudioManager()
 
     private nonisolated(unsafe) var player: AVAudioPlayer?
     private nonisolated(unsafe) var fadeTimer: Timer?
     private var cancellable: AnyCancellable?
-    var autoPlayAudio = true
-    private let normalVolume: Float = 0.35
 
+    @Published var autoPlayAudio = true
     @Published var isMuted = false {
         didSet { player?.volume = isMuted ? 0 : normalVolume }
     }
+    private let normalVolume: Float = 0.35
 
     private init() {}
 

@@ -64,9 +64,9 @@ enum NervIslandIcon {
 
 struct NervConsoleView: View {
     @ObservedObject var viewModel: NotchViewModel
+    @ObservedObject var audioManager = AudioManager.shared
     let layout: NotchIslandLayout
     let onOpenSettings: () -> Void
-    @State private var isMuted = false
 
     init(
         viewModel: NotchViewModel,
@@ -171,13 +171,19 @@ struct NervConsoleView: View {
     }
 
     private var expandedSoundToggleButton: some View {
-        Button {
-            isMuted.toggle()
-            AudioManager.shared.isMuted = isMuted
+        let isSilent = !audioManager.autoPlayAudio || audioManager.isMuted
+        let isAutoPlayOff = !audioManager.autoPlayAudio
+
+        return Button {
+            if isAutoPlayOff {
+                audioManager.autoPlayAudio = true
+            } else {
+                audioManager.isMuted.toggle()
+            }
         } label: {
-            Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+            Image(systemName: isSilent ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(isMuted ? NervStyle.orange.opacity(0.5) : NervStyle.orange)
+                .foregroundStyle(isSilent ? NervStyle.orange.opacity(0.5) : NervStyle.orange)
                 .frame(
                     width: layout.expandedSettingsButtonSize,
                     height: layout.expandedSettingsButtonSize
@@ -185,8 +191,8 @@ struct NervConsoleView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(isMuted ? "Unmute" : "Mute")
-        .accessibilityLabel(isMuted ? "Unmute" : "Mute")
+        .help(isAutoPlayOff ? "Turn on audio" : (audioManager.isMuted ? "Unmute" : "Mute"))
+        .accessibilityLabel(isAutoPlayOff ? "Turn on audio" : (audioManager.isMuted ? "Unmute" : "Mute"))
     }
 
     private var expandedSettingsButton: some View {
