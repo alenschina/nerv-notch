@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settings = AppSettings.load()
     private var didStartMainInterface = false
     private let launchIntroStore = LaunchIntroStore()
+    private let launchIntroPresentationPolicy = LaunchIntroPresentationPolicy()
     private let sampler = TelemetrySampler()
     @MainActor private lazy var settingsWindowController = SettingsWindowController(
         settings: settings,
@@ -28,7 +29,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         guard !didStartMainInterface else { return }
 
-        if launchIntroStore.hasCompletedLaunchIntro {
+        if !launchIntroPresentationPolicy.shouldShowLaunchIntro(
+            settings: settings,
+            hasCompletedLaunchIntro: launchIntroStore.hasCompletedLaunchIntro
+        ) {
             startMainInterface()
             return
         }

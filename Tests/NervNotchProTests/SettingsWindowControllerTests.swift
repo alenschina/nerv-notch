@@ -66,4 +66,18 @@ final class SettingsWindowControllerTests: XCTestCase {
         XCTAssertTrue(settingsSource.contains("SettingsSidebarToggleButton"))
         XCTAssertTrue(settingsSource.contains(".frame(maxWidth: .infinity, alignment: .trailing)"))
     }
+
+    func testGeneralSettingsExposeLaunchIntroRepeatToggle() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceFile = projectRoot
+            .appendingPathComponent("Sources/NervNotchProApp/Settings/SettingsWindowController.swift")
+        let settingsSource = try String(contentsOf: sourceFile)
+
+        XCTAssertTrue(settingsSource.contains("alwaysShowLaunchIntroBinding"))
+        XCTAssertTrue(settingsSource.contains("settings.alwaysShowLaunchIntro"))
+        XCTAssertTrue(settingsSource.contains("每次启动播放初始化动画"))
+    }
 }

@@ -13,8 +13,44 @@ struct AppSettings: Equatable, Sendable, Codable {
     var syncWaveAnimated: Bool = true
     var sideWarningStripAnimated: Bool = true
     var clickOnlyMode: Bool = false
+    var alwaysShowLaunchIntro: Bool = false
 
     private static let userDefaultsKey = "NervNotch.settings"
+
+    enum CodingKeys: String, CodingKey {
+        case hoverDelay
+        case closeGracePeriod
+        case samplingInterval
+        case usesSimulatedNotch
+        case targetScreenIdentifier
+        case fanModeEnabled
+        case autoPlayAudio
+        case volume
+        case warningStripAnimated
+        case syncWaveAnimated
+        case sideWarningStripAnimated
+        case clickOnlyMode
+        case alwaysShowLaunchIntro
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        hoverDelay = try container.decodeIfPresent(TimeInterval.self, forKey: .hoverDelay) ?? hoverDelay
+        closeGracePeriod = try container.decodeIfPresent(TimeInterval.self, forKey: .closeGracePeriod) ?? closeGracePeriod
+        samplingInterval = try container.decodeIfPresent(TimeInterval.self, forKey: .samplingInterval) ?? samplingInterval
+        usesSimulatedNotch = try container.decodeIfPresent(Bool.self, forKey: .usesSimulatedNotch) ?? usesSimulatedNotch
+        targetScreenIdentifier = try container.decodeIfPresent(String.self, forKey: .targetScreenIdentifier)
+        fanModeEnabled = try container.decodeIfPresent(Bool.self, forKey: .fanModeEnabled) ?? fanModeEnabled
+        autoPlayAudio = try container.decodeIfPresent(Bool.self, forKey: .autoPlayAudio) ?? autoPlayAudio
+        volume = try container.decodeIfPresent(Float.self, forKey: .volume) ?? volume
+        warningStripAnimated = try container.decodeIfPresent(Bool.self, forKey: .warningStripAnimated) ?? warningStripAnimated
+        syncWaveAnimated = try container.decodeIfPresent(Bool.self, forKey: .syncWaveAnimated) ?? syncWaveAnimated
+        sideWarningStripAnimated = try container.decodeIfPresent(Bool.self, forKey: .sideWarningStripAnimated) ?? sideWarningStripAnimated
+        clickOnlyMode = try container.decodeIfPresent(Bool.self, forKey: .clickOnlyMode) ?? clickOnlyMode
+        alwaysShowLaunchIntro = try container.decodeIfPresent(Bool.self, forKey: .alwaysShowLaunchIntro) ?? alwaysShowLaunchIntro
+    }
 
     static func load() -> AppSettings {
         guard let data = UserDefaults.standard.data(forKey: userDefaultsKey),

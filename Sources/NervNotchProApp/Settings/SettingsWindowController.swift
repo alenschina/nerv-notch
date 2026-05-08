@@ -219,6 +219,16 @@ private struct GeneralSettingsView: View {
         )
     }
 
+    private var alwaysShowLaunchIntroBinding: Binding<Bool> {
+        Binding(
+            get: { settings.alwaysShowLaunchIntro },
+            set: {
+                settings.alwaysShowLaunchIntro = $0
+                onSettingsChanged(settings)
+            }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("通用")
@@ -232,6 +242,16 @@ private struct GeneralSettingsView: View {
                     Text("仅点击模式")
                         .font(.headline)
                     Text("仅响应鼠标点击来展开或收起 island 面板，忽略鼠标悬停和移出事件。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Toggle(isOn: alwaysShowLaunchIntroBinding) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("每次启动播放初始化动画")
+                        .font(.headline)
+                    Text("开启后，每次重新启动应用都会播放 NERV 初始化动画，而不是只在首次启动时播放。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
