@@ -13,6 +13,7 @@ struct SettingsActions {
 enum SettingsPane: String, CaseIterable, Identifiable {
     case general
     case audio
+    case appearance
 
     var id: String {
         rawValue
@@ -24,6 +25,8 @@ enum SettingsPane: String, CaseIterable, Identifiable {
             return "通用"
         case .audio:
             return "声音"
+        case .appearance:
+            return "外观"
         }
     }
 
@@ -33,6 +36,8 @@ enum SettingsPane: String, CaseIterable, Identifiable {
             return "gearshape"
         case .audio:
             return "speaker.wave.2"
+        case .appearance:
+            return "paintbrush"
         }
     }
 }
@@ -178,6 +183,8 @@ private struct SettingsDetailView: View {
             GeneralSettingsView(actions: actions)
         case .audio:
             AudioSettingsView(settings: settings, onSettingsChanged: onSettingsChanged)
+        case .appearance:
+            AppearanceSettingsView(settings: settings, onSettingsChanged: onSettingsChanged)
         }
     }
 }
@@ -246,6 +253,63 @@ private struct AudioSettingsView: View {
             .onChange(of: autoPlayAudio) { newValue in
                 var updated = settings
                 updated.autoPlayAudio = newValue
+                onSettingsChanged(updated)
+            }
+
+            Spacer()
+        }
+        .padding(24)
+    }
+}
+
+private struct AppearanceSettingsView: View {
+    let settings: AppSettings
+    let onSettingsChanged: (AppSettings) -> Void
+    @State private var warningStripAnimated: Bool
+    @State private var syncWaveAnimated: Bool
+
+    init(settings: AppSettings, onSettingsChanged: @escaping (AppSettings) -> Void) {
+        self.settings = settings
+        self.onSettingsChanged = onSettingsChanged
+        self._warningStripAnimated = State(initialValue: settings.warningStripAnimated)
+        self._syncWaveAnimated = State(initialValue: settings.syncWaveAnimated)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("外观")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Divider()
+
+            Toggle(isOn: $warningStripAnimated) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("警戒线动画")
+                        .font(.headline)
+                    Text("控制中央框架中的斜纹警戒线是否滚动。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .onChange(of: warningStripAnimated) { newValue in
+                var updated = settings
+                updated.warningStripAnimated = newValue
+                onSettingsChanged(updated)
+            }
+
+            Toggle(isOn: $syncWaveAnimated) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("波形图动画")
+                        .font(.headline)
+                    Text("控制左侧面板中的同步波形图是否动态。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .onChange(of: syncWaveAnimated) { newValue in
+                var updated = settings
+                updated.syncWaveAnimated = newValue
                 onSettingsChanged(updated)
             }
 

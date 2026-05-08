@@ -8,6 +8,8 @@ struct AppSettings: Equatable, Sendable, Codable {
     var targetScreenIdentifier: String?
     var fanModeEnabled: Bool = true
     var autoPlayAudio: Bool = true
+    var warningStripAnimated: Bool = true
+    var syncWaveAnimated: Bool = true
 
     private static let userDefaultsKey = "NervNotch.settings"
 

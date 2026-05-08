@@ -123,7 +123,11 @@ struct NervConsoleView: View {
 
     private var expandedConsole: some View {
         ZStack(alignment: .topLeading) {
-            MagiTriadConsoleView(state: viewModel.magiState)
+            MagiTriadConsoleView(
+                state: viewModel.magiState,
+                warningStripAnimated: viewModel.settings.warningStripAnimated,
+                syncWaveAnimated: viewModel.settings.syncWaveAnimated
+            )
 
             expandedHeader
                 .padding(.top, layout.expandedHeaderTopPadding)

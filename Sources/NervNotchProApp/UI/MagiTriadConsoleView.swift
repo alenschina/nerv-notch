@@ -435,6 +435,8 @@ struct MagiConsoleLayoutMetrics: Equatable {
 
 struct MagiTriadConsoleView: View {
     let state: MagiDecisionState
+    let warningStripAnimated: Bool
+    let syncWaveAnimated: Bool
 
     private let metrics = MagiConsoleLayoutMetrics()
 
@@ -452,7 +454,8 @@ struct MagiTriadConsoleView: View {
                     ) {
                         SynchronizationRateView(
                             rateText: SynchronizationRateLayout.rateText(swapUsageRatio: state.swapUsageRatio),
-                            batteryText: state.batteryPercentageText
+                            batteryText: state.batteryPercentageText,
+                            isAnimated: syncWaveAnimated
                         )
                     }
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
@@ -463,7 +466,8 @@ struct MagiTriadConsoleView: View {
                         melchior: state.cpu,
                         judgement: state.judgement,
                         leadingRows: leftRows,
-                        trailingRows: rightRows
+                        trailingRows: rightRows,
+                        warningStripAnimated: warningStripAnimated
                     )
                     .frame(width: metrics.triadOuterFrameWidth, height: metrics.triadOuterFrameHeight)
 
@@ -686,12 +690,13 @@ private struct MagiTriadFramedView: View {
     let judgement: CentralDogmaJudgement
     let leadingRows: [String]
     let trailingRows: [String]
+    let warningStripAnimated: Bool
 
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
         ZStack(alignment: .top) {
-            MagiConsoleFramedChrome(strokeWidth: metrics.triadOuterFrameStrokeWidth, warningStripAnimated: true)
+            MagiConsoleFramedChrome(strokeWidth: metrics.triadOuterFrameStrokeWidth, warningStripAnimated: warningStripAnimated)
 
             MagiTriadView(
                 balthasar: balthasar,
@@ -821,12 +826,13 @@ struct SynchronizationRateLayout: Equatable {
 private struct SynchronizationRateView: View {
     let rateText: String
     let batteryText: String
+    let isAnimated: Bool
 
     var body: some View {
         TimelineView(.animation) { timeline in
             GeometryReader { proxy in
                 let layout = SynchronizationRateLayout(containerSize: proxy.size)
-                let phase = layout.phase(at: timeline.date.timeIntervalSinceReferenceDate)
+                let phase = isAnimated ? layout.phase(at: timeline.date.timeIntervalSinceReferenceDate) : 0
 
                 ZStack {
                     SynchronizationScanlineField()

@@ -74,5 +74,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settings = updated
         updated.save()
         AudioManager.shared.autoPlayAudio = updated.autoPlayAudio
+        viewModel?.settings = updated
     }
 }

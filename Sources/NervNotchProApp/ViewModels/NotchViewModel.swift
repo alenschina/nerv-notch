@@ -6,7 +6,7 @@ final class NotchViewModel: ObservableObject {
     @Published private(set) var magiState: MagiDecisionState
     @Published private(set) var interactionState: NotchInteractionStateMachine.State = .closed
 
-    let settings: AppSettings
+    @Published var settings: AppSettings
     private let decisionEngine: MagiDecisionEngine
     private var stateMachine: NotchInteractionStateMachine
 
