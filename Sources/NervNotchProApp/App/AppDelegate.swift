@@ -2,9 +2,12 @@ import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var windowController: NotchWindowController?
+    private var launchIntroWindowController: LaunchIntroWindowController?
     private var viewModel: NotchViewModel?
     private var timer: Timer?
     private var settings = AppSettings.load()
+    private var didStartMainInterface = false
+    private let launchIntroStore = LaunchIntroStore()
     private let sampler = TelemetrySampler()
     @MainActor private lazy var settingsWindowController = SettingsWindowController(
         settings: settings,
@@ -22,6 +25,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     private func start() {
         FontRegistration.registerBundledFonts()
+
+        guard !didStartMainInterface else { return }
+
+        if launchIntroStore.hasCompletedLaunchIntro {
+            startMainInterface()
+            return
+        }
+
+        guard let screen = NSScreen.main ?? NSScreen.screens.first else {
+            startMainInterface()
+            return
+        }
+
+        let controller = LaunchIntroWindowController(screen: screen) { [weak self] in
+            self?.completeLaunchIntro()
+        }
+        launchIntroWindowController = controller
+        controller.showWindow(nil)
+    }
+
+    @MainActor
+    private func startMainInterface() {
+        guard !didStartMainInterface else { return }
+        didStartMainInterface = true
 
         let viewModel = NotchViewModel(settings: settings, decisionEngine: MagiDecisionEngine())
         self.viewModel = viewModel
@@ -51,6 +78,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             userInfo: nil,
             repeats: true
         )
+    }
+
+    @MainActor
+    private func completeLaunchIntro() {
+        launchIntroStore.markCompleted()
+        launchIntroWindowController = nil
+        startMainInterface()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
