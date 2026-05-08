@@ -758,7 +758,7 @@ struct SynchronizationRateLayout: Equatable {
     let waveCount = 13
     let phaseVelocity: CGFloat = 1.35
     let titleText = "VIRTUAL MEM / SWAP 使用率"
-    let batteryTitleText = "BATTERY / 电池"
+    let batteryTitleText = "BATTERY / 電池"
     let titleTopPadding: CGFloat = 34
     let batteryTitleTopPadding: CGFloat = 12
     let batteryHorizontalInset: CGFloat = 3
@@ -1204,7 +1204,7 @@ struct EmergencyHoneycombLayout: Equatable {
     let contentInset: CGFloat = 7
     let topPadding: CGFloat = 50
     let bottomPadding: CGFloat = 31
-    let titleText = "DISK SPACE / 磁盘容量"
+    let titleText = "DISK SPACE / 磁盤容量"
     let ioTitleText = "DISK I/O"
     let titleTopPadding: CGFloat = 34
     let ioBottomPadding: CGFloat = 8
