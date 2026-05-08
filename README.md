@@ -41,6 +41,40 @@ BUILD_NUMBER="1" \
 
 For distribution outside your own machine, sign with a Developer ID certificate, then notarize and staple the app before shipping a zip or DMG.
 
+## Release
+
+Pushing a version tag triggers the GitHub Actions release workflow, which builds, signs, notarizes, packages a DMG, and uploads it as a draft GitHub Release.
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+You can also trigger the workflow manually from the Actions tab.
+
+### Required secrets for signed releases
+
+For unsigned builds (local use only), no secrets are needed. The workflow will produce an unsigned DMG.
+
+To distribute signed and notarized builds, configure these secrets in the repository:
+
+| Secret | Description |
+|--------|-------------|
+| `MACOS_CERTIFICATE` | Base64-encoded Developer ID Application `.p12` certificate |
+| `MACOS_CERTIFICATE_PASSWORD` | Password for the `.p12` certificate |
+| `MACOS_SIGNING_IDENTITY` | Signing identity, e.g. `Developer ID Application: Your Name (TEAMID)` |
+| `MACOS_KEYCHAIN_PASSWORD` | Arbitrary password for the temporary keychain |
+| `APPLE_NOTARY_KEY` | Base64-encoded App Store Connect API `.p8` key |
+| `APPLE_NOTARY_KEY_ID` | API Key ID |
+| `APPLE_NOTARY_ISSUER` | Issuer ID (visible in App Store Connect → Keys) |
+
+To base64-encode a file:
+
+```bash
+base64 < certificate.p12 | pbcopy
+base64 < AuthKey.p8 | pbcopy
+```
+
 ## MVP Scope
 
 - CPU telemetry
