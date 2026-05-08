@@ -103,9 +103,15 @@ final class SettingsWindowController {
 
 struct SettingsRootView: View {
     let actions: SettingsActions
-    let settings: AppSettings
     let onSettingsChanged: (AppSettings) -> Void
     @State private var navigation = SettingsNavigationModel()
+    @State private var settingsState: AppSettings
+
+    init(actions: SettingsActions, settings: AppSettings, onSettingsChanged: @escaping (AppSettings) -> Void) {
+        self.actions = actions
+        self.onSettingsChanged = onSettingsChanged
+        self._settingsState = State(initialValue: settings)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -134,7 +140,12 @@ struct SettingsRootView: View {
                     Divider()
                 }
 
-                SettingsDetailView(selection: navigation.selection, actions: actions, settings: settings, onSettingsChanged: onSettingsChanged)
+                SettingsDetailView(
+                    selection: navigation.selection,
+                    actions: actions,
+                    settings: $settingsState,
+                    onSettingsChanged: onSettingsChanged
+                )
             }
         }
         .frame(minWidth: 560, minHeight: 360)
@@ -174,7 +185,7 @@ private struct SettingsSidebarView: View {
 private struct SettingsDetailView: View {
     let selection: SettingsPane
     let actions: SettingsActions
-    let settings: AppSettings
+    @Binding var settings: AppSettings
     let onSettingsChanged: (AppSettings) -> Void
 
     var body: some View {
@@ -182,9 +193,9 @@ private struct SettingsDetailView: View {
         case .general:
             GeneralSettingsView(actions: actions)
         case .audio:
-            AudioSettingsView(settings: settings, onSettingsChanged: onSettingsChanged)
+            AudioSettingsView(settings: $settings, onSettingsChanged: onSettingsChanged)
         case .appearance:
-            AppearanceSettingsView(settings: settings, onSettingsChanged: onSettingsChanged)
+            AppearanceSettingsView(settings: $settings, onSettingsChanged: onSettingsChanged)
         }
     }
 }
@@ -223,14 +234,17 @@ private struct GeneralSettingsView: View {
 }
 
 private struct AudioSettingsView: View {
-    let settings: AppSettings
+    @Binding var settings: AppSettings
     let onSettingsChanged: (AppSettings) -> Void
-    @State private var autoPlayAudio: Bool
 
-    init(settings: AppSettings, onSettingsChanged: @escaping (AppSettings) -> Void) {
-        self.settings = settings
-        self.onSettingsChanged = onSettingsChanged
-        self._autoPlayAudio = State(initialValue: settings.autoPlayAudio)
+    private var autoPlayBinding: Binding<Bool> {
+        Binding(
+            get: { settings.autoPlayAudio },
+            set: {
+                settings.autoPlayAudio = $0
+                onSettingsChanged(settings)
+            }
+        )
     }
 
     var body: some View {
@@ -241,7 +255,7 @@ private struct AudioSettingsView: View {
 
             Divider()
 
-            Toggle(isOn: $autoPlayAudio) {
+            Toggle(isOn: autoPlayBinding) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("展开时自动播放")
                         .font(.headline)
@@ -249,11 +263,6 @@ private struct AudioSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-            }
-            .onChange(of: autoPlayAudio) { newValue in
-                var updated = settings
-                updated.autoPlayAudio = newValue
-                onSettingsChanged(updated)
             }
 
             Spacer()
@@ -263,16 +272,27 @@ private struct AudioSettingsView: View {
 }
 
 private struct AppearanceSettingsView: View {
-    let settings: AppSettings
+    @Binding var settings: AppSettings
     let onSettingsChanged: (AppSettings) -> Void
-    @State private var warningStripAnimated: Bool
-    @State private var syncWaveAnimated: Bool
 
-    init(settings: AppSettings, onSettingsChanged: @escaping (AppSettings) -> Void) {
-        self.settings = settings
-        self.onSettingsChanged = onSettingsChanged
-        self._warningStripAnimated = State(initialValue: settings.warningStripAnimated)
-        self._syncWaveAnimated = State(initialValue: settings.syncWaveAnimated)
+    private var warningStripBinding: Binding<Bool> {
+        Binding(
+            get: { settings.warningStripAnimated },
+            set: {
+                settings.warningStripAnimated = $0
+                onSettingsChanged(settings)
+            }
+        )
+    }
+
+    private var syncWaveBinding: Binding<Bool> {
+        Binding(
+            get: { settings.syncWaveAnimated },
+            set: {
+                settings.syncWaveAnimated = $0
+                onSettingsChanged(settings)
+            }
+        )
     }
 
     var body: some View {
@@ -283,7 +303,7 @@ private struct AppearanceSettingsView: View {
 
             Divider()
 
-            Toggle(isOn: $warningStripAnimated) {
+            Toggle(isOn: warningStripBinding) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("警戒线动画")
                         .font(.headline)
@@ -292,14 +312,8 @@ private struct AppearanceSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .onChange(of: warningStripAnimated) { newValue in
-                var updated = settings
-                updated.warningStripAnimated = newValue
-                updated.syncWaveAnimated = syncWaveAnimated
-                onSettingsChanged(updated)
-            }
 
-            Toggle(isOn: $syncWaveAnimated) {
+            Toggle(isOn: syncWaveBinding) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("波形图动画")
                         .font(.headline)
@@ -307,12 +321,6 @@ private struct AppearanceSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-            }
-            .onChange(of: syncWaveAnimated) { newValue in
-                var updated = settings
-                updated.warningStripAnimated = warningStripAnimated
-                updated.syncWaveAnimated = newValue
-                onSettingsChanged(updated)
             }
 
             Spacer()
