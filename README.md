@@ -1,53 +1,59 @@
+[中文版本](README.zh-CN.md)
+
 # NERV Notch
 
-macOS 状态栏悬浮岛，采用 NERV/MAGI 指挥终端美学风格。实时展示 CPU、内存、网络、磁盘、Swap、电池等遥测数据，常驻于 MacBook 刘海区域。
+A macOS notch status island with a NERV/MAGI command-console aesthetic. Displays real-time CPU, memory, network, disk I/O, swap, and battery telemetry in a floating panel anchored to the MacBook notch. Written in Swift, zero third-party dependencies.
 
-## 系统要求
+## Features
+
+- **Real-time telemetry** — CPU, memory, network throughput, disk space & I/O, swap, battery
+- **MAGI triad decision panel** — Melchior (CPU), Balthazar (memory/network), Casper (disk/swap) push raw metrics through a Central Dogma consensus engine producing synchronized colour-coded judgements: green (normal), orange (elevated), red (emergency)
+- **Notch-resident island** — compact mode sits inside the physical notch area as a subtle status strip; hover for ~1 second or click to expand into the full MAGI console
+- **Click-only mode** — optionally disable hover expansion so the island responds exclusively to clicks
+- **Animated warning chrome** — diagonal stripe backgrounds scroll behind the triad during elevated and emergency states, with independent per-strip animation toggles
+- **NERV launch intro** — first-run animated intro sequence with CRT scanlines and NERV branding; toggleable to replay on every launch
+- **Background audio** — configurable ambient soundscape that plays when the console expands
+- **Multi-screen aware** — follows the MacBook notch or simulates one on displays without a physical notch
+- **Zero dependencies** — Apple system frameworks only (AppKit, SwiftUI, Combine, Darwin)
+
+## Requirements
 
 - macOS 13+
-- 字体已打包在 App 内（Share Tech Mono、DS-Digital-Bold、SourceHanSerifCN-Bold），无需用户安装
+- Fonts are bundled inside the app — no user installation needed
 
-## 功能
-
-- CPU / 内存 / 网络 / 磁盘空间 / 磁盘 I/O / Swap / 电池实时遥测
-- MAGI 三贤人决策面板（Melchior / Balthazar / Casper）
-- Central Dogma 综合裁决
-- 悬停约 1 秒展开完整控制台，点击外部关闭
-- 紧凑模式下的警告条滚动动画
-- 零第三方依赖，纯 Apple 系统框架
-
-## 快速开始
+## Quick Start
 
 ```bash
 ./scripts/run-dev.sh
 ```
 
-## 开发
+## Development
 
 ```bash
-# 构建
+# Build
 swift build
 
-# 运行全部测试
+# Run all tests
 swift test
 
-# 运行单个测试
+# Run a single test
 swift test --filter NotchGeometryTests/testNotchScreenRect
 
-# 并行测试
+# Parallel tests
 swift test --parallel
+
+# Code coverage
+swift test --enable-code-coverage
 ```
 
-### 本地打包
+### Packaging
 
 ```bash
+# Ad-hoc signed (local use)
 ./scripts/package-app.sh
 open dist/NervNotch.app
-```
 
-签名发布：
-
-```bash
+# Signed release
 SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
   PRODUCT_BUNDLE_IDENTIFIER="com.example.NervNotch" \
   VERSION="0.1.0" BUILD_NUMBER="1" \
@@ -56,23 +62,23 @@ SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
 
 ## Release
 
-推送版本标签即可触发 GitHub Actions 自动构建、签名、公证，生成 DMG 并上传为 draft release：
+Push a version tag to trigger automated build, signing, notarization, and DMG upload via GitHub Actions:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-也可从 Actions 页面手动触发。未配置签名证书时仍可生成未签名 DMG（本地使用）。
+You can also trigger the workflow manually from the Actions tab. An unsigned DMG is produced when signing credentials are unavailable.
 
-签名和公证需要配置 [repository secrets](.github/workflows/release.yml)：`MACOS_CERTIFICATE`、`MACOS_CERTIFICATE_PASSWORD`、`MACOS_SIGNING_IDENTITY`、`MACOS_KEYCHAIN_PASSWORD`、`APPLE_NOTARY_KEY`、`APPLE_NOTARY_KEY_ID`、`APPLE_NOTARY_ISSUER`。
+See [`.github/workflows/release.yml`](.github/workflows/release.yml) for the required repository secrets (`MACOS_CERTIFICATE`, `MACOS_CERTIFICATE_PASSWORD`, `MACOS_SIGNING_IDENTITY`, `MACOS_KEYCHAIN_PASSWORD`, `APPLE_NOTARY_KEY`, `APPLE_NOTARY_KEY_ID`, `APPLE_NOTARY_ISSUER`).
 
-## 架构
+## Architecture
 
-Swift 5.9，MVVM + 函数式核心。SwiftUI 视图托管在 AppKit `NSPanel` 中。Combine 仅用于单条 `@Published` ↔ `sink` 绑定。
+Swift 5.9, MVVM with a functional core. Domain types are `Sendable` + `Equatable` value types. SwiftUI views are hosted inside AppKit `NSPanel` / `NSWindow`. Combine is used for a single `@Published` ↔ `sink` binding.
 
-详细架构文档见 [`.planning/codebase/`](.planning/codebase/)（ARCHITECTURE.md、CONVENTIONS.md、TESTING.md）。
+Detailed architecture docs live in [`.planning/codebase/`](.planning/codebase/) — ARCHITECTURE.md, CONVENTIONS.md, TESTING.md, and more.
 
-## 许可
+## License
 
-个人同人原型项目，不包含受版权保护的图像素材。
+Personal fan prototype. No copyrighted imagery included.
