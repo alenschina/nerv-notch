@@ -691,7 +691,7 @@ private struct MagiTriadFramedView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            MagiConsoleFramedChrome(strokeWidth: metrics.triadOuterFrameStrokeWidth)
+            MagiConsoleFramedChrome(strokeWidth: metrics.triadOuterFrameStrokeWidth, warningStripAnimated: true)
 
             MagiTriadView(
                 balthasar: balthasar,
@@ -1554,6 +1554,7 @@ private struct MagiTriadEmbeddedInfoColumn: View {
 private struct MagiConsoleFramedChrome: View {
     let strokeWidth: CGFloat
     var strokeOffsetX: CGFloat = 0
+    var warningStripAnimated: Bool = false
 
     private let metrics = MagiConsoleLayoutMetrics()
 
@@ -1565,7 +1566,7 @@ private struct MagiConsoleFramedChrome: View {
                     .frame(width: strokeWidth)
                     .shadow(color: NervStyle.red.opacity(0.55), radius: 4)
 
-                MagiWarningStrip()
+                MagiWarningStrip(isAnimated: warningStripAnimated)
                     .frame(
                         width: max(0, strokeWidth - metrics.triadOuterFrameStrokeLineWidth * 2),
                         height: metrics.triadWarningStripHeight
@@ -1581,24 +1582,29 @@ private struct MagiConsoleFramedChrome: View {
 }
 
 private struct MagiWarningStrip: View {
+    let isAnimated: Bool
+    private let stripeWidth: CGFloat = 18
+
     var body: some View {
         GeometryReader { proxy in
-            let stripeWidth: CGFloat = 18
-            ZStack {
-                NervStyle.orange
-
-                Path { path in
-                    var x = -stripeWidth
-                    while x < proxy.size.width + stripeWidth {
-                        path.move(to: CGPoint(x: x, y: proxy.size.height))
-                        path.addLine(to: CGPoint(x: x + stripeWidth * 0.45, y: 0))
-                        path.addLine(to: CGPoint(x: x + stripeWidth, y: 0))
-                        path.addLine(to: CGPoint(x: x + stripeWidth * 0.55, y: proxy.size.height))
-                        path.closeSubpath()
-                        x += stripeWidth
-                    }
+            if isAnimated {
+                TimelineView(.animation) { timeline in
+                    let phase = timeline.date.timeIntervalSinceReferenceDate * 30
+                    let offset = phase.truncatingRemainder(dividingBy: stripeWidth)
+                    MagiWarningStripPattern(
+                        width: proxy.size.width,
+                        height: proxy.size.height,
+                        stripeWidth: stripeWidth,
+                        phaseOffset: offset
+                    )
                 }
-                .fill(Color.black.opacity(0.88))
+            } else {
+                MagiWarningStripPattern(
+                    width: proxy.size.width,
+                    height: proxy.size.height,
+                    stripeWidth: stripeWidth,
+                    phaseOffset: 0
+                )
             }
         }
         .clipped()
@@ -1608,6 +1614,33 @@ private struct MagiWarningStrip: View {
         )
         .shadow(color: NervStyle.orange.opacity(0.65), radius: 3)
         .clipped()
+    }
+}
+
+private struct MagiWarningStripPattern: View {
+    let width: CGFloat
+    let height: CGFloat
+    let stripeWidth: CGFloat
+    let phaseOffset: CGFloat
+
+    var body: some View {
+        ZStack {
+            NervStyle.orange
+
+            Path { path in
+                var x = -stripeWidth + phaseOffset
+                while x < width + stripeWidth {
+                    path.move(to: CGPoint(x: x, y: height))
+                    path.addLine(to: CGPoint(x: x + stripeWidth * 0.45, y: 0))
+                    path.addLine(to: CGPoint(x: x + stripeWidth, y: 0))
+                    path.addLine(to: CGPoint(x: x + stripeWidth * 0.55, y: height))
+                    path.closeSubpath()
+                    x += stripeWidth
+                }
+            }
+            .fill(Color.black.opacity(0.88))
+        }
+        .frame(width: width, height: height)
     }
 }
 
