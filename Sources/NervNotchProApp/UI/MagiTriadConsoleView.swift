@@ -727,7 +727,7 @@ struct SynchronizationRateLayout: Equatable {
     let contentInset: CGFloat = 7
     let waveCount = 13
     let phaseVelocity: CGFloat = 1.35
-    let titleText = "SYNCHRONIZATION RATE / 同步率"
+    let titleText = "VIRTUAL MEM / SWAP 使用率"
     let batteryTitleText = "BATTERY / 电池"
     let titleTopPadding: CGFloat = 34
     let batteryTitleTopPadding: CGFloat = 12
@@ -833,11 +833,11 @@ private struct SynchronizationRateView: View {
 
                     VStack(spacing: 0) {
                         Text(layout.titleText)
-                            .font(.system(size: 6.4, weight: .black, design: .monospaced))
+                            .font(.system(size: 7.6, weight: .black, design: .monospaced))
                             .foregroundStyle(NervStyle.orange)
                             .lineLimit(1)
                             .minimumScaleFactor(0.28)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
 
                         Spacer(minLength: 0)
@@ -888,7 +888,7 @@ private struct SynchronizationRateView: View {
 
                     VStack(spacing: layout.batteryTitleValueSpacing) {
                         Text(layout.batteryTitleText)
-                            .font(.system(size: 6.4, weight: .black, design: .monospaced))
+                            .font(.system(size: 7.6, weight: .black, design: .monospaced))
                             .foregroundStyle(NervStyle.orange)
                             .lineLimit(1)
                             .minimumScaleFactor(0.28)

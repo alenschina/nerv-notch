@@ -10,7 +10,7 @@ final class SynchronizationRateViewTests: XCTestCase {
         ))
 
         XCTAssertEqual(SynchronizationRateLayout.rateText(swapUsageRatio: 0.42), "42%")
-        XCTAssertEqual(layout.titleText, "SYNCHRONIZATION RATE / 同步率")
+        XCTAssertEqual(layout.titleText, "VIRTUAL MEM / SWAP 使用率")
         XCTAssertEqual(layout.batteryTitleText, "BATTERY / 电池")
         XCTAssertEqual(layout.rateLabelFontName, "SourceHanSerifCN-Bold")
         XCTAssertEqual(layout.rateValueFontName, "DS-Digital-Bold")
