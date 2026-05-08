@@ -131,7 +131,7 @@ struct LaunchIntroView: View {
 
             VStack(spacing: 0) {
                 classifiedStrip
-                Text("使徒来袭")
+                Text("使徒來襲")
                     .font(.custom(LaunchIntroTypography.fontName, size: 96))
                     .foregroundStyle(NervStyle.red)
                     .tracking(12)
