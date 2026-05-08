@@ -27,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.viewModel = viewModel
 
         AudioManager.shared.autoPlayAudio = settings.autoPlayAudio
+        AudioManager.shared.normalVolume = settings.volume
         AudioManager.shared.attach(to: viewModel)
 
         let screen = NSScreen.main ?? NSScreen.screens.first
@@ -74,6 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settings = updated
         updated.save()
         AudioManager.shared.autoPlayAudio = updated.autoPlayAudio
+        AudioManager.shared.normalVolume = updated.volume
         viewModel?.settings = updated
     }
 }

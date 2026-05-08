@@ -8,6 +8,7 @@ struct AppSettings: Equatable, Sendable, Codable {
     var targetScreenIdentifier: String?
     var fanModeEnabled: Bool = true
     var autoPlayAudio: Bool = true
+    var volume: Float = 0.35
     var warningStripAnimated: Bool = true
     var syncWaveAnimated: Bool = true
     var sideWarningStripAnimated: Bool = true

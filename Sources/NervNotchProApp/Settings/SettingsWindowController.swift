@@ -247,6 +247,16 @@ private struct AudioSettingsView: View {
         )
     }
 
+    private var volumeBinding: Binding<Float> {
+        Binding(
+            get: { settings.volume },
+            set: {
+                settings.volume = $0
+                onSettingsChanged(settings)
+            }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("声音")
@@ -260,6 +270,23 @@ private struct AudioSettingsView: View {
                     Text("展开时自动播放")
                         .font(.headline)
                     Text("展开 island 面板时自动播放背景音乐。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("音量")
+                    .font(.headline)
+
+                HStack {
+                    Image(systemName: "speaker.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Slider(value: volumeBinding, in: 0...1)
+
+                    Image(systemName: "speaker.wave.3.fill")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

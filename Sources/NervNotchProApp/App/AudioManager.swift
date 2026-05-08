@@ -1,7 +1,6 @@
 import AVFoundation
 import Combine
 import Foundation
-
 import SwiftUI
 
 @MainActor
@@ -16,7 +15,11 @@ final class AudioManager: ObservableObject {
     @Published var isMuted = false {
         didSet { player?.volume = isMuted ? 0 : normalVolume }
     }
-    private let normalVolume: Float = 0.35
+    @Published var normalVolume: Float = 0.35 {
+        didSet {
+            if !isMuted { player?.volume = normalVolume }
+        }
+    }
 
     private init() {}
 
