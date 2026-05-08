@@ -29,6 +29,20 @@ enum TelemetryCalculations {
             activeInterfaceCount: 0
         )
     }
+
+    static func diskIORate(previous: DiskIOCounters, current: DiskIOCounters, interval: TimeInterval) -> DiskIORate {
+        guard interval > 0 else {
+            return DiskIORate(readBytesPerSecond: 0, writeBytesPerSecond: 0)
+        }
+
+        let readDelta = current.readBytes.saturatingSubtract(previous.readBytes)
+        let writeDelta = current.writtenBytes.saturatingSubtract(previous.writtenBytes)
+
+        return DiskIORate(
+            readBytesPerSecond: UInt64(Double(readDelta) / interval),
+            writeBytesPerSecond: UInt64(Double(writeDelta) / interval)
+        )
+    }
 }
 
 private extension UInt64 {

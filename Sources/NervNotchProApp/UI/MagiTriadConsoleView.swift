@@ -470,7 +470,10 @@ struct MagiTriadConsoleView: View {
                         strokeWidth: metrics.rightAuxiliaryFrameStrokeWidth,
                         strokeOffsetX: metrics.rightAuxiliaryFrameStrokeOffsetX
                     ) {
-                        EmergencyHoneycombView(diskUsageRatio: state.diskUsageRatio)
+                        EmergencyHoneycombView(
+                            diskUsageRatio: state.diskUsageRatio,
+                            diskIORateText: state.diskIORateText
+                        )
                     }
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
                 }
@@ -993,15 +996,22 @@ struct EmergencyHoneycombCell: Equatable {
 struct EmergencyHoneycombLayout: Equatable {
     let containerSize: CGSize
     var diskUsageRatio: Double? = nil
+    var diskIORateText: String = "R --  W --"
     let contentInset: CGFloat = 7
     let topPadding: CGFloat = 50
-    let bottomPadding: CGFloat = 10
+    let bottomPadding: CGFloat = 31
     let titleText = "DISK SPACE / 磁盘容量"
+    let ioTitleText = "DISK I/O"
     let titleTopPadding: CGFloat = 34
+    let ioBottomPadding: CGFloat = 8
     let titleAlignment: Alignment = .center
     let honeycombScale: CGFloat = 0.94
     let connectedBorderLineWidth: CGFloat = 4
     let cellDividerLineWidth: CGFloat = 1.2
+
+    var ioRateText: String {
+        diskIORateText
+    }
 
     private let columnCount = 3
     private let rowCount = 7
@@ -1141,10 +1151,15 @@ struct EmergencyHoneycombLayout: Equatable {
 
 private struct EmergencyHoneycombView: View {
     let diskUsageRatio: Double?
+    let diskIORateText: String
 
     var body: some View {
         GeometryReader { proxy in
-            let layout = EmergencyHoneycombLayout(containerSize: proxy.size, diskUsageRatio: diskUsageRatio)
+            let layout = EmergencyHoneycombLayout(
+                containerSize: proxy.size,
+                diskUsageRatio: diskUsageRatio,
+                diskIORateText: diskIORateText
+            )
 
             ZStack {
                 Color.black.opacity(0.42)
@@ -1162,6 +1177,29 @@ private struct EmergencyHoneycombView: View {
                 }
                 .padding(.horizontal, layout.contentInset)
                 .padding(.top, layout.titleTopPadding)
+
+                VStack(spacing: 2) {
+                    Spacer(minLength: 0)
+
+                    Text(layout.ioTitleText)
+                        .font(.system(size: 7.6, weight: .black, design: .monospaced))
+                        .foregroundStyle(NervStyle.orange)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.28)
+                        .frame(maxWidth: .infinity, alignment: layout.titleAlignment)
+                        .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
+
+                    Text(layout.ioRateText)
+                        .font(.custom(MagiConsoleTypography().metricFontName, size: 10.4))
+                        .fontWeight(.black)
+                        .foregroundStyle(NervStyle.orange)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.42)
+                        .frame(maxWidth: .infinity, alignment: layout.titleAlignment)
+                        .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
+                }
+                .padding(.horizontal, layout.contentInset)
+                .padding(.bottom, layout.ioBottomPadding)
 
                 ForEach(Array(layout.cells.enumerated()), id: \.offset) { _, cell in
                     EmergencyHoneycombCellView(cell: cell)

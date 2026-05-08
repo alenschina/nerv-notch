@@ -43,10 +43,21 @@ struct DiskSpaceSample: Equatable, Sendable {
     let availableBytes: UInt64
 }
 
+struct DiskIOCounters: Equatable, Sendable {
+    let readBytes: UInt64
+    let writtenBytes: UInt64
+}
+
+struct DiskIORate: Equatable, Sendable {
+    let readBytesPerSecond: UInt64
+    let writeBytesPerSecond: UInt64
+}
+
 struct SystemSnapshot: Equatable, Sendable {
     let sampledAt: Date
     let cpu: CPUSample?
     let memory: MemorySample?
     let network: NetworkRate?
     let disk: DiskSpaceSample?
+    let diskIO: DiskIORate?
 }

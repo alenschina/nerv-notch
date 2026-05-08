@@ -29,4 +29,13 @@ final class TelemetryCalculationTests: XCTestCase {
         XCTAssertEqual(rate.downBytesPerSecond, 0)
         XCTAssertEqual(rate.upBytesPerSecond, 0)
     }
+
+    func testDiskIORateUsesReadAndWriteByteDelta() {
+        let previous = DiskIOCounters(readBytes: 1_000, writtenBytes: 2_000)
+        let current = DiskIOCounters(readBytes: 5_096, writtenBytes: 6_096)
+        let rate = TelemetryCalculations.diskIORate(previous: previous, current: current, interval: 2.0)
+
+        XCTAssertEqual(rate.readBytesPerSecond, 2_048)
+        XCTAssertEqual(rate.writeBytesPerSecond, 2_048)
+    }
 }

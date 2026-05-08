@@ -9,6 +9,8 @@ final class EmergencyHoneycombViewTests: XCTestCase {
             height: metrics.triadOuterFrameHeight - 2
         ))
         XCTAssertEqual(layout.titleText, "DISK SPACE / 磁盘容量")
+        XCTAssertEqual(layout.ioTitleText, "DISK I/O")
+        XCTAssertEqual(layout.ioRateText, "R --  W --")
         XCTAssertEqual(layout.contentInset, SynchronizationRateLayout(containerSize: .zero).contentInset)
         XCTAssertEqual(layout.titleTopPadding, SynchronizationRateLayout(containerSize: .zero).titleTopPadding)
         XCTAssertEqual(layout.titleAlignment, .center)
@@ -44,10 +46,12 @@ final class EmergencyHoneycombViewTests: XCTestCase {
                 width: metrics.rightAuxiliaryFrameStrokeWidth - 2,
                 height: metrics.triadOuterFrameHeight - 2
             ),
-            diskUsageRatio: 0.5
+            diskUsageRatio: 0.5,
+            diskIORateText: "R 512 KB/s  W 128 KB/s"
         )
 
         XCTAssertEqual(layout.titleText, "DISK SPACE / 磁盘容量")
+        XCTAssertEqual(layout.ioRateText, "R 512 KB/s  W 128 KB/s")
         XCTAssertEqual(layout.filledCells.count, 8)
         XCTAssertEqual(layout.emptyCells.count, 8)
 

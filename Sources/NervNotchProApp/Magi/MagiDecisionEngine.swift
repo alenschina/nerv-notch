@@ -6,6 +6,7 @@ struct MagiDecisionState: Equatable, Sendable {
     let memory: MagiPanelDecision
     let network: MagiPanelDecision
     let diskUsageRatio: Double?
+    let diskIORateText: String
     let judgement: CentralDogmaJudgement
 
     static let defaultValue = MagiDecisionState(
@@ -26,6 +27,7 @@ struct MagiDecisionState: Equatable, Sendable {
             level: .normal, statusText: "ACTIVE", decisionText: "COMM LINK ACTIVE"
         ),
         diskUsageRatio: nil,
+        diskIORateText: "R --  W --",
         judgement: CentralDogmaJudgement(
             level: .synchronized,
             title: "SYNCHRONIZED",
@@ -78,6 +80,7 @@ struct MagiDecisionEngine: Sendable {
             memory: memory,
             network: network,
             diskUsageRatio: diskUsageRatio(snapshot.disk),
+            diskIORateText: diskIORateText(snapshot.diskIO),
             judgement: judgement
         )
     }
@@ -251,6 +254,14 @@ struct MagiDecisionEngine: Sendable {
             return nil
         }
         return min(1, max(0, Double(sample.usedBytes) / Double(sample.totalBytes)))
+    }
+
+    private func diskIORateText(_ rate: DiskIORate?) -> String {
+        guard let rate else {
+            return "R --  W --"
+        }
+
+        return "R \(ByteFormat.rate(rate.readBytesPerSecond))  W \(ByteFormat.rate(rate.writeBytesPerSecond))"
     }
 }
 
