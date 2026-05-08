@@ -12,6 +12,7 @@ struct SettingsActions {
 
 enum SettingsPane: String, CaseIterable, Identifiable {
     case general
+    case audio
 
     var id: String {
         rawValue
@@ -21,6 +22,8 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .general:
             return "通用"
+        case .audio:
+            return "声音"
         }
     }
 
@@ -28,6 +31,8 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .general:
             return "gearshape"
+        case .audio:
+            return "speaker.wave.2"
         }
     }
 }
@@ -46,9 +51,14 @@ final class SettingsWindowController {
     static let windowLevel = NSWindow.Level.mainMenu + 4
 
     private let actions: SettingsActions
+    private let settings: AppSettings
     private var window: NSWindow?
 
-    init(onQuit: @MainActor @escaping () -> Void = { NSApp.terminate(nil) }) {
+    init(
+        settings: AppSettings = AppSettings(),
+        onQuit: @MainActor @escaping () -> Void = { NSApp.terminate(nil) }
+    ) {
+        self.settings = settings
         self.actions = SettingsActions(onQuitApplication: onQuit)
     }
 
@@ -77,7 +87,7 @@ final class SettingsWindowController {
         window.contentMinSize = NSSize(width: 560, height: 360)
         window.center()
         window.contentViewController = NSHostingController(
-            rootView: SettingsRootView(actions: actions)
+            rootView: SettingsRootView(actions: actions, settings: settings)
         )
         return window
     }
@@ -85,6 +95,7 @@ final class SettingsWindowController {
 
 struct SettingsRootView: View {
     let actions: SettingsActions
+    let settings: AppSettings
     @State private var navigation = SettingsNavigationModel()
 
     var body: some View {
@@ -114,7 +125,7 @@ struct SettingsRootView: View {
                     Divider()
                 }
 
-                SettingsDetailView(selection: navigation.selection, actions: actions)
+                SettingsDetailView(selection: navigation.selection, actions: actions, settings: settings)
             }
         }
         .frame(minWidth: 560, minHeight: 360)
@@ -154,11 +165,14 @@ private struct SettingsSidebarView: View {
 private struct SettingsDetailView: View {
     let selection: SettingsPane
     let actions: SettingsActions
+    let settings: AppSettings
 
     var body: some View {
         switch selection {
         case .general:
             GeneralSettingsView(actions: actions)
+        case .audio:
+            AudioSettingsView(settings: settings)
         }
     }
 }
@@ -188,6 +202,42 @@ private struct GeneralSettingsView: View {
                     actions.quitApplication()
                 }
                 .buttonStyle(.bordered)
+            }
+
+            Spacer()
+        }
+        .padding(24)
+    }
+}
+
+private struct AudioSettingsView: View {
+    let settings: AppSettings
+    @State private var autoPlayAudio: Bool
+
+    init(settings: AppSettings) {
+        self.settings = settings
+        self._autoPlayAudio = State(initialValue: settings.autoPlayAudio)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("声音")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Divider()
+
+            Toggle(isOn: $autoPlayAudio) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("展开时自动播放")
+                        .font(.headline)
+                    Text("展开 island 面板时自动播放背景音乐。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .onChange(of: autoPlayAudio) { newValue in
+                AudioManager.shared.autoPlayAudio = newValue
             }
 
             Spacer()

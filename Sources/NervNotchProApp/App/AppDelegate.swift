@@ -6,7 +6,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var timer: Timer?
     private let settings = AppSettings()
     private let sampler = TelemetrySampler()
-    @MainActor private lazy var settingsWindowController = SettingsWindowController()
+    @MainActor private lazy var settingsWindowController = SettingsWindowController(
+        settings: settings
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -21,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let viewModel = NotchViewModel(settings: settings, decisionEngine: MagiDecisionEngine())
         self.viewModel = viewModel
 
+        AudioManager.shared.autoPlayAudio = settings.autoPlayAudio
         AudioManager.shared.attach(to: viewModel)
 
         let screen = NSScreen.main ?? NSScreen.screens.first

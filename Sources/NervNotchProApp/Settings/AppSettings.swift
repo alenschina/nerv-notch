@@ -7,4 +7,5 @@ struct AppSettings: Equatable, Sendable {
     var usesSimulatedNotch: Bool = false
     var targetScreenIdentifier: String?
     var fanModeEnabled: Bool = true
+    var autoPlayAudio: Bool = true
 }

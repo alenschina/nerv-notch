@@ -9,6 +9,7 @@ final class AudioManager {
     private nonisolated(unsafe) var player: AVAudioPlayer?
     private nonisolated(unsafe) var fadeTimer: Timer?
     private var cancellable: AnyCancellable?
+    var autoPlayAudio = true
     private let normalVolume: Float = 0.35
 
     @Published var isMuted = false {
@@ -23,7 +24,9 @@ final class AudioManager {
             .sink { [weak self] state in
                 switch state {
                 case .opened:
-                    self?.play()
+                    if self?.autoPlayAudio == true {
+                        self?.play()
+                    }
                 case .closing:
                     self?.startFadeOut()
                 case .closed:
