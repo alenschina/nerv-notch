@@ -5,7 +5,7 @@ macOS 状态栏悬浮岛，采用 NERV/MAGI 指挥终端美学风格。实时展
 ## 系统要求
 
 - macOS 13+
-- 字体（需自行安装）：Share Tech Mono、DS-Digital-Bold、SourceHanSerifCN-Bold、Helvetica Neue Condensed Bold
+- 字体已打包在 App 内（Share Tech Mono、DS-Digital-Bold、SourceHanSerifCN-Bold），无需用户安装
 
 ## 功能
 

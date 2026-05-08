@@ -89,5 +89,5 @@ SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
 - `NotchPanel.ignoresMouseEvents` is toggled based on interaction state so the compact island doesn't block clicks
 - Zero third-party dependencies — Apple system frameworks only (AppKit, SwiftUI, Combine, Foundation, Darwin)
 - No logging framework — all diagnostics are visual (the MAGI console itself is the system monitor)
-- Fonts: "Share Tech Mono", "DS-Digital-Bold", "SourceHanSerifCN-Bold", "Helvetica Neue Condensed Bold" — these are not bundled, must be installed on the system
+- Fonts: "Share Tech Mono", "DS-Digital-Bold", and "SourceHanSerifCN-Bold" are bundled in `Resources/fonts/` and registered at launch via `CTFontManagerRegisterFontsForURL(.process)`. "Helvetica Neue Condensed Bold" is a macOS system font
 - Detailed architecture docs exist in `.planning/codebase/` (ARCHITECTURE.md, CONVENTIONS.md, TESTING.md, etc.)

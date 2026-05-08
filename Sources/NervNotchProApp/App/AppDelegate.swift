@@ -16,6 +16,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     private func start() {
+        FontRegistration.registerBundledFonts()
+
         let viewModel = NotchViewModel(settings: settings, decisionEngine: MagiDecisionEngine())
         self.viewModel = viewModel
 
