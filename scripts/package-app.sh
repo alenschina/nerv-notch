@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="NervNotchPro"
-EXECUTABLE_NAME="NervNotchPro"
-PRODUCT_BUNDLE_IDENTIFIER="${PRODUCT_BUNDLE_IDENTIFIER:-dev.local.NervNotchPro}"
+APP_NAME="NervNotch"
+EXECUTABLE_NAME="NervNotch"
+PRODUCT_BUNDLE_IDENTIFIER="${PRODUCT_BUNDLE_IDENTIFIER:-dev.local.NervNotch}"
 VERSION="${VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 SIGNING_IDENTITY="${SIGNING_IDENTITY:--}"
@@ -20,7 +20,7 @@ cd "$REPO_ROOT"
 swift build -c release
 BIN_DIR="$(swift build -c release --show-bin-path)"
 EXECUTABLE_PATH="$BIN_DIR/$EXECUTABLE_NAME"
-RESOURCE_BUNDLE_PATH="$BIN_DIR/NervNotchPro_NervNotchProApp.bundle"
+RESOURCE_BUNDLE_PATH="$BIN_DIR/NervNotch_NervNotchProApp.bundle"
 ICON_PATH="$REPO_ROOT/Sources/NervNotchProApp/Resources/nerv-island-icon.png"
 
 if [[ ! -x "$EXECUTABLE_PATH" ]]; then
@@ -47,7 +47,7 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>
-  <string>NERV Notch Pro</string>
+  <string>NERV Notch</string>
   <key>CFBundleExecutable</key>
   <string>$EXECUTABLE_NAME</string>
   <key>CFBundleIdentifier</key>
@@ -55,7 +55,7 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>NERV Notch Pro</string>
+  <string>NERV Notch</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

@@ -5,20 +5,20 @@
             "request": "launch",
             "args": [],
             "cwd": "${workspaceFolder:nerv-notch-pro}",
-            "name": "Debug NervNotchPro",
-            "target": "NervNotchPro",
+            "name": "Debug NervNotch",
+            "target": "NervNotch",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug NervNotchPro"
+            "preLaunchTask": "swift: Build Debug NervNotch"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
             "cwd": "${workspaceFolder:nerv-notch-pro}",
-            "name": "Release NervNotchPro",
-            "target": "NervNotchPro",
+            "name": "Release NervNotch",
+            "target": "NervNotch",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release NervNotchPro"
+            "preLaunchTask": "swift: Build Release NervNotch"
         }
     ]
 }

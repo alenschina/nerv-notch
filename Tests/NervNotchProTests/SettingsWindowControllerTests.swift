@@ -10,7 +10,7 @@ final class SettingsWindowControllerTests: XCTestCase {
 
         let window = controller.makeWindowForTesting()
 
-        XCTAssertEqual(window.title, "NervNotchPro Settings")
+        XCTAssertEqual(window.title, "NervNotch Settings")
         XCTAssertEqual(window.contentMinSize.width, 560)
         XCTAssertEqual(window.contentMinSize.height, 360)
         XCTAssertTrue(window.contentViewController is NSHostingController<SettingsRootView>)

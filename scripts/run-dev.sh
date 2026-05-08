@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-swift run NervNotchPro
+swift run NervNotch

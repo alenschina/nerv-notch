@@ -26,14 +26,14 @@ Package a local macOS app bundle:
 
 ```bash
 ./scripts/package-app.sh
-open dist/NervNotchPro.app
+open dist/NervNotch.app
 ```
 
-By default the package script creates `dist/NervNotchPro.app` and applies an ad-hoc signature for local use. For a signed build, pass your Developer ID identity:
+By default the package script creates `dist/NervNotch.app` and applies an ad-hoc signature for local use. For a signed build, pass your Developer ID identity:
 
 ```bash
 SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
-PRODUCT_BUNDLE_IDENTIFIER="com.example.NervNotchPro" \
+PRODUCT_BUNDLE_IDENTIFIER="com.example.NervNotch" \
 VERSION="0.1.0" \
 BUILD_NUMBER="1" \
 ./scripts/package-app.sh

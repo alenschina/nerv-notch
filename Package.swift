@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "NervNotchPro",
+    name: "NervNotch",
     platforms: [
         .macOS(.v13)
     ],
     products: [
-        .executable(name: "NervNotchPro", targets: ["NervNotchProApp"])
+        .executable(name: "NervNotch", targets: ["NervNotchProApp"])
     ],
     targets: [
         .executableTarget(

@@ -71,7 +71,7 @@ final class SettingsWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "NervNotchPro Settings"
+        window.title = "NervNotch Settings"
         window.isReleasedWhenClosed = false
         window.level = Self.windowLevel
         window.contentMinSize = NSSize(width: 560, height: 360)
@@ -178,7 +178,7 @@ private struct GeneralSettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("当前应用")
                         .font(.headline)
-                    Text("结束 NervNotchPro 进程并关闭所有窗口。")
+                    Text("结束 NervNotch 进程并关闭所有窗口。")
                         .foregroundStyle(.secondary)
                 }
 
