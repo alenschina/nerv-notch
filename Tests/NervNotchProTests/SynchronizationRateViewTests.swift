@@ -20,7 +20,7 @@ final class SynchronizationRateViewTests: XCTestCase {
         XCTAssertLessThan(layout.waveTopY, layout.rateBaselineY)
         XCTAssertLessThan(layout.rateBaselineY, layout.bottomTickY)
         XCTAssertEqual(layout.upperPanelHeight, layout.containerSize.height * 4 / 5, accuracy: 0.001)
-        XCTAssertEqual(layout.batteryPanelTopExtension, 20)
+        XCTAssertEqual(layout.batteryPanelTopExtension, 4)
         XCTAssertEqual(layout.batteryPanelTopY, layout.containerSize.height * 4 / 5 - layout.batteryPanelTopExtension, accuracy: 0.001)
         XCTAssertEqual(layout.batteryPanelHeight, layout.containerSize.height / 5 + layout.batteryPanelTopExtension, accuracy: 0.001)
         XCTAssertLessThan(layout.bottomTickY, layout.batteryPanelTopY)

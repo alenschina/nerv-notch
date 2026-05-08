@@ -734,7 +734,7 @@ struct SynchronizationRateLayout: Equatable {
     let batteryHorizontalInset: CGFloat = 3
     let batteryValueFontSize: CGFloat = 21
     let batteryContentVerticalOffset: CGFloat = 3
-    let batteryPanelTopExtension: CGFloat = 20
+    let batteryPanelTopExtension: CGFloat = 4
     let batteryTitleValueSpacing: CGFloat = 10
     let batteryTitleAlignmentName = "center"
     let rateLabelFontName = "SourceHanSerifCN-Bold"
@@ -782,7 +782,7 @@ struct SynchronizationRateLayout: Equatable {
     }
 
     var waveRenderHeight: CGFloat {
-        upperPanelHeight * 0.42
+        upperPanelHeight * 0.54
     }
 
     var waveMaskBottomY: CGFloat {
@@ -806,7 +806,7 @@ struct SynchronizationRateLayout: Equatable {
     }
 
     var rateBaselineY: CGFloat {
-        upperPanelHeight * 0.76
+        upperPanelHeight * 0.82
     }
 
     var bottomTickY: CGFloat {
