@@ -11,9 +11,9 @@ struct SettingsActions {
 }
 
 enum SettingsPane: String, CaseIterable, Identifiable {
-    case general
-    case audio
     case appearance
+    case audio
+    case general
 
     var id: String {
         rawValue
