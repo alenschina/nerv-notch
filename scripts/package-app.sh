@@ -22,6 +22,7 @@ BIN_DIR="$(swift build -c release --show-bin-path)"
 EXECUTABLE_PATH="$BIN_DIR/$EXECUTABLE_NAME"
 RESOURCE_BUNDLE_PATH="$BIN_DIR/NervNotch_NervNotchProApp.bundle"
 ICON_PATH="$REPO_ROOT/Sources/NervNotchProApp/Resources/nerv-island-icon.png"
+APP_ICON_PATH="$REPO_ROOT/Sources/NervNotchProApp/Resources/NervNotch.icns"
 
 if [[ ! -x "$EXECUTABLE_PATH" ]]; then
   echo "Missing release executable: $EXECUTABLE_PATH" >&2
@@ -39,6 +40,12 @@ elif [[ -f "$RESOURCE_BUNDLE_PATH/nerv-island-icon.png" ]]; then
   cp "$RESOURCE_BUNDLE_PATH/nerv-island-icon.png" "$RESOURCES_DIR/"
 fi
 
+if [[ -f "$APP_ICON_PATH" ]]; then
+  cp "$APP_ICON_PATH" "$RESOURCES_DIR/NervNotch.icns"
+elif [[ -f "$RESOURCE_BUNDLE_PATH/NervNotch.icns" ]]; then
+  cp "$RESOURCE_BUNDLE_PATH/NervNotch.icns" "$RESOURCES_DIR/NervNotch.icns"
+fi
+
 cat > "$CONTENTS_DIR/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -52,6 +59,8 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <string>$EXECUTABLE_NAME</string>
   <key>CFBundleIdentifier</key>
   <string>$PRODUCT_BUNDLE_IDENTIFIER</string>
+  <key>CFBundleIconFile</key>
+  <string>NervNotch</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
