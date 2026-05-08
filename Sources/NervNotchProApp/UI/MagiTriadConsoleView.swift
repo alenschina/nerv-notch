@@ -1116,7 +1116,7 @@ private struct SynchronizationWaveShape: Shape {
         let top = rect.height * 0.24
         let bottom = rect.height * 0.70
         let centerY = (top + bottom) / 2
-        let amplitude = max(8, (bottom - top) * 0.46)
+        let amplitude = max(8, (bottom - top) * 0.65)
         let width = max(rect.width, 1)
         let sampleCount = max(Int(width * 2), 36)
         let frequency: CGFloat = 1.05
