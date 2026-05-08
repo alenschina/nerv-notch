@@ -295,6 +295,16 @@ private struct AppearanceSettingsView: View {
         )
     }
 
+    private var sideWarningStripBinding: Binding<Bool> {
+        Binding(
+            get: { settings.sideWarningStripAnimated },
+            set: {
+                settings.sideWarningStripAnimated = $0
+                onSettingsChanged(settings)
+            }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("外观")
@@ -305,9 +315,19 @@ private struct AppearanceSettingsView: View {
 
             Toggle(isOn: warningStripBinding) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("警戒线动画")
+                    Text("中央警戒线动画")
                         .font(.headline)
                     Text("控制中央框架中的斜纹警戒线是否滚动。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Toggle(isOn: sideWarningStripBinding) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("两侧警戒线动画")
+                        .font(.headline)
+                    Text("控制左右两侧的斜纹警戒线是否滚动。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

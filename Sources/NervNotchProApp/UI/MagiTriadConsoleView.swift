@@ -437,12 +437,13 @@ struct MagiTriadConsoleView: View {
     let state: MagiDecisionState
     let warningStripAnimated: Bool
     let syncWaveAnimated: Bool
+    let sideWarningStripAnimated: Bool
 
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
         ZStack {
-            MagiSideWarningBackgroundStrips()
+            MagiSideWarningBackgroundStrips(isAnimated: sideWarningStripAnimated)
 
             consoleGrid
 
@@ -546,66 +547,90 @@ struct MagiTriadConsoleView: View {
 }
 
 private struct MagiSideWarningBackgroundStrips: View {
+    let isAnimated: Bool
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
         HStack(spacing: 0) {
-            MagiSideWarningBackgroundStrip()
+            MagiSideWarningBackgroundStrip(
+                isAnimated: isAnimated,
+                scrollDirection: .up
+            )
                 .frame(width: metrics.sideWarningBackgroundPaintedWidth)
 
             Spacer(minLength: 0)
 
-            MagiSideWarningBackgroundStrip()
+            MagiSideWarningBackgroundStrip(
+                isAnimated: isAnimated,
+                scrollDirection: .down
+            )
                 .frame(width: metrics.sideWarningBackgroundPaintedWidth)
         }
         .allowsHitTesting(false)
     }
 }
 
+private enum SideWarningScrollDirection {
+    case up
+    case down
+}
+
 private struct MagiSideWarningBackgroundStrip: View {
+    let isAnimated: Bool
+    let scrollDirection: SideWarningScrollDirection
     private let metrics = MagiConsoleLayoutMetrics()
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack {
-                Color.black.opacity(0.28)
+            let stripeWidth = metrics.sideWarningBackgroundStripeWidth
+            let directionMultiplier: CGFloat = scrollDirection == .up ? -1 : 1
 
-                NervStyle.orange
-                    .opacity(metrics.sideWarningBackgroundOpacity)
+            TimelineView(.animation) { timeline in
+                let rawPhase = timeline.date.timeIntervalSinceReferenceDate * 12
+                let phase = isAnimated
+                    ? (rawPhase * directionMultiplier).truncatingRemainder(dividingBy: stripeWidth)
+                    : 0
 
-                Path { path in
-                    let stripeWidth = metrics.sideWarningBackgroundStripeWidth
-                    let stripeHeight = metrics.sideWarningBackgroundStripeHeight
-                    var y = -stripeHeight
+                ZStack {
+                    Color.black.opacity(0.28)
 
-                    while y < proxy.size.height + stripeHeight {
-                        path.move(to: CGPoint(x: 0, y: y + stripeHeight))
-                        path.addLine(to: CGPoint(x: proxy.size.width, y: y))
-                        path.addLine(to: CGPoint(x: proxy.size.width, y: y + stripeHeight * 0.45))
-                        path.addLine(to: CGPoint(x: 0, y: y + stripeHeight * 1.45))
-                        path.closeSubpath()
-                        y += stripeWidth
+                    NervStyle.orange
+                        .opacity(metrics.sideWarningBackgroundOpacity)
+
+                    Path { path in
+                        let stripeHeight = metrics.sideWarningBackgroundStripeHeight
+                        var y = -stripeHeight + phase
+
+                        while y < proxy.size.height + stripeHeight + stripeWidth {
+                            path.move(to: CGPoint(x: 0, y: y + stripeHeight))
+                            path.addLine(to: CGPoint(x: proxy.size.width, y: y))
+                            path.addLine(to: CGPoint(x: proxy.size.width, y: y + stripeHeight * 0.45))
+                            path.addLine(to: CGPoint(x: 0, y: y + stripeHeight * 1.45))
+                            path.closeSubpath()
+                            y += stripeWidth
+                        }
                     }
-                }
-                .fill(Color.black.opacity(0.72))
+                    .fill(Color.black.opacity(0.72))
 
-                Path { path in
-                    let rowHeight: CGFloat = 7
-                    var y: CGFloat = 0
+                    Path { path in
+                        let rowHeight: CGFloat = 7
+                        var y: CGFloat = phase.truncatingRemainder(dividingBy: rowHeight)
+                        if y > 0 { y -= rowHeight }
 
-                    while y <= proxy.size.height {
-                        path.move(to: CGPoint(x: 0, y: y))
-                        path.addLine(to: CGPoint(x: proxy.size.width, y: y))
-                        y += rowHeight
+                        while y <= proxy.size.height {
+                            path.move(to: CGPoint(x: 0, y: y))
+                            path.addLine(to: CGPoint(x: proxy.size.width, y: y))
+                            y += rowHeight
+                        }
                     }
+                    .stroke(Color.black.opacity(0.42), lineWidth: 1)
                 }
-                .stroke(Color.black.opacity(0.42), lineWidth: 1)
+                .overlay(
+                    Rectangle()
+                        .stroke(NervStyle.orange.opacity(0.18), lineWidth: 1)
+                )
+                .clipped()
             }
-            .overlay(
-                Rectangle()
-                    .stroke(NervStyle.orange.opacity(0.18), lineWidth: 1)
-            )
-            .clipped()
         }
     }
 }

@@ -10,6 +10,7 @@ struct AppSettings: Equatable, Sendable, Codable {
     var autoPlayAudio: Bool = true
     var warningStripAnimated: Bool = true
     var syncWaveAnimated: Bool = true
+    var sideWarningStripAnimated: Bool = true
 
     private static let userDefaultsKey = "NervNotch.settings"
 

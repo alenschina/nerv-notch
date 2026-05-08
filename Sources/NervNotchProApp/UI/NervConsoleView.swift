@@ -126,7 +126,8 @@ struct NervConsoleView: View {
             MagiTriadConsoleView(
                 state: viewModel.magiState,
                 warningStripAnimated: viewModel.settings.warningStripAnimated,
-                syncWaveAnimated: viewModel.settings.syncWaveAnimated
+                syncWaveAnimated: viewModel.settings.syncWaveAnimated,
+                sideWarningStripAnimated: viewModel.settings.sideWarningStripAnimated
             )
 
             expandedHeader
