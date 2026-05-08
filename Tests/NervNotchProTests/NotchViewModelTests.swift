@@ -14,7 +14,9 @@ final class NotchViewModelTests: XCTestCase {
             memory: MemorySample(totalBytes: 1000, usedBytes: 400, availableBytes: 600, compressedBytes: 0),
             network: NetworkRate(downBytesPerSecond: 1024, upBytesPerSecond: 2048, activeInterfaceCount: 1),
             disk: DiskSpaceSample(totalBytes: 1000, usedBytes: 625, availableBytes: 375),
-            diskIO: DiskIORate(readBytesPerSecond: 512, writeBytesPerSecond: 1_024)
+            diskIO: DiskIORate(readBytesPerSecond: 512, writeBytesPerSecond: 1_024),
+            swap: SwapUsageSample(totalBytes: 1000, usedBytes: 125, availableBytes: 875),
+            battery: BatterySample(chargeRatio: 0.71, isCharging: false)
         )
 
         await viewModel.apply(snapshot)
@@ -23,6 +25,8 @@ final class NotchViewModelTests: XCTestCase {
         XCTAssertEqual(magiState.cpu.level, .highLoad)
         XCTAssertEqual(magiState.diskUsageRatio, 0.625)
         XCTAssertEqual(magiState.diskIORateText, "R 0 KB/s  W 1 KB/s")
+        XCTAssertEqual(magiState.swapUsageRatio, 0.125)
+        XCTAssertEqual(magiState.batteryPercentageText, "71%")
         XCTAssertEqual(magiState.judgement.level, .elevatedAlert)
     }
 

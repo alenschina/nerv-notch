@@ -53,6 +53,17 @@ struct DiskIORate: Equatable, Sendable {
     let writeBytesPerSecond: UInt64
 }
 
+struct SwapUsageSample: Equatable, Sendable {
+    let totalBytes: UInt64
+    let usedBytes: UInt64
+    let availableBytes: UInt64
+}
+
+struct BatterySample: Equatable, Sendable {
+    let chargeRatio: Double
+    let isCharging: Bool
+}
+
 struct SystemSnapshot: Equatable, Sendable {
     let sampledAt: Date
     let cpu: CPUSample?
@@ -60,4 +71,6 @@ struct SystemSnapshot: Equatable, Sendable {
     let network: NetworkRate?
     let disk: DiskSpaceSample?
     let diskIO: DiskIORate?
+    let swap: SwapUsageSample?
+    let battery: BatterySample?
 }

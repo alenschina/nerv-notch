@@ -20,4 +20,19 @@ final class TelemetrySamplerSmokeTests: XCTestCase {
         XCTAssertGreaterThan(sample?.totalBytes ?? 0, 0)
         XCTAssertLessThanOrEqual(sample?.usedBytes ?? 0, sample?.totalBytes ?? 0)
     }
+
+    func testSwapSamplerReportsSystemSwapUsageWhenAvailable() {
+        let sample = SwapUsageSampler().sample()
+        XCTAssertNotNil(sample)
+        XCTAssertGreaterThanOrEqual(sample?.usedBytes ?? 0, 0)
+        XCTAssertLessThanOrEqual(sample?.usedBytes ?? 0, sample?.totalBytes ?? 0)
+    }
+
+    func testBatterySamplerReportsPercentageWhenBatteryIsAvailable() {
+        let sample = BatterySampler().sample()
+        if let sample {
+            XCTAssertGreaterThanOrEqual(sample.chargeRatio, 0)
+            XCTAssertLessThanOrEqual(sample.chargeRatio, 1)
+        }
+    }
 }

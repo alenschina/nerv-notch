@@ -451,7 +451,8 @@ struct MagiTriadConsoleView: View {
                         strokeOffsetX: metrics.leftAuxiliaryFrameStrokeOffsetX
                     ) {
                         SynchronizationRateView(
-                            rateText: SynchronizationRateLayout.rateText(cpuLoadText: state.cpu.primaryValue)
+                            rateText: SynchronizationRateLayout.rateText(swapUsageRatio: state.swapUsageRatio),
+                            batteryText: state.batteryPercentageText
                         )
                     }
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
@@ -727,43 +728,89 @@ struct SynchronizationRateLayout: Equatable {
     let waveCount = 13
     let phaseVelocity: CGFloat = 1.35
     let titleText = "SYNCHRONIZATION RATE / 同步率"
+    let batteryTitleText = "BATTERY / 电池"
     let titleTopPadding: CGFloat = 34
+    let batteryTitleTopPadding: CGFloat = 12
+    let batteryHorizontalInset: CGFloat = 3
+    let batteryValueFontSize: CGFloat = 21
+    let batteryContentVerticalOffset: CGFloat = 3
+    let batteryPanelTopExtension: CGFloat = 20
+    let batteryTitleValueSpacing: CGFloat = 10
+    let batteryTitleAlignmentName = "center"
     let rateLabelFontName = "SourceHanSerifCN-Bold"
     let rateValueFontName = "DS-Digital-Bold"
 
-    static func rateText(cpuLoadText: String) -> String {
-        let trimmedValue = cpuLoadText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmedValue.hasSuffix("%") else {
+    static func rateText(swapUsageRatio: Double?) -> String {
+        guard let swapUsageRatio else {
             return "--"
         }
 
-        let numericText = String(trimmedValue.dropLast())
-        guard let cpuLoad = Double(numericText) else {
-            return "--"
+        let rate = min(100, max(0, swapUsageRatio * 100))
+        if rate.rounded() == rate {
+            return "\(Int(rate))%"
         }
 
-        let synchronizedRate = min(100, max(0, 100 - cpuLoad))
-        if synchronizedRate.rounded() == synchronizedRate {
-            return "\(Int(synchronizedRate))%"
-        }
+        return "\(String(format: "%.1f", rate))%"
+    }
 
-        return "\(String(format: "%.1f", synchronizedRate))%"
+    var upperPanelHeight: CGFloat {
+        containerSize.height * 4 / 5
+    }
+
+    var batteryPanelTopY: CGFloat {
+        upperPanelHeight - batteryPanelTopExtension
+    }
+
+    var batteryPanelHeight: CGFloat {
+        max(0, containerSize.height - batteryPanelTopY)
+    }
+
+    var batteryContentHeight: CGFloat {
+        batteryPanelHeight
+    }
+
+    var batteryContentCenterY: CGFloat {
+        batteryPanelTopY + batteryPanelHeight / 2 + batteryContentVerticalOffset
+    }
+
+    var batterySeparatorY: CGFloat {
+        batteryPanelTopY
+    }
+
+    var waveRenderTopY: CGFloat {
+        titleTopPadding + 18
+    }
+
+    var waveRenderHeight: CGFloat {
+        upperPanelHeight * 0.42
+    }
+
+    var waveMaskBottomY: CGFloat {
+        waveRenderHeight
+    }
+
+    var topGuideY: CGFloat {
+        waveRenderTopY
+    }
+
+    var bottomGuideY: CGFloat {
+        waveRenderTopY + waveRenderHeight
     }
 
     var waveTopY: CGFloat {
-        containerSize.height * 0.24
+        waveRenderTopY + waveRenderHeight * 0.24
     }
 
     var waveBottomY: CGFloat {
-        containerSize.height * 0.70
+        waveRenderTopY + waveRenderHeight * 0.70
     }
 
     var rateBaselineY: CGFloat {
-        containerSize.height * 0.78
+        upperPanelHeight * 0.76
     }
 
     var bottomTickY: CGFloat {
-        containerSize.height - 17
+        batteryPanelTopY - 17
     }
 
     func phase(at time: TimeInterval) -> CGFloat {
@@ -773,6 +820,7 @@ struct SynchronizationRateLayout: Equatable {
 
 private struct SynchronizationRateView: View {
     let rateText: String
+    let batteryText: String
 
     var body: some View {
         TimelineView(.animation) { timeline in
@@ -811,14 +859,13 @@ private struct SynchronizationRateView: View {
                         )
                         .shadow(color: waveColor(for: index, count: layout.waveCount).opacity(0.45), radius: 2)
                         .padding(.horizontal, layout.contentInset + 2)
-                        .padding(.vertical, 2)
                     }
-                    .mask(
-                        Rectangle()
-                            .padding(.horizontal, layout.contentInset)
-                            .padding(.top, layout.waveTopY - 6)
-                            .padding(.bottom, proxy.size.height - layout.waveBottomY - 6)
+                    .frame(width: proxy.size.width, height: layout.waveRenderHeight)
+                    .position(
+                        x: proxy.size.width / 2,
+                        y: layout.waveRenderTopY + layout.waveRenderHeight / 2
                     )
+                    .clipped()
 
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
                         Text("同步率")
@@ -836,6 +883,50 @@ private struct SynchronizationRateView: View {
                     .position(x: proxy.size.width / 2, y: layout.rateBaselineY)
 
                     SynchronizationTickMarks(layout: layout)
+
+                    BatteryPanelSeparator(layout: layout)
+
+                    VStack(spacing: layout.batteryTitleValueSpacing) {
+                        Text(layout.batteryTitleText)
+                            .font(.system(size: 6.4, weight: .black, design: .monospaced))
+                            .foregroundStyle(NervStyle.orange)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.28)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .shadow(color: NervStyle.orange.opacity(0.75), radius: 3)
+
+                        HStack(alignment: .center, spacing: 5) {
+                            BatteryReserveIcon(chargeText: batteryText)
+                                .frame(
+                                    width: BatteryReserveIconLayout(chargeText: batteryText).iconWidth,
+                                    height: BatteryReserveIconLayout(chargeText: batteryText).iconHeight
+                                )
+                                .shadow(color: NervStyle.red.opacity(0.75), radius: 4)
+
+                            Text(batteryText)
+                                .font(.custom(layout.rateValueFontName, size: layout.batteryValueFontSize))
+                                .fontWeight(.black)
+                                .foregroundStyle(NervStyle.red)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.26)
+                                .shadow(color: NervStyle.red.opacity(0.95), radius: 5)
+                        }
+                        .frame(
+                            width: max(0, proxy.size.width - layout.batteryHorizontalInset * 2),
+                            alignment: .center
+                        )
+                    }
+                    .padding(.horizontal, layout.batteryHorizontalInset)
+                    .frame(maxHeight: .infinity, alignment: .center)
+                    .frame(
+                        width: proxy.size.width,
+                        height: layout.batteryContentHeight,
+                        alignment: .top
+                    )
+                    .position(
+                        x: proxy.size.width / 2,
+                        y: layout.batteryContentCenterY
+                    )
                 }
                 .background(Color.black.opacity(0.28))
                 .clipped()
@@ -856,6 +947,73 @@ private struct SynchronizationRateView: View {
     }
 }
 
+struct BatteryReserveIconLayout: Equatable {
+    let chargeText: String
+    let segmentCount = 5
+    let iconWidth: CGFloat = 48
+    let iconHeight: CGFloat = 19
+    let strokeColorName = "NervStyle.red"
+    let fillColorName = "NervStyle.red"
+
+    var filledSegmentCount: Int {
+        guard let percentage = percentageValue else {
+            return 0
+        }
+
+        let normalized = min(100, max(0, percentage))
+        guard normalized > 0 else {
+            return 0
+        }
+        return min(segmentCount, max(1, Int(ceil(normalized / 100 * Double(segmentCount)))))
+    }
+
+    private var percentageValue: Double? {
+        let trimmed = chargeText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.hasSuffix("%") else {
+            return nil
+        }
+        return Double(trimmed.dropLast())
+    }
+}
+
+private struct BatteryReserveIcon: View {
+    let chargeText: String
+
+    var body: some View {
+        let layout = BatteryReserveIconLayout(chargeText: chargeText)
+
+        GeometryReader { proxy in
+            let terminalWidth = max(3, proxy.size.width * 0.10)
+            let bodyWidth = max(1, proxy.size.width - terminalWidth)
+            let segmentSpacing: CGFloat = 2.2
+            let horizontalInset: CGFloat = 5
+            let availableSegmentWidth = max(1, bodyWidth - horizontalInset * 2 - segmentSpacing * CGFloat(layout.segmentCount - 1))
+            let segmentWidth = max(2, availableSegmentWidth / CGFloat(layout.segmentCount))
+
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 3)
+                    .stroke(NervStyle.red, lineWidth: 2)
+                    .frame(width: bodyWidth, height: proxy.size.height)
+
+                RoundedRectangle(cornerRadius: 1.2)
+                    .fill(NervStyle.red)
+                    .frame(width: terminalWidth, height: proxy.size.height * 0.48)
+                    .offset(x: bodyWidth - 0.7)
+
+                HStack(spacing: segmentSpacing) {
+                    ForEach(0..<layout.segmentCount, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 1.4)
+                            .fill(index < layout.filledSegmentCount ? NervStyle.red : Color.clear)
+                            .frame(width: segmentWidth, height: proxy.size.height - 6)
+                    }
+                }
+                .padding(.leading, horizontalInset)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        }
+    }
+}
+
 private struct SynchronizationGuideLines: View {
     let layout: SynchronizationRateLayout
 
@@ -864,8 +1022,8 @@ private struct SynchronizationGuideLines: View {
             Path { path in
                 let left = layout.contentInset
                 let right = proxy.size.width - layout.contentInset
-                let topRuleY = layout.waveTopY - 18
-                let bottomRuleY = layout.rateBaselineY + 16
+                let topRuleY = layout.topGuideY
+                let bottomRuleY = layout.bottomGuideY
 
                 path.move(to: CGPoint(x: left, y: topRuleY))
                 path.addLine(to: CGPoint(x: right, y: topRuleY))
@@ -885,10 +1043,10 @@ private struct SynchronizationGuideLines: View {
                 let left = layout.contentInset
                 let right = proxy.size.width - layout.contentInset
 
-                path.move(to: CGPoint(x: left, y: layout.waveTopY - 18))
-                path.addLine(to: CGPoint(x: right, y: layout.waveTopY - 18))
-                path.move(to: CGPoint(x: left, y: layout.rateBaselineY + 16))
-                path.addLine(to: CGPoint(x: right, y: layout.rateBaselineY + 16))
+                path.move(to: CGPoint(x: left, y: layout.topGuideY))
+                path.addLine(to: CGPoint(x: right, y: layout.topGuideY))
+                path.move(to: CGPoint(x: left, y: layout.bottomGuideY))
+                path.addLine(to: CGPoint(x: right, y: layout.bottomGuideY))
             }
             .stroke(NervStyle.orange.opacity(0.78), lineWidth: 1)
             .shadow(color: NervStyle.orange.opacity(0.4), radius: 2)
@@ -914,6 +1072,21 @@ private struct SynchronizationTickMarks: View {
             }
             .stroke(NervStyle.orange.opacity(0.72), lineWidth: 1)
             .shadow(color: NervStyle.orange.opacity(0.45), radius: 2)
+        }
+    }
+}
+
+private struct BatteryPanelSeparator: View {
+    let layout: SynchronizationRateLayout
+
+    var body: some View {
+        GeometryReader { proxy in
+            Path { path in
+                path.move(to: CGPoint(x: layout.contentInset, y: layout.batterySeparatorY))
+                path.addLine(to: CGPoint(x: proxy.size.width - layout.contentInset, y: layout.batterySeparatorY))
+            }
+            .stroke(NervStyle.red.opacity(0.82), lineWidth: 1)
+            .shadow(color: NervStyle.red.opacity(0.55), radius: 3)
         }
     }
 }

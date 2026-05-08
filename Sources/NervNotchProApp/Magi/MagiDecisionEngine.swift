@@ -7,6 +7,8 @@ struct MagiDecisionState: Equatable, Sendable {
     let network: MagiPanelDecision
     let diskUsageRatio: Double?
     let diskIORateText: String
+    let swapUsageRatio: Double?
+    let batteryPercentageText: String
     let judgement: CentralDogmaJudgement
 
     static let defaultValue = MagiDecisionState(
@@ -28,6 +30,8 @@ struct MagiDecisionState: Equatable, Sendable {
         ),
         diskUsageRatio: nil,
         diskIORateText: "R --  W --",
+        swapUsageRatio: nil,
+        batteryPercentageText: "--",
         judgement: CentralDogmaJudgement(
             level: .synchronized,
             title: "SYNCHRONIZED",
@@ -81,6 +85,8 @@ struct MagiDecisionEngine: Sendable {
             network: network,
             diskUsageRatio: diskUsageRatio(snapshot.disk),
             diskIORateText: diskIORateText(snapshot.diskIO),
+            swapUsageRatio: swapUsageRatio(snapshot.swap),
+            batteryPercentageText: batteryPercentageText(snapshot.battery),
             judgement: judgement
         )
     }
@@ -262,6 +268,21 @@ struct MagiDecisionEngine: Sendable {
         }
 
         return "R \(ByteFormat.rate(rate.readBytesPerSecond))  W \(ByteFormat.rate(rate.writeBytesPerSecond))"
+    }
+
+    private func swapUsageRatio(_ sample: SwapUsageSample?) -> Double? {
+        guard let sample, sample.totalBytes > 0 else {
+            return nil
+        }
+        return min(1, max(0, Double(sample.usedBytes) / Double(sample.totalBytes)))
+    }
+
+    private func batteryPercentageText(_ sample: BatterySample?) -> String {
+        guard let sample else {
+            return "--"
+        }
+
+        return percent(min(1, max(0, sample.chargeRatio)))
     }
 }
 
