@@ -52,14 +52,17 @@ final class SettingsWindowController {
 
     private let actions: SettingsActions
     private let settings: AppSettings
+    private let onSettingsChanged: (AppSettings) -> Void
     private var window: NSWindow?
 
     init(
         settings: AppSettings = AppSettings(),
-        onQuit: @MainActor @escaping () -> Void = { NSApp.terminate(nil) }
+        onQuit: @MainActor @escaping () -> Void = { NSApp.terminate(nil) },
+        onSettingsChanged: @escaping (AppSettings) -> Void = { _ in }
     ) {
         self.settings = settings
         self.actions = SettingsActions(onQuitApplication: onQuit)
+        self.onSettingsChanged = onSettingsChanged
     }
 
     func showSettings() {
@@ -87,7 +90,7 @@ final class SettingsWindowController {
         window.contentMinSize = NSSize(width: 560, height: 360)
         window.center()
         window.contentViewController = NSHostingController(
-            rootView: SettingsRootView(actions: actions, settings: settings)
+            rootView: SettingsRootView(actions: actions, settings: settings, onSettingsChanged: onSettingsChanged)
         )
         return window
     }
@@ -96,6 +99,7 @@ final class SettingsWindowController {
 struct SettingsRootView: View {
     let actions: SettingsActions
     let settings: AppSettings
+    let onSettingsChanged: (AppSettings) -> Void
     @State private var navigation = SettingsNavigationModel()
 
     var body: some View {
@@ -125,7 +129,7 @@ struct SettingsRootView: View {
                     Divider()
                 }
 
-                SettingsDetailView(selection: navigation.selection, actions: actions, settings: settings)
+                SettingsDetailView(selection: navigation.selection, actions: actions, settings: settings, onSettingsChanged: onSettingsChanged)
             }
         }
         .frame(minWidth: 560, minHeight: 360)
@@ -166,13 +170,14 @@ private struct SettingsDetailView: View {
     let selection: SettingsPane
     let actions: SettingsActions
     let settings: AppSettings
+    let onSettingsChanged: (AppSettings) -> Void
 
     var body: some View {
         switch selection {
         case .general:
             GeneralSettingsView(actions: actions)
         case .audio:
-            AudioSettingsView(settings: settings)
+            AudioSettingsView(settings: settings, onSettingsChanged: onSettingsChanged)
         }
     }
 }
@@ -212,10 +217,12 @@ private struct GeneralSettingsView: View {
 
 private struct AudioSettingsView: View {
     let settings: AppSettings
+    let onSettingsChanged: (AppSettings) -> Void
     @State private var autoPlayAudio: Bool
 
-    init(settings: AppSettings) {
+    init(settings: AppSettings, onSettingsChanged: @escaping (AppSettings) -> Void) {
         self.settings = settings
+        self.onSettingsChanged = onSettingsChanged
         self._autoPlayAudio = State(initialValue: settings.autoPlayAudio)
     }
 
@@ -237,7 +244,9 @@ private struct AudioSettingsView: View {
                 }
             }
             .onChange(of: autoPlayAudio) { newValue in
-                AudioManager.shared.autoPlayAudio = newValue
+                var updated = settings
+                updated.autoPlayAudio = newValue
+                onSettingsChanged(updated)
             }
 
             Spacer()

@@ -4,10 +4,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var windowController: NotchWindowController?
     private var viewModel: NotchViewModel?
     private var timer: Timer?
-    private let settings = AppSettings()
+    private var settings = AppSettings.load()
     private let sampler = TelemetrySampler()
     @MainActor private lazy var settingsWindowController = SettingsWindowController(
-        settings: settings
+        settings: settings,
+        onSettingsChanged: { [weak self] updated in
+            self?.applySettings(updated)
+        }
     )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -64,5 +67,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     private func openSettings() {
         settingsWindowController.showSettings()
+    }
+
+    @MainActor
+    private func applySettings(_ updated: AppSettings) {
+        settings = updated
+        updated.save()
+        AudioManager.shared.autoPlayAudio = updated.autoPlayAudio
     }
 }
