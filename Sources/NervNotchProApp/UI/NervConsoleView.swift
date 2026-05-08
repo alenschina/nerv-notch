@@ -66,6 +66,7 @@ struct NervConsoleView: View {
     @ObservedObject var viewModel: NotchViewModel
     let layout: NotchIslandLayout
     let onOpenSettings: () -> Void
+    @State private var isMuted = false
 
     init(
         viewModel: NotchViewModel,
@@ -128,7 +129,10 @@ struct NervConsoleView: View {
                 .padding(.top, layout.expandedHeaderTopPadding)
                 .padding(.leading, layout.expandedHeaderLeadingPadding)
 
-            expandedSettingsButton
+            HStack(spacing: 10) {
+                expandedSoundToggleButton
+                expandedSettingsButton
+            }
                 .padding(.top, layout.expandedHeaderTopPadding)
                 .padding(.trailing, layout.expandedHeaderTrailingPadding)
                 .frame(maxWidth: .infinity, alignment: .topTrailing)
@@ -164,6 +168,25 @@ struct NervConsoleView: View {
         }
         // Match row height to the square icon so the label centers with the glyph box (custom CJK line metrics often read low in a default HStack).
         .frame(height: layout.expandedHeaderIconSize, alignment: .center)
+    }
+
+    private var expandedSoundToggleButton: some View {
+        Button {
+            isMuted.toggle()
+            AudioManager.shared.isMuted = isMuted
+        } label: {
+            Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(isMuted ? NervStyle.orange.opacity(0.5) : NervStyle.orange)
+                .frame(
+                    width: layout.expandedSettingsButtonSize,
+                    height: layout.expandedSettingsButtonSize
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(isMuted ? "Unmute" : "Mute")
+        .accessibilityLabel(isMuted ? "Unmute" : "Mute")
     }
 
     private var expandedSettingsButton: some View {
