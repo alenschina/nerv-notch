@@ -81,4 +81,4 @@ Detailed architecture docs live in [`.planning/codebase/`](.planning/codebase/) 
 
 ## License
 
-Personal fan prototype. No copyrighted imagery included.
+Personal fan prototype. No copyrighted imagery or music included.
