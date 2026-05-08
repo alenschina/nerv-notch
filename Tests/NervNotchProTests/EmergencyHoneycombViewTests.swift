@@ -8,12 +8,12 @@ final class EmergencyHoneycombViewTests: XCTestCase {
             width: metrics.rightAuxiliaryFrameStrokeWidth - 2,
             height: metrics.triadOuterFrameHeight - 2
         ))
-        XCTAssertEqual(layout.titleText, "EMERGENCY / 警告")
+        XCTAssertEqual(layout.titleText, "DISK SPACE / 磁盘容量")
         XCTAssertEqual(layout.contentInset, SynchronizationRateLayout(containerSize: .zero).contentInset)
         XCTAssertEqual(layout.titleTopPadding, SynchronizationRateLayout(containerSize: .zero).titleTopPadding)
         XCTAssertEqual(layout.titleAlignment, .center)
         XCTAssertEqual(layout.honeycombScale, 0.94)
-        XCTAssertTrue(layout.cells.allSatisfy { $0.label == "EMERGENCY" })
+        XCTAssertTrue(layout.cells.allSatisfy { $0.label == "DISK" })
         XCTAssertEqual(Set(layout.cells.map(\.column)).count, 3)
         XCTAssertEqual(layout.cells.count, 16)
         XCTAssertFalse(layout.cells.contains { $0.column == 0 && $0.row == 0 })
@@ -35,5 +35,24 @@ final class EmergencyHoneycombViewTests: XCTestCase {
 
         XCTAssertGreaterThanOrEqual(layout.contiguousNeighborPairCount, 18)
         XCTAssertLessThanOrEqual(layout.maximumContiguousNeighborError, 0.001)
+    }
+
+    func testDiskHoneycombFillsCellsFromBottomToTopByUsageRatio() {
+        let metrics = MagiConsoleLayoutMetrics()
+        let layout = EmergencyHoneycombLayout(
+            containerSize: CGSize(
+                width: metrics.rightAuxiliaryFrameStrokeWidth - 2,
+                height: metrics.triadOuterFrameHeight - 2
+            ),
+            diskUsageRatio: 0.5
+        )
+
+        XCTAssertEqual(layout.titleText, "DISK SPACE / 磁盘容量")
+        XCTAssertEqual(layout.filledCells.count, 8)
+        XCTAssertEqual(layout.emptyCells.count, 8)
+
+        let highestFilledCellY = layout.filledCells.map(\.center.y).min() ?? 0
+        let lowestEmptyCellY = layout.emptyCells.map(\.center.y).max() ?? 0
+        XCTAssertGreaterThanOrEqual(highestFilledCellY, lowestEmptyCellY)
     }
 }

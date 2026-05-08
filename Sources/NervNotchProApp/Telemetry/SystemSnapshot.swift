@@ -37,9 +37,16 @@ struct NetworkRate: Equatable, Sendable {
     let activeInterfaceCount: Int
 }
 
+struct DiskSpaceSample: Equatable, Sendable {
+    let totalBytes: UInt64
+    let usedBytes: UInt64
+    let availableBytes: UInt64
+}
+
 struct SystemSnapshot: Equatable, Sendable {
     let sampledAt: Date
     let cpu: CPUSample?
     let memory: MemorySample?
     let network: NetworkRate?
+    let disk: DiskSpaceSample?
 }

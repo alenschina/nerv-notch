@@ -470,7 +470,7 @@ struct MagiTriadConsoleView: View {
                         strokeWidth: metrics.rightAuxiliaryFrameStrokeWidth,
                         strokeOffsetX: metrics.rightAuxiliaryFrameStrokeOffsetX
                     ) {
-                        EmergencyHoneycombView()
+                        EmergencyHoneycombView(diskUsageRatio: state.diskUsageRatio)
                     }
                         .frame(width: metrics.sideAuxiliaryFrameWidth, height: metrics.triadOuterFrameHeight)
                 }
@@ -974,6 +974,7 @@ struct EmergencyHoneycombCell: Equatable {
     let center: CGPoint
     let sideLength: CGFloat
     let label: String
+    let isFilled: Bool
 
     var frame: CGRect {
         CGRect(
@@ -991,10 +992,11 @@ struct EmergencyHoneycombCell: Equatable {
 
 struct EmergencyHoneycombLayout: Equatable {
     let containerSize: CGSize
+    var diskUsageRatio: Double? = nil
     let contentInset: CGFloat = 7
     let topPadding: CGFloat = 50
     let bottomPadding: CGFloat = 10
-    let titleText = "EMERGENCY / 警告"
+    let titleText = "DISK SPACE / 磁盘容量"
     let titleTopPadding: CGFloat = 34
     let titleAlignment: Alignment = .center
     let honeycombScale: CGFloat = 0.94
@@ -1011,6 +1013,8 @@ struct EmergencyHoneycombLayout: Equatable {
         let originX = -bounds.minX + max(0, (containerSize.width - bounds.width) / 2)
         let originY = topPadding - bounds.minY + max(0, (availableHeight - bounds.height) / 2)
 
+        let filledCoordinates = Set(filledCellCoordinates)
+
         return includedCoordinates.map { coordinate in
                 let column = coordinate.column
                 let row = coordinate.row
@@ -1022,9 +1026,18 @@ struct EmergencyHoneycombLayout: Equatable {
                     row: row,
                     center: CGPoint(x: x, y: y),
                     sideLength: sideLength,
-                    label: "EMERGENCY"
+                    label: "DISK",
+                    isFilled: filledCoordinates.contains(HoneycombCoordinate(column: column, row: row))
                 )
         }
+    }
+
+    var filledCells: [EmergencyHoneycombCell] {
+        cells.filter(\.isFilled)
+    }
+
+    var emptyCells: [EmergencyHoneycombCell] {
+        cells.filter { !$0.isFilled }
     }
 
     var contiguousNeighborPairCount: Int {
@@ -1067,12 +1080,32 @@ struct EmergencyHoneycombLayout: Equatable {
         return errors
     }
 
-    private var includedCoordinates: [(column: Int, row: Int)] {
+    private var includedCoordinates: [HoneycombCoordinate] {
         (0..<columnCount).flatMap { column in
             (0..<rowCount).compactMap { row in
-                shouldIncludeCell(column: column, row: row) ? (column, row) : nil
+                shouldIncludeCell(column: column, row: row) ? HoneycombCoordinate(column: column, row: row) : nil
             }
         }
+    }
+
+    private var filledCellCoordinates: [HoneycombCoordinate] {
+        let ratio = min(1, max(0, diskUsageRatio ?? 0))
+        let filledCellCount = Int((Double(includedCoordinates.count) * ratio).rounded())
+        let hexHeight = CGFloat(sqrt(3.0))
+
+        return Array(
+            includedCoordinates
+                .sorted { left, right in
+                    let leftY = CGFloat(left.row) * hexHeight + CGFloat(left.column) * hexHeight / 2
+                    let rightY = CGFloat(right.row) * hexHeight + CGFloat(right.column) * hexHeight / 2
+
+                    if leftY != rightY {
+                        return leftY > rightY
+                    }
+                    return left.column < right.column
+                }
+                .prefix(filledCellCount)
+        )
     }
 
     private func normalizedCellBounds(sideLength: CGFloat) -> CGRect {
@@ -1107,9 +1140,11 @@ struct EmergencyHoneycombLayout: Equatable {
 }
 
 private struct EmergencyHoneycombView: View {
+    let diskUsageRatio: Double?
+
     var body: some View {
         GeometryReader { proxy in
-            let layout = EmergencyHoneycombLayout(containerSize: proxy.size)
+            let layout = EmergencyHoneycombLayout(containerSize: proxy.size, diskUsageRatio: diskUsageRatio)
 
             ZStack {
                 Color.black.opacity(0.42)
@@ -1197,8 +1232,13 @@ private struct EmergencyHoneycombCellView: View {
     }
 
     private var fillColor: Color {
-        NervStyle.red.opacity(0.94)
+        cell.isFilled ? NervStyle.red.opacity(0.94) : Color.black.opacity(0.18)
     }
+}
+
+private struct HoneycombCoordinate: Equatable, Hashable {
+    let column: Int
+    let row: Int
 }
 
 private struct EmergencyHoneycombHexagon: Shape {

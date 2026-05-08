@@ -13,4 +13,11 @@ final class TelemetrySamplerSmokeTests: XCTestCase {
         XCTAssertNotNil(sample)
         XCTAssertGreaterThan(sample?.totalBytes ?? 0, 0)
     }
+
+    func testDiskSamplerReportsRootVolumeCapacityWhenAvailable() {
+        let sample = DiskSpaceSampler().sample()
+        XCTAssertNotNil(sample)
+        XCTAssertGreaterThan(sample?.totalBytes ?? 0, 0)
+        XCTAssertLessThanOrEqual(sample?.usedBytes ?? 0, sample?.totalBytes ?? 0)
+    }
 }

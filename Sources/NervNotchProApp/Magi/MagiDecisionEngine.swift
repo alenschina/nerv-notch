@@ -5,6 +5,7 @@ struct MagiDecisionState: Equatable, Sendable {
     let cpu: MagiPanelDecision
     let memory: MagiPanelDecision
     let network: MagiPanelDecision
+    let diskUsageRatio: Double?
     let judgement: CentralDogmaJudgement
 
     static let defaultValue = MagiDecisionState(
@@ -24,6 +25,7 @@ struct MagiDecisionState: Equatable, Sendable {
             primaryValue: "0 KB/s", secondaryValue: "NO SIGNAL",
             level: .normal, statusText: "ACTIVE", decisionText: "COMM LINK ACTIVE"
         ),
+        diskUsageRatio: nil,
         judgement: CentralDogmaJudgement(
             level: .synchronized,
             title: "SYNCHRONIZED",
@@ -75,6 +77,7 @@ struct MagiDecisionEngine: Sendable {
             cpu: cpu,
             memory: memory,
             network: network,
+            diskUsageRatio: diskUsageRatio(snapshot.disk),
             judgement: judgement
         )
     }
@@ -241,6 +244,13 @@ struct MagiDecisionEngine: Sendable {
 
     private func percent(_ ratio: Double) -> String {
         "\(Int((ratio * 100).rounded()))%"
+    }
+
+    private func diskUsageRatio(_ sample: DiskSpaceSample?) -> Double? {
+        guard let sample, sample.totalBytes > 0 else {
+            return nil
+        }
+        return min(1, max(0, Double(sample.usedBytes) / Double(sample.totalBytes)))
     }
 }
 

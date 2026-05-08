@@ -12,13 +12,15 @@ final class NotchViewModelTests: XCTestCase {
             sampledAt: Date(timeIntervalSince1970: 1),
             cpu: CPUSample(usageRatio: 0.8, coreCount: 10, userRatio: 0.6, systemRatio: 0.2, idleRatio: 0.2),
             memory: MemorySample(totalBytes: 1000, usedBytes: 400, availableBytes: 600, compressedBytes: 0),
-            network: NetworkRate(downBytesPerSecond: 1024, upBytesPerSecond: 2048, activeInterfaceCount: 1)
+            network: NetworkRate(downBytesPerSecond: 1024, upBytesPerSecond: 2048, activeInterfaceCount: 1),
+            disk: DiskSpaceSample(totalBytes: 1000, usedBytes: 625, availableBytes: 375)
         )
 
         await viewModel.apply(snapshot)
 
         let magiState = await viewModel.magiState
         XCTAssertEqual(magiState.cpu.level, .highLoad)
+        XCTAssertEqual(magiState.diskUsageRatio, 0.625)
         XCTAssertEqual(magiState.judgement.level, .elevatedAlert)
     }
 
