@@ -43,7 +43,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 }
 
 struct SettingsNavigationModel: Equatable {
-    var selection: SettingsPane = .general
+    var selection: SettingsPane = SettingsPane.allCases.first ?? .general
     var isSidebarVisible = true
 
     mutating func toggleSidebar() {
@@ -73,6 +73,10 @@ final class SettingsWindowController {
     func showSettings() {
         let window = window ?? makeWindow()
         self.window = window
+        let currentSettings = AppSettings.load()
+        window.contentViewController = NSHostingController(
+            rootView: SettingsRootView(actions: actions, settings: currentSettings, onSettingsChanged: onSettingsChanged)
+        )
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()

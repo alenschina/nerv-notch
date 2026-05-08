@@ -38,7 +38,7 @@ final class SettingsWindowControllerTests: XCTestCase {
     func testSettingsSidebarStartsOnGeneralPane() {
         let model = SettingsNavigationModel()
 
-        XCTAssertEqual(model.selection, .general)
+        XCTAssertEqual(model.selection, SettingsPane.allCases.first)
         XCTAssertTrue(model.isSidebarVisible)
         XCTAssertEqual(SettingsPane.general.title, "通用")
         XCTAssertEqual(SettingsPane.general.systemImageName, "gearshape")
@@ -50,7 +50,7 @@ final class SettingsWindowControllerTests: XCTestCase {
         model.toggleSidebar()
 
         XCTAssertFalse(model.isSidebarVisible)
-        XCTAssertEqual(model.selection, .general)
+        XCTAssertEqual(model.selection, SettingsPane.allCases.first)
     }
 
     func testSettingsRootUsesFixedTrailingSidebarToggleInsteadOfSystemSplitToggle() throws {
