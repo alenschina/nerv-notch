@@ -4,6 +4,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var windowController: NotchWindowController?
     private var viewModel: NotchViewModel?
     private var timer: Timer?
+    private var audioManager: AudioManager?
     private let settings = AppSettings()
     private let sampler = TelemetrySampler()
     @MainActor private lazy var settingsWindowController = SettingsWindowController()
@@ -20,6 +21,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let viewModel = NotchViewModel(settings: settings, decisionEngine: MagiDecisionEngine())
         self.viewModel = viewModel
+
+        let audioManager = AudioManager()
+        audioManager.attach(to: viewModel)
+        self.audioManager = audioManager
 
         let screen = NSScreen.main ?? NSScreen.screens.first
         if let screen {
