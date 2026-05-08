@@ -986,7 +986,7 @@ private struct BatteryReserveIcon: View {
             let terminalWidth = max(3, proxy.size.width * 0.10)
             let bodyWidth = max(1, proxy.size.width - terminalWidth)
             let segmentSpacing: CGFloat = 1.0
-            let horizontalInset: CGFloat = 5
+            let horizontalInset: CGFloat = 2
             let availableSegmentWidth = max(1, bodyWidth - horizontalInset * 2 - segmentSpacing * CGFloat(layout.segmentCount - 1))
             let segmentWidth = max(2, availableSegmentWidth / CGFloat(layout.segmentCount))
 
