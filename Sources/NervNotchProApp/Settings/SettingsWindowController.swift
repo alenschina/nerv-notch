@@ -295,6 +295,7 @@ private struct AppearanceSettingsView: View {
             .onChange(of: warningStripAnimated) { newValue in
                 var updated = settings
                 updated.warningStripAnimated = newValue
+                updated.syncWaveAnimated = syncWaveAnimated
                 onSettingsChanged(updated)
             }
 
@@ -309,6 +310,7 @@ private struct AppearanceSettingsView: View {
             }
             .onChange(of: syncWaveAnimated) { newValue in
                 var updated = settings
+                updated.warningStripAnimated = warningStripAnimated
                 updated.syncWaveAnimated = newValue
                 onSettingsChanged(updated)
             }
