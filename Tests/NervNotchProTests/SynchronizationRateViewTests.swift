@@ -50,13 +50,13 @@ final class SynchronizationRateViewTests: XCTestCase {
 
     func testBatteryIconUsesRedSegmentFillFromBatteryPercentage() {
         XCTAssertEqual(BatteryReserveIconLayout(chargeText: "0%").filledSegmentCount, 0)
-        XCTAssertEqual(BatteryReserveIconLayout(chargeText: "18%").filledSegmentCount, 1)
-        XCTAssertEqual(BatteryReserveIconLayout(chargeText: "71%").filledSegmentCount, 4)
-        XCTAssertEqual(BatteryReserveIconLayout(chargeText: "100%").filledSegmentCount, 5)
+        XCTAssertEqual(BatteryReserveIconLayout(chargeText: "18%").filledSegmentCount, 2)
+        XCTAssertEqual(BatteryReserveIconLayout(chargeText: "71%").filledSegmentCount, 6)
+        XCTAssertEqual(BatteryReserveIconLayout(chargeText: "100%").filledSegmentCount, 8)
         XCTAssertEqual(BatteryReserveIconLayout(chargeText: "--").filledSegmentCount, 0)
 
         let layout = BatteryReserveIconLayout(chargeText: "71%")
-        XCTAssertEqual(layout.segmentCount, 5)
+        XCTAssertEqual(layout.segmentCount, 8)
         XCTAssertEqual(layout.strokeColorName, "NervStyle.red")
         XCTAssertEqual(layout.fillColorName, "NervStyle.red")
         XCTAssertEqual(layout.iconWidth, 48)

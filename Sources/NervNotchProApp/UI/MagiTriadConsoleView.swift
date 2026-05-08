@@ -949,7 +949,7 @@ private struct SynchronizationRateView: View {
 
 struct BatteryReserveIconLayout: Equatable {
     let chargeText: String
-    let segmentCount = 5
+    let segmentCount = 8
     let iconWidth: CGFloat = 48
     let iconHeight: CGFloat = 19
     let strokeColorName = "NervStyle.red"
@@ -985,7 +985,7 @@ private struct BatteryReserveIcon: View {
         GeometryReader { proxy in
             let terminalWidth = max(3, proxy.size.width * 0.10)
             let bodyWidth = max(1, proxy.size.width - terminalWidth)
-            let segmentSpacing: CGFloat = 2.2
+            let segmentSpacing: CGFloat = 1.0
             let horizontalInset: CGFloat = 5
             let availableSegmentWidth = max(1, bodyWidth - horizontalInset * 2 - segmentSpacing * CGFloat(layout.segmentCount - 1))
             let segmentWidth = max(2, availableSegmentWidth / CGFloat(layout.segmentCount))
