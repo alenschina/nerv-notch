@@ -12,6 +12,7 @@ struct AppSettings: Equatable, Sendable, Codable {
     var warningStripAnimated: Bool = true
     var syncWaveAnimated: Bool = true
     var sideWarningStripAnimated: Bool = true
+    var clickOnlyMode: Bool = false
 
     private static let userDefaultsKey = "NervNotch.settings"
 

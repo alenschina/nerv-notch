@@ -25,6 +25,14 @@ final class NotchViewModel: ObservableObject {
     }
 
     func handleInteraction(_ event: NotchInteractionStateMachine.Event, at time: TimeInterval = Date().timeIntervalSince1970) {
+        if settings.clickOnlyMode {
+            switch event {
+            case .notchClicked, .outsideClicked:
+                break
+            case .mouseEnteredNotch, .mouseExitedNotch, .mouseEnteredPanel, .mouseExitedPanel, .timerTick:
+                return
+            }
+        }
         stateMachine.handle(event, at: time)
         interactionState = stateMachine.state
     }

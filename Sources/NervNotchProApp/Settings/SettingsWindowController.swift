@@ -191,7 +191,7 @@ private struct SettingsDetailView: View {
     var body: some View {
         switch selection {
         case .general:
-            GeneralSettingsView(actions: actions)
+            GeneralSettingsView(actions: actions, settings: $settings, onSettingsChanged: onSettingsChanged)
         case .audio:
             AudioSettingsView(settings: $settings, onSettingsChanged: onSettingsChanged)
         case .appearance:
@@ -202,6 +202,18 @@ private struct SettingsDetailView: View {
 
 private struct GeneralSettingsView: View {
     let actions: SettingsActions
+    @Binding var settings: AppSettings
+    let onSettingsChanged: (AppSettings) -> Void
+
+    private var clickOnlyModeBinding: Binding<Bool> {
+        Binding(
+            get: { settings.clickOnlyMode },
+            set: {
+                settings.clickOnlyMode = $0
+                onSettingsChanged(settings)
+            }
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -210,6 +222,16 @@ private struct GeneralSettingsView: View {
                 .fontWeight(.semibold)
 
             Divider()
+
+            Toggle(isOn: clickOnlyModeBinding) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("仅点击模式")
+                        .font(.headline)
+                    Text("仅响应鼠标点击来展开或收起 island 面板，忽略鼠标悬停和移出事件。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
