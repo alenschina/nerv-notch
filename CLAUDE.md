@@ -49,19 +49,22 @@ SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
 
 | Layer | Key Files | Role |
 |-------|-----------|------|
-| App bootstrap | `main.swift`, `App/NervNotchApplication.swift`, `App/AppDelegate.swift` | NSApplication setup, object graph wiring, timer-driven telemetry polling |
+| App bootstrap | `main.swift`, `App/AppDelegate.swift`, `App/NervNotchApplication.swift`, `App/FontRegistration.swift`, `App/AudioManager.swift` | NSApplication setup, object graph wiring, font registration (CTFontManager), background audio playback, timer-driven telemetry polling |
+| Launch intro | `App/LaunchIntroWindowController.swift`, `App/LaunchIntroStore.swift`, `App/LaunchIntroPresentationPolicy.swift`, `UI/LaunchIntroView.swift` | First-run NERV-branded intro animation (borderless NSWindow), UserDefaults-backed completion flag, policy respecting `alwaysShowLaunchIntro` override |
 | Notch system | `Notch/NotchWindowController.swift`, `Notch/NotchPanel.swift`, `Notch/NotchEventMonitor.swift`, `Notch/NotchGeometry.swift` | Borderless floating NSPanel, global+local NSEvent monitoring, hit-test geometry |
-| Interaction FSM | `Notch/NotchInteractionStateMachine.swift` | Pure state machine: `closed → hoverArming → opened → closing → closed` |
-| ViewModel | `ViewModels/NotchViewModel.swift` | `@MainActor ObservableObject`, bridges `SystemSnapshot` to `MagiDecisionState`, delegates interaction to FSM |
-| UI (SwiftUI) | `UI/NervConsoleView.swift`, `UI/MagiTriadConsoleView.swift`, `UI/NotchIslandChrome.swift`, `UI/NervStyle.swift` | Compact island + expanded MAGI console with triad layout, custom shapes, warning chrome |
+| Interaction FSM | `Notch/NotchInteractionStateMachine.swift` | Pure state machine: `closed → hoverArming → opened → closing → closed`; `clickOnlyMode` skips hover/exit events so only `.notchClicked` and `.outsideClicked` trigger transitions |
+| ViewModel | `ViewModels/NotchViewModel.swift` | `@MainActor ObservableObject`, bridges `SystemSnapshot` to `MagiDecisionState`, delegates interaction to FSM, filters hover events when `settings.clickOnlyMode` |
+| UI (SwiftUI) | `UI/NervConsoleView.swift`, `UI/MagiTriadConsoleView.swift`, `UI/NotchIslandChrome.swift`, `UI/NervStyle.swift`, `UI/MagiDecisionPanelView.swift`, `UI/CentralDogmaJudgementView.swift`, `UI/ScanlineOverlay.swift` | Compact island + expanded MAGI console with triad layout, custom shapes, warning chrome, CRT scanline effect |
 | Decision engine | `Magi/MagiDecisionEngine.swift` | Pure function: `SystemSnapshot → MagiDecisionState` with threshold-based CPU/memory/network triage and Central Dogma consensus |
 | Telemetry | `Telemetry/TelemetrySampler.swift`, `Telemetry/CPUUsageSampler.swift`, `Telemetry/MemoryUsageSampler.swift`, `Telemetry/NetworkUsageSampler.swift`, `Telemetry/DiskSpaceSampler.swift`, `Telemetry/DiskIOSampler.swift`, `Telemetry/SwapUsageSampler.swift`, `Telemetry/BatterySampler.swift`, `Telemetry/TelemetryCalculations.swift` | Low-level Darwin API sampling (Mach, sysctl, getifaddrs, IOKit); rate calculations use delta-over-time |
-| Settings | `Settings/AppSettings.swift`, `Settings/SettingsWindowController.swift` | Simple struct with defaults; SwiftUI settings window raised above the island |
+| Settings | `Settings/AppSettings.swift`, `Settings/SettingsWindowController.swift` | `Codable` struct with explicit `CodingKeys` and custom `init(from:)` for forward compatibility; SwiftUI settings window (general/audio/appearance) at `mainMenu + 4` |
 | Data types | `Telemetry/SystemSnapshot.swift` | All telemetry sample types + `SystemSnapshot` aggregate — value types only |
 
 **Data flow:** `Timer (1s) → TelemetrySampler.sample() → SystemSnapshot → NotchViewModel.apply() → MagiDecisionEngine.evaluate() → MagiDecisionState → SwiftUI views render`
 
 **Interaction flow:** `NSEvent → NotchEventMonitor → NotchInteractionStateMachine.Event → ViewModel.handleInteraction() → @Published interactionState → NotchPanel.ignoresMouseEvents toggle + SwiftUI re-render`
+
+**Launch flow:** `AppDelegate.applicationDidFinishLaunching → LaunchIntroPresentationPolicy.shouldShowLaunchIntro → (if yes) LaunchIntroWindowController → onFinish → completeLaunchIntro() → LaunchIntroStore.markCompleted() → startNotch()`
 
 ## Testing approach
 
@@ -82,6 +85,7 @@ SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
 
 - Domain types are all value types conforming to `Sendable` + `Equatable` — no reference semantics in business logic
 - Samplers are `final class` only because they hold internal delta state for rate calculations (previous CPU ticks, previous network counters, etc.)
+- `AppSettings` uses explicit `CodingKeys` with `init(from:)` decoding each key via `decodeIfPresent` + fallback to default — safe to add new properties without breaking existing UserDefaults blobs
 - Error handling: all failure paths return optionals (`-> CPUSample?`). No `throws`, no `do`/`catch`, no custom `Error` types anywhere in the codebase. `guard let` early-exit is the dominant pattern
 - Resource cleanup: `deinit` for invalidating timers and stopping event monitors; `defer` blocks for Mach port deallocation and state snapshots
 - Window level hierarchy: NotchPanel = `mainMenu + 3`, Settings = `mainMenu + 4`
