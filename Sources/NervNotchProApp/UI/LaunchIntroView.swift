@@ -131,14 +131,17 @@ struct LaunchIntroView: View {
 
             VStack(spacing: 0) {
                 classifiedStrip
-                Text("使徒來襲")
-                    .font(.custom(LaunchIntroTypography.fontName, size: 96))
-                    .foregroundStyle(NervStyle.red)
-                    .tracking(12)
-                    .shadow(color: NervStyle.red.opacity(0.5), radius: 7)
-                    .padding(.leading, 12)
-                    .frame(width: 480, height: 142)
-                    .background(Color.black)
+                VStack(spacing: 0) {
+                    Text("使徒")
+                    Text("襲來")
+                }
+                .font(.custom(LaunchIntroTypography.fontName, size: 96))
+                .foregroundStyle(NervStyle.red)
+                .tracking(12)
+                .shadow(color: NervStyle.red.opacity(0.5), radius: 7)
+                .padding(.leading, 12)
+                .frame(width: 480, height: 220)
+                .background(Color.black)
                 classifiedStrip
             }
             .frame(width: 480)
