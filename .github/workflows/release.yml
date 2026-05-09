@@ -20,6 +20,7 @@ jobs:
     env:
       APP_NAME: NervNotch
       BUILD_NUMBER: ${{ github.run_number }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       # Secrets as job-level env so they can be used in step `if` conditions
       MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE || '' }}
       APPLE_NOTARY_KEY: ${{ secrets.APPLE_NOTARY_KEY || '' }}
@@ -156,9 +157,11 @@ jobs:
           xcrun stapler staple "${{ steps.dmg.outputs.dmg-path }}"
 
       - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "v${{ steps.meta.outputs.version }}"
-          files: ${{ steps.dmg.outputs.dmg-path }}
-          generate_release_notes: true
-          draft: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.meta.outputs.version }}" \
+            "${{ steps.dmg.outputs.dmg-path }}" \
+            --title "v${{ steps.meta.outputs.version }}" \
+            --generate-notes \
+            --draft
