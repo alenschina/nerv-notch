@@ -599,9 +599,10 @@ private struct MagiSideWarningBackgroundStrip: View {
 
                     Path { path in
                         let stripeHeight = metrics.sideWarningBackgroundStripeHeight
-                        var y = -stripeHeight + phase
+                        let stripeVerticalSpan = stripeHeight * 1.45
+                        var y = -stripeVerticalSpan + phase
 
-                        while y < proxy.size.height + stripeHeight + stripeWidth {
+                        while y < proxy.size.height + stripeVerticalSpan + stripeWidth {
                             path.move(to: CGPoint(x: 0, y: y + stripeHeight))
                             path.addLine(to: CGPoint(x: proxy.size.width, y: y))
                             path.addLine(to: CGPoint(x: proxy.size.width, y: y + stripeHeight * 0.45))
